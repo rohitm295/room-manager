@@ -77,6 +77,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{di
 <small>System</small>
 <button onclick="showPage('settings',this)">⚙ &nbsp; Settings</button>
 <button onclick="showPage('backup',this)">⇩ &nbsp; Backup & Data</button>
+<button id="adminNav" onclick="showPage('admin',this)" style="display:none">👑 &nbsp; Admin Panel</button>
 </nav>
 </aside>
 <main class="main">
@@ -129,6 +130,23 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{di
 
 <div id="backup" class="page"><div class="card"><h3>Backup & Data</h3><div class="muted">Keep a backup of your RoomFlow data before changing devices.</div><br><div class="toolbar"><button class="btn primary" onclick="exportJSON()">Download Full Backup</button><label class="btn">Import Backup <input type="file" id="importFile" accept=".json" onchange="importJSON(event)" hidden></label><button class="btn" onclick="exportRentCSV()">Rent CSV</button><button class="btn" onclick="exportElecCSV()">Electricity CSV</button></div></div><br><div class="card dangerzone"><h3>Delete All Data</h3><div class="muted">This permanently clears rent, electricity and settings from this browser.</div><br><button class="btn danger" onclick="clearData()">Delete All Data</button></div></div>
 
+<div id="admin" class="page">
+  <div class="card" style="background:linear-gradient(135deg,#172554,#2563eb);color:#fff;border:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div><h3 style="margin-bottom:6px">👑 Admin Dashboard</h3><div style="color:#dbeafe;font-size:13px">Manage and monitor RoomFlow accounts</div></div>
+      <button class="btn" onclick="loadAdminPanel()">↻ Refresh</button>
+    </div>
+  </div><br>
+  <div class="grid">
+    <div class="card stat"><div class="label">Total Users</div><div class="value" id="adminUsers">0</div></div>
+    <div class="card stat"><div class="label">Active Accounts</div><div class="value green" id="adminActive">0</div></div>
+    <div class="card stat"><div class="label">Rent Records</div><div class="value" id="adminRentRecords">0</div></div>
+    <div class="card stat"><div class="label">Electricity Records</div><div class="value" id="adminElecRecords">0</div></div>
+  </div>
+  <div class="card"><h3>All Accounts</h3><div class="muted" style="margin-bottom:14px">Account-level cloud data summary</div>
+    <div class="tablewrap"><table class="table"><thead><tr><th>Email</th><th>Created</th><th>Last Login</th><th>Rent Records</th><th>Meter Records</th><th>Status</th></tr></thead><tbody id="adminUserTable"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table></div>
+  </div>
+</div>
 </section></main></div>
 
 <div class="modal" id="rentModal"><div class="modalbox"><div class="modalhead"><h3 id="rentModalTitle">Add Rent</h3><button class="close" onclick="closeModal('rentModal')">✕</button></div>
@@ -261,6 +279,55 @@ async function loadCloudData(){
   cloudReady=true;
 }
 
+async function ensureUserProfile(user){
+  const ref=db.collection('users').doc(user.uid);
+  const snap=await ref.get();
+  const now=firebase.firestore.FieldValue.serverTimestamp();
+  if(!snap.exists){
+    await ref.set({email:user.email||'',createdAt:now,lastLogin:now,active:true},{merge:true});
+  }else{
+    await ref.set({email:user.email||snap.data().email||'',lastLogin:now},{merge:true});
+  }
+}
+async function checkAdmin(user){
+  try{
+    const snap=await db.collection('admins').doc(user.uid).get();
+    const nav=document.getElementById('adminNav');
+    nav.style.display=snap.exists?'block':'none';
+    return snap.exists;
+  }catch(e){
+    document.getElementById('adminNav').style.display='none';
+    return false;
+  }
+}
+function fmtDate(v){
+  if(!v)return '—';
+  try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}catch(e){return '—'}
+}
+async function loadAdminPanel(){
+  const nav=document.getElementById('adminNav');
+  if(nav.style.display==='none')return;
+  const tbody=document.getElementById('adminUserTable');
+  tbody.innerHTML='<tr><td colspan="6" class="empty">Loading accounts...</td></tr>';
+  try{
+    const snap=await db.collection('users').get();
+    let totalRent=0,totalElec=0;
+    const rows=await Promise.all(snap.docs.map(async d=>{
+      const u=d.data()||{};
+      const [rs,es]=await Promise.all([d.ref.collection('rents').get(),d.ref.collection('electricity').get()]);
+      totalRent+=rs.size;totalElec+=es.size;
+      return `<tr><td><b>${esc(u.email||d.id)}</b></td><td>${fmtDate(u.createdAt)}</td><td>${fmtDate(u.lastLogin)}</td><td>${rs.size}</td><td>${es.size}</td><td>${u.active===false?'<span class="badge overdue">Disabled</span>':'<span class="badge paid">Active</span>'}</td></tr>`;
+    }));
+    document.getElementById('adminUsers').textContent=snap.size;
+    document.getElementById('adminActive').textContent=snap.docs.filter(d=>(d.data()||{}).active!==false).length;
+    document.getElementById('adminRentRecords').textContent=totalRent;
+    document.getElementById('adminElecRecords').textContent=totalElec;
+    tbody.innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" class="empty">No accounts found.</td></tr>';
+  }catch(err){
+    tbody.innerHTML=`<tr><td colspan="6" class="empty">Admin data could not be loaded: ${esc(err.message)}</td></tr>`;
+  }
+}
+
 function showLogin(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('appRoot').style.display='none';
@@ -303,6 +370,7 @@ async function createAccount(){
   btn.disabled=true;btn.textContent='Creating account...';
   try{
     const cred=await auth.createUserWithEmailAndPassword(email,password);
+    await ensureUserProfile(cred.user);
     await auth.signOut();
     document.getElementById('loginEmail').value=email;
     document.getElementById('loginPassword').value='';
@@ -361,6 +429,7 @@ function showPage(id,btn){
   document.getElementById('pageTitle').textContent=document.querySelector(`#${id}`)?.querySelector('h1,h3')?.textContent||'Dashboard';
   document.getElementById('sidebar').classList.remove('open');
   renderAll();
+  if(id==='admin') loadAdminPanel();
 }
 function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
 function toggleTheme(){
@@ -561,6 +630,8 @@ auth.onAuthStateChanged(async user=>{
     return;
   }
   try{
+    await ensureUserProfile(user);
+    await checkAdmin(user);
     showApp(user);
     await loadCloudData();
     renderAll();
