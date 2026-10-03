@@ -196,9 +196,10 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-let settings=JSON.parse(localStorage.getItem(KEY.settings)||'null')||{rent:8000,dueDay:5,unitRate:8,reminderDays:3};
-let rents=JSON.parse(localStorage.getItem(KEY.rents)||'[]');
-let electricity=JSON.parse(localStorage.getItem(KEY.elec)||'[]');
+// Cloud is the source of truth. Never initialize account data from another browser user's local cache.
+let settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+let rents=[];
+let electricity=[];
 let cloudReady=false;
 
 function money(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
@@ -249,6 +250,10 @@ async function saveAll(){
 }
 
 async function loadCloudData(){
+  // Clear any previous account's browser cache before reading this account.
+  localStorage.removeItem(KEY.settings);
+  localStorage.removeItem(KEY.rents);
+  localStorage.removeItem(KEY.elec);
   const root=userRoot();
   const [sSnap,rSnap,eSnap]=await Promise.all([
     root.collection('settings').doc('main').get(),
@@ -612,6 +617,12 @@ document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key
 auth.onAuthStateChanged(async user=>{
   if(!user){
     cloudReady=false;
+    settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+    rents=[];
+    electricity=[];
+    localStorage.removeItem(KEY.settings);
+    localStorage.removeItem(KEY.rents);
+    localStorage.removeItem(KEY.elec);
     showLogin();
     return;
   }
