@@ -40,8 +40,27 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{di
       <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
     </div>
     <button id="loginBtn" onclick="loginUser()" class="btn primary" style="width:100%;margin-top:4px">Login</button>
-    <button onclick="resetPassword()" style="width:100%;background:transparent;color:#2563eb;margin-top:13px">Forgot password?</button>
+    <button id="createAccountBtn" onclick="showCreateAccount()" style="width:100%;background:transparent;color:#2563eb;margin-top:13px">Create New Account</button>
+    <button id="forgotBtn" onclick="resetPassword()" style="width:100%;background:transparent;color:#64748b;margin-top:8px">Forgot password?</button>
     <div id="loginError" style="display:none;color:#b91c1c;background:#fee2e2;border-radius:9px;padding:10px;margin-top:14px;font-size:13px"></div>
+
+    <div id="signupBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5e7eb">
+      <div style="font-size:18px;font-weight:800;margin-bottom:14px">Create New Account</div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Email</label>
+        <input id="signupEmail" type="email" autocomplete="email" placeholder="Enter your email" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Password</label>
+        <input id="signupPassword" type="password" autocomplete="new-password" placeholder="Minimum 6 characters" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Confirm Password</label>
+        <input id="signupConfirm" type="password" autocomplete="new-password" placeholder="Re-enter password" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <button id="signupBtn" onclick="createAccount()" class="btn primary" style="width:100%">Create Account</button>
+      <button onclick="showLoginForm()" style="width:100%;background:transparent;color:#64748b;margin-top:10px">Back to Login</button>
+    </div>
   </div>
 </div>
 
@@ -254,7 +273,54 @@ function showApp(user){
 function setLoginError(msg){
   const x=document.getElementById('loginError');
   x.textContent=msg;
+  x.style.color='#b91c1c';
+  x.style.background='#fee2e2';
   x.style.display=msg?'block':'none';
+}
+function showCreateAccount(){
+  document.getElementById('signupBox').style.display='block';
+  document.getElementById('loginBtn').style.display='none';
+  document.getElementById('createAccountBtn').style.display='none';
+  document.getElementById('forgotBtn').style.display='none';
+  setLoginError('');
+}
+function showLoginForm(){
+  document.getElementById('signupBox').style.display='none';
+  document.getElementById('loginBtn').style.display='block';
+  document.getElementById('createAccountBtn').style.display='block';
+  document.getElementById('forgotBtn').style.display='block';
+  setLoginError('');
+}
+async function createAccount(){
+  const email=document.getElementById('signupEmail').value.trim();
+  const password=document.getElementById('signupPassword').value;
+  const confirm=document.getElementById('signupConfirm').value;
+  setLoginError('');
+  if(!email||!password||!confirm){setLoginError('Please fill all fields.');return}
+  if(password.length<6){setLoginError('Password must be at least 6 characters.');return}
+  if(password!==confirm){setLoginError('Passwords do not match.');return}
+  const btn=document.getElementById('signupBtn');
+  btn.disabled=true;btn.textContent='Creating account...';
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    await auth.signOut();
+    document.getElementById('loginEmail').value=email;
+    document.getElementById('loginPassword').value='';
+    document.getElementById('signupEmail').value='';
+    document.getElementById('signupPassword').value='';
+    document.getElementById('signupConfirm').value='';
+    showLoginForm();
+    setLoginError('Account created successfully. Now login with your email and password.');
+    document.getElementById('loginError').style.color='#15803d';
+    document.getElementById('loginError').style.background='#dcfce7';
+  }catch(err){
+    const map={
+      'auth/email-already-in-use':'An account already exists with this email.',
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/weak-password':'Password is too weak. Use at least 6 characters.'
+    };
+    setLoginError(map[err.code]||err.message||'Account creation failed.');
+  }finally{btn.disabled=false;btn.textContent='Create Account'}
 }
 async function loginUser(){
   const email=document.getElementById('loginEmail').value.trim();
