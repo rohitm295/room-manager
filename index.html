@@ -43,6 +43,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{di
     <button id="createAccountBtn" onclick="showCreateAccount()" style="width:100%;background:transparent;color:#2563eb;margin-top:13px">Create New Account</button>
     <button id="forgotBtn" onclick="resetPassword()" style="width:100%;background:transparent;color:#64748b;margin-top:8px">Forgot password?</button>
     <div id="loginError" style="display:none;color:#b91c1c;background:#fee2e2;border-radius:9px;padding:10px;margin-top:14px;font-size:13px"></div>
+    <div style="margin-top:10px;text-align:center;color:#94a3b8;font-size:11px">Firebase project: roomflow-6c920</div>
 
     <div id="signupBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5e7eb">
       <div style="font-size:18px;font-weight:800;margin-bottom:14px">Create New Account</div>
@@ -182,6 +183,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{di
 <script>
 const KEY={settings:'roomflow_settings_v5',rents:'roomflow_rents_v5',elec:'roomflow_electricity_v5',theme:'roomflow_theme_v5'};
 
+const ADMIN_UID="WWdq6WnM1Wc4KttJ0HmITLCmNbw2";
 const firebaseConfig={
   apiKey:"AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
   authDomain:"roomflow-6c920.firebaseapp.com",
@@ -195,6 +197,9 @@ const firebaseConfig={
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
+
+// Keep the login session on this browser.
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
 
 // Cloud is the source of truth. Never initialize account data from another browser user's local cache.
 let settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
@@ -382,22 +387,30 @@ async function createAccount(){
   }finally{btn.disabled=false;btn.textContent='Create Account'}
 }
 async function loginUser(){
-  const email=document.getElementById('loginEmail').value.trim();
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
   const password=document.getElementById('loginPassword').value;
   setLoginError('');
   if(!email||!password){setLoginError('Please enter email and password.');return}
   const btn=document.getElementById('loginBtn');
   btn.disabled=true;btn.textContent='Signing in...';
   try{
-    await auth.signInWithEmailAndPassword(email,password);
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+    if(!cred || !cred.user) throw new Error('Firebase did not return a signed-in user.');
   }catch(err){
+    const code=err && err.code ? err.code : '';
     const map={
-      'auth/invalid-credential':'Invalid email or password.',
-      'auth/user-not-found':'No account found with this email.',
-      'auth/wrong-password':'Invalid email or password.',
-      'auth/too-many-requests':'Too many attempts. Please try again later.'
+      'auth/invalid-credential':'Firebase rejected these credentials. Use Forgot password to set a new password.',
+      'auth/user-not-found':'No Firebase account exists for this email.',
+      'auth/wrong-password':'The password does not match this Firebase account.',
+      'auth/too-many-requests':'Too many login attempts. Wait a few minutes and try again.',
+      'auth/network-request-failed':'Network error. Check your internet connection and reload.',
+      'auth/invalid-api-key':'Firebase configuration error: wrong/invalid API key.',
+      'auth/app-not-authorized':'This website domain is not authorized in Firebase Authentication.',
+      'auth/operation-not-allowed':'Email/Password sign-in is disabled in Firebase Authentication.'
     };
-    setLoginError(map[err.code]||err.message||'Login failed.');
+    setLoginError((map[code]||err.message||'Login failed.') + (code ? ' ['+code+']' : ''));
+    console.error('RoomFlow login error:', err);
   }finally{
     btn.disabled=false;btn.textContent='Login';
   }
