@@ -256,26 +256,12 @@ async function loadCloudData(){
     root.collection('electricity').get()
   ]);
 
-  const localSettings=JSON.parse(localStorage.getItem(KEY.settings)||'null');
-  const localRents=JSON.parse(localStorage.getItem(KEY.rents)||'[]');
-  const localElec=JSON.parse(localStorage.getItem(KEY.elec)||'[]');
-  const cloudHasData=sSnap.exists || !rSnap.empty || !eSnap.empty;
-  const localHasData=!!localSettings || localRents.length>0 || localElec.length>0;
-
-  if(!cloudHasData && localHasData){
-    settings=localSettings||{rent:8000,dueDay:5,unitRate:8,reminderDays:3};
-    rents=localRents;
-    electricity=localElec;
-    if(confirm('Local RoomFlow data was found on this device. Upload it to your Firebase account?')){
-      await saveAll();
-      toast('Local data uploaded to Firebase');
-    }
-  }else{
-    settings=sSnap.exists?(sSnap.data()||{rent:8000,dueDay:5,unitRate:8,reminderDays:3}):{rent:8000,dueDay:5,unitRate:8,reminderDays:3};
-    rents=rSnap.docs.map(d=>({...d.data(),id:d.id}));
-    electricity=eSnap.docs.map(d=>({...d.data(),id:d.id}));
-    localSave();
-  }
+  // IMPORTANT: never auto-import old browser/localStorage data into a new account.
+  // Each Firebase account starts with its own clean cloud data.
+  settings=sSnap.exists?(sSnap.data()||{rent:8000,dueDay:5,unitRate:8,reminderDays:3}):{rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+  rents=rSnap.docs.map(d=>({...d.data(),id:d.id}));
+  electricity=eSnap.docs.map(d=>({...d.data(),id:d.id}));
+  localSave();
   cloudReady=true;
 }
 
