@@ -1,1 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+<title>RoomFlow — Room & Utility Manager</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--primary:#2563eb;--primary2:#1d4ed8;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--side:#0f172a;--side2:#111827}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.app{display:flex;min-height:100vh}
+.sidebar{width:245px;background:linear-gradient(180deg,var(--side),var(--side2));color:#fff;padding:22px 14px;position:fixed;inset:0 auto 0 0;z-index:20}
+.brand{font-size:22px;font-weight:800;padding:8px 12px 24px}.brand span{color:#60a5fa}.nav button{width:100%;text-align:left;background:transparent;color:#cbd5e1;padding:12px 14px;border-radius:10px;margin:3px 0}.nav button:hover,.nav button.active{background:#1e293b;color:#fff}.nav small{display:block;color:#64748b;text-transform:uppercase;font-size:10px;padding:18px 14px 6px;letter-spacing:1px}
+.main{margin-left:245px;width:calc(100% - 245px)}.topbar{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}.topbar h2{font-size:18px;margin:0}.actions{display:flex;gap:8px}.iconbtn{background:#f1f5f9;padding:9px 12px;border-radius:9px}
+.content{padding:26px;max-width:1450px;margin:auto}.page{display:none}.page.active{display:block}
+.hero{background:linear-gradient(135deg,#172554,#2563eb);color:#fff;border-radius:18px;padding:25px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.hero h1{margin:0 0 7px;font-size:25px}.hero p{margin:0;color:#dbeafe}.hero .big{font-size:30px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 4px 18px #0f172a08}.stat .label{font-size:12px;color:var(--muted)}.stat .value{font-size:24px;font-weight:800;margin-top:8px}.green{color:var(--green)}.red{color:var(--red)}.orange{color:var(--orange)}
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.card h3{margin:0 0 16px;font-size:16px}.meterbox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.mini{background:#f8fafc;border:1px solid var(--line);padding:13px;border-radius:10px}.mini b{display:block;margin-top:5px;font-size:17px}.muted{color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}.toolbar input,.toolbar select,.form input,.form select,.form textarea{border:1px solid var(--line);border-radius:9px;padding:10px 11px;background:#fff;outline:none;width:100%}.toolbar input{max-width:260px}.btn{padding:10px 14px;border-radius:9px;font-weight:700;background:#e2e8f0;color:#172033}.btn.primary{background:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary2)}.btn.danger{background:#fee2e2;color:#b91c1c}.btn.success{background:#dcfce7;color:#15803d}
+.tablewrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:760px}.table th,.table td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}.table th{font-size:11px;text-transform:uppercase;color:var(--muted);background:#f8fafc}.badge{display:inline-block;padding:5px 8px;border-radius:99px;font-size:11px;font-weight:700}.badge.paid{background:#dcfce7;color:#15803d}.badge.pending{background:#fef3c7;color:#a16207}.badge.overdue{background:#fee2e2;color:#b91c1c}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.field.full{grid-column:1/-1}.modal{display:none;position:fixed;inset:0;background:#0f172a88;z-index:50;align-items:center;justify-content:center;padding:18px}.modal.show{display:flex}.modalbox{background:#fff;border-radius:16px;width:min(680px,100%);max-height:90vh;overflow:auto;padding:22px}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modalhead h3{margin:0}.close{background:#f1f5f9;border-radius:8px;padding:7px 10px}.preview{background:#eff6ff;border:1px solid #bfdbfe;padding:14px;border-radius:12px;margin-top:14px}.preview strong{font-size:20px}.empty{text-align:center;padding:35px;color:var(--muted)}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick button{text-align:left;background:#f8fafc;border:1px solid var(--line);padding:15px;border-radius:12px}.quick b{display:block;margin-bottom:4px}
+.mobilemenu{display:none}.settings{max-width:720px}.dangerzone{border:1px solid #fecaca;background:#fff7f7}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+@media(max-width:700px){.sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:translateX(0)}.main{margin-left:0;width:100%}.mobilemenu{display:block}.topbar{padding:0 15px}.content{padding:15px}.hero{padding:19px;display:block}.hero .big{margin-top:14px}.meterbox{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.quick{grid-template-columns:1fr}.grid{gap:9px}.stat .value{font-size:20px}.topbar h2{font-size:16px}}
+</style>
+</head>
+<body>
 
+<div id="loginScreen" style="display:flex;position:fixed;inset:0;z-index:200;background:#f4f7fb;align-items:center;justify-content:center;padding:20px">
+  <div style="width:min(420px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:28px;box-shadow:0 20px 60px #0f172a18">
+    <div style="font-size:28px;font-weight:800;color:#172033;margin-bottom:6px">Room<span style="color:#2563eb">Flow</span></div>
+    <div style="color:#6b7280;font-size:14px;margin-bottom:22px">Secure Room & Utility Manager</div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Email</label>
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="Enter your email" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Password</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+    </div>
+    <button id="loginBtn" onclick="loginUser()" class="btn primary" style="width:100%;margin-top:4px">Login</button>
+    <button id="createAccountBtn" onclick="showCreateAccount()" style="width:100%;background:transparent;color:#2563eb;margin-top:13px">Create New Account</button>
+    <button id="forgotBtn" onclick="resetPassword()" style="width:100%;background:transparent;color:#64748b;margin-top:8px">Forgot password?</button>
+    <div id="loginError" style="display:none;color:#b91c1c;background:#fee2e2;border-radius:9px;padding:10px;margin-top:14px;font-size:13px"></div>
+    <div style="margin-top:10px;text-align:center;color:#94a3b8;font-size:11px">Firebase project: roomflow-6c920</div>
+
+    <div id="signupBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5e7eb">
+      <div style="font-size:18px;font-weight:800;margin-bottom:14px">Create New Account</div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Email</label>
+        <input id="signupEmail" type="email" autocomplete="email" placeholder="Enter your email" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Password</label>
+        <input id="signupPassword" type="password" autocomplete="new-password" placeholder="Minimum 6 characters" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Confirm Password</label>
+        <input id="signupConfirm" type="password" autocomplete="new-password" placeholder="Re-enter password" style="width:100%;border:1px solid #e5e7eb;border-radius:9px;padding:11px;outline:none">
+      </div>
+      <button id="signupBtn" onclick="createAccount()" class="btn primary" style="width:100%">Create Account</button>
+      <button onclick="showLoginForm()" style="width:100%;background:transparent;color:#64748b;margin-top:10px">Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="appRoot" style="display:none">
+<aside class="sidebar" id="sidebar">
+<div class="brand">Room<span>Flow</span></div>
+<nav class="nav">
+<button class="active" onclick="showPage('dashboard',this)">⌂ &nbsp; Dashboard</button>
+<button onclick="showPage('rent',this)">₹ &nbsp; Rent Manager</button>
+<button onclick="showPage('electricity',this)">⚡ &nbsp; Electricity</button>
+<button onclick="showPage('history',this)">▤ &nbsp; Payment History</button>
+<button onclick="showPage('reminders',this)">🔔 &nbsp; Reminders</button>
+<button onclick="showPage('reports',this)">▥ &nbsp; Reports</button>
+<small>System</small>
+<button onclick="showPage('settings',this)">⚙ &nbsp; Settings</button>
+<button onclick="showPage('backup',this)">⇩ &nbsp; Backup & Data</button>
+</nav>
+</aside>
+<main class="main">
+<header class="topbar"><div><button class="iconbtn mobilemenu" onclick="toggleMenu()">☰</button> <h2 id="pageTitle" style="display:inline-block">Dashboard</h2></div><div class="actions"><span id="userEmail" class="muted" style="align-self:center"></span><button class="iconbtn" onclick="toggleTheme()">◐</button><button class="btn primary" onclick="openRent()">+ Rent</button><button class="btn primary" onclick="openElectricity()">+ Meter</button><button class="btn" onclick="logoutUser()">Logout</button></div></header>
+<section class="content">
+
+<div id="dashboard" class="page active">
+<div class="hero"><div><h1>Room & Utility Manager</h1><p id="monthLabel"></p></div><div><div class="muted" style="color:#bfdbfe">Total Payable</div><div class="big" id="dashTotal">₹0</div></div></div>
+<div class="grid">
+<div class="card stat"><div class="label">Monthly Rent</div><div class="value" id="dashRent">₹0</div></div>
+<div class="card stat"><div class="label">Electricity</div><div class="value" id="dashElec">₹0</div></div>
+<div class="card stat"><div class="label">Total Pending</div><div class="value red" id="dashPending">₹0</div></div>
+<div class="card stat"><div class="label">Meter Units</div><div class="value" id="dashUnits">0</div></div>
+</div>
+<div class="two">
+<div class="card"><h3>Current Meter Reading</h3><div class="meterbox">
+<div class="mini"><span class="muted">Previous</span><b id="mPrev">—</b></div>
+<div class="mini"><span class="muted">Current</span><b id="mCurr">—</b></div>
+<div class="mini"><span class="muted">Units</span><b id="mUnits">—</b></div>
+<div class="mini"><span class="muted">Bill</span><b id="mBill">₹0</b></div>
+</div><div style="margin-top:15px"><span id="mStatus"></span></div></div>
+<div class="card"><h3>Quick Actions</h3><div class="quick">
+<button onclick="openRent()"><b>+ Add Rent</b><span class="muted">Create monthly rent</span></button>
+<button onclick="openElectricity()"><b>⚡ Add Meter</b><span class="muted">Record meter reading</span></button>
+<button onclick="showPage('reports')"><b>▥ Reports</b><span class="muted">View monthly summary</span></button>
+</div></div>
+</div>
+</div>
+
+<div id="rent" class="page"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h3>Rent Manager</h3><div class="muted">Manage monthly rent and payment status</div></div><button class="btn primary" onclick="openRent()">+ Add Rent</button></div></div><br>
+<div class="toolbar"><input id="rentSearch" oninput="renderRent()" placeholder="Search month or note..."><select id="rentStatus" onchange="renderRent()"><option value="">All status</option><option>Pending</option><option>Paid</option><option>Overdue</option></select></div><div class="tablewrap"><table class="table"><thead><tr><th>Month</th><th>Rent</th><th>Due Date</th><th>Status</th><th>Paid On</th><th>Actions</th></tr></thead><tbody id="rentTable"></tbody></table></div></div>
+
+<div id="electricity" class="page"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h3>Electricity & Meter Reading</h3><div class="muted">Previous → Current → Units → Bill</div></div><button class="btn primary" onclick="openElectricity()">+ Add Meter Reading</button></div></div><br>
+<div class="toolbar"><input id="elecSearch" oninput="renderElec()" placeholder="Search month or note..."><select id="elecStatus" onchange="renderElec()"><option value="">All status</option><option>Pending</option><option>Paid</option></select></div><div class="tablewrap"><table class="table"><thead><tr><th>Month</th><th>Previous</th><th>Current</th><th>Units</th><th>Rate</th><th>Bill</th><th>Status</th><th>Actions</th></tr></thead><tbody id="elecTable"></tbody></table></div></div>
+
+<div id="history" class="page"><div class="card"><h3>Payment History</h3><div class="muted">Rent and electricity payments together</div></div><br><div class="tablewrap"><table class="table"><thead><tr><th>Type</th><th>Month</th><th>Amount</th><th>Paid On</th><th>Status</th></tr></thead><tbody id="historyTable"></tbody></table></div></div>
+
+<div id="reminders" class="page"><div class="card"><h3>Payment Reminders</h3><div class="muted">Pending and overdue items</div></div><br><div class="tablewrap"><table class="table"><thead><tr><th>Type</th><th>Month</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="reminderTable"></tbody></table></div></div>
+
+<div id="reports" class="page"><div class="grid">
+<div class="card stat"><div class="label">Rent Records</div><div class="value" id="rCount">0</div></div><div class="card stat"><div class="label">Rent Paid</div><div class="value green" id="rPaid">₹0</div></div><div class="card stat"><div class="label">Electricity Units</div><div class="value" id="eUnits">0</div></div><div class="card stat"><div class="label">Electricity Expense</div><div class="value" id="eExpense">₹0</div></div>
+</div><div class="card"><h3>Overall Summary</h3><div id="reportText" class="muted"></div></div></div>
+
+<div id="settings" class="page"><div class="card settings"><h3>Settings</h3><div class="muted" style="margin-bottom:18px">Default values used for new records</div><div class="formgrid">
+<div class="field"><label>Default Monthly Rent</label><input id="setRent" type="number"></div>
+<div class="field"><label>Rent Due Day</label><input id="setDue" type="number" min="1" max="28"></div>
+<div class="field"><label>Electricity Rate / Unit (₹)</label><input id="setRate" type="number" step=".01"></div>
+<div class="field"><label>Reminder Days</label><input id="setReminder" type="number"></div>
+</div><br><button class="btn primary" onclick="saveSettings()">Save Settings</button></div></div>
+
+<div id="backup" class="page"><div class="card"><h3>Backup & Data</h3><div class="muted">Keep a backup of your RoomFlow data before changing devices.</div><br><div class="toolbar"><button class="btn primary" onclick="exportJSON()">Download Full Backup</button><label class="btn">Import Backup <input type="file" id="importFile" accept=".json" onchange="importJSON(event)" hidden></label><button class="btn" onclick="exportRentCSV()">Rent CSV</button><button class="btn" onclick="exportElecCSV()">Electricity CSV</button></div></div><br><div class="card dangerzone"><h3>Delete All Data</h3><div class="muted">This permanently clears rent, electricity and settings from this browser.</div><br><button class="btn danger" onclick="clearData()">Delete All Data</button></div></div>
+
+</section></main></div>
+
+<div class="modal" id="rentModal"><div class="modalbox"><div class="modalhead"><h3 id="rentModalTitle">Add Rent</h3><button class="close" onclick="closeModal('rentModal')">✕</button></div>
+<form id="rentForm" class="formgrid" onsubmit="saveRent(event)"><input type="hidden" id="rentId">
+<div class="field"><label>Billing Month</label><input id="rentMonth" type="month" required></div>
+<div class="field"><label>Rent Amount (₹)</label><input id="rentAmount" type="number" min="0" required></div>
+<div class="field"><label>Due Date</label><input id="rentDue" type="date" required></div>
+<div class="field"><label>Status</label><select id="rentStat"><option>Pending</option><option>Paid</option><option>Overdue</option></select></div>
+<div class="field"><label>Paid On</label><input id="rentPaid" type="date"></div>
+<div class="field full"><label>Note</label><textarea id="rentNote" rows="3" placeholder="Optional note"></textarea></div>
+<div class="field full"><button class="btn primary" style="width:100%">Save Rent</button></div></form></div></div>
+
+<div class="modal" id="elecModal"><div class="modalbox"><div class="modalhead"><h3 id="elecModalTitle">Add Meter Reading</h3><button class="close" onclick="closeModal('elecModal')">✕</button></div>
+<form id="elecForm" class="formgrid" onsubmit="saveElec(event)"><input type="hidden" id="elecId">
+<div class="field"><label>Billing Month</label><input id="elecMonth" type="month" required onchange="autoPrev()"></div>
+<div class="field"><label>Reading Date</label><input id="elecDate" type="date" required></div>
+<div class="field"><label>Previous Reading</label><input id="elecPrev" type="number" step=".01" min="0" required oninput="previewElec()"></div>
+<div class="field"><label>Current Reading</label><input id="elecCurr" type="number" step=".01" min="0" required oninput="previewElec()"></div>
+<div class="field"><label>Rate / Unit (₹)</label><input id="elecRate" type="number" step=".01" min="0" required oninput="previewElec()"></div>
+<div class="field"><label>Payment Status</label><select id="elecStat"><option>Pending</option><option>Paid</option></select></div>
+<div class="field"><label>Paid On</label><input id="elecPaid" type="date"></div>
+<div class="field full"><label>Note</label><textarea id="elecNote" rows="2"></textarea></div>
+<div class="field full"><div class="preview">Units: <strong id="pvUnits">0</strong> &nbsp; | &nbsp; Electricity Bill: <strong id="pvBill">₹0</strong></div></div>
+<div class="field full"><button class="btn primary" style="width:100%">Save Meter Reading</button></div></form></div></div>
+
+<div id="toast" style="position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:12px 16px;border-radius:10px;display:none;z-index:100;font-size:13px"></div>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+const KEY={settings:'roomflow_settings_v5',rents:'roomflow_rents_v5',elec:'roomflow_electricity_v5',theme:'roomflow_theme_v5'};
+
+const firebaseConfig={
+  apiKey:"AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+  authDomain:"roomflow-6c920.firebaseapp.com",
+  projectId:"roomflow-6c920",
+  storageBucket:"roomflow-6c920.firebasestorage.app",
+  messagingSenderId:"827966111309",
+  appId:"1:827966111309:web:85a6bdb0b98f3a865a2604",
+  measurementId:"G-1YGPS03PKC"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+// Keep the login session on this browser.
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
+// Cloud is the source of truth. Never initialize account data from another browser user's local cache.
+let settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+let rents=[];
+let electricity=[];
+let cloudReady=false;
+
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function monthNow(){return new Date().toISOString().slice(0,7)}
+function today(){return new Date().toISOString().slice(0,10)}
+function units(e){return Math.max(0,Number(e.currentReading)-Number(e.previousReading))}
+function bill(e){return units(e)*Number(e.unitRate||0)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function badge(s){let c=String(s||'').toLowerCase();return `<span class="badge ${c}">${esc(s)}</span>`}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>x.style.display='none',2200)}
+
+function localSave(){
+  localStorage.setItem(KEY.settings,JSON.stringify(settings));
+  localStorage.setItem(KEY.rents,JSON.stringify(rents));
+  localStorage.setItem(KEY.elec,JSON.stringify(electricity));
+}
+
+function userRoot(){
+  const u=auth.currentUser;
+  if(!u) throw new Error('Not authenticated');
+  return db.collection('users').doc(u.uid);
+}
+
+async function syncCollection(name,items){
+  const col=userRoot().collection(name);
+  const snap=await col.get();
+  const batches=[];
+  let batch=db.batch(),count=0;
+  for(const d of snap.docs){
+    batch.delete(d.ref); count++;
+    if(count>=400){batches.push(batch);batch=db.batch();count=0;}
+  }
+  for(const item of items){
+    const ref=col.doc(String(item.id));
+    batch.set(ref,item,{merge:false}); count++;
+    if(count>=400){batches.push(batch);batch=db.batch();count=0;}
+  }
+  if(count) batches.push(batch);
+  for(const b of batches) await b.commit();
+}
+
+async function saveAll(){
+  localSave();
+  if(!cloudReady || !auth.currentUser) return;
+  await userRoot().collection('settings').doc('main').set(settings);
+  await syncCollection('rents',rents);
+  await syncCollection('electricity',electricity);
+}
+
+async function loadCloudData(){
+  // Clear any previous account's browser cache before reading this account.
+  localStorage.removeItem(KEY.settings);
+  localStorage.removeItem(KEY.rents);
+  localStorage.removeItem(KEY.elec);
+  const root=userRoot();
+  const [sSnap,rSnap,eSnap]=await Promise.all([
+    root.collection('settings').doc('main').get(),
+    root.collection('rents').get(),
+    root.collection('electricity').get()
+  ]);
+
+  // IMPORTANT: never auto-import old browser/localStorage data into a new account.
+  // Each Firebase account starts with its own clean cloud data.
+  settings=sSnap.exists?(sSnap.data()||{rent:8000,dueDay:5,unitRate:8,reminderDays:3}):{rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+  rents=rSnap.docs.map(d=>({...d.data(),id:d.id}));
+  electricity=eSnap.docs.map(d=>({...d.data(),id:d.id}));
+  localSave();
+  cloudReady=true;
+}
+
+async function ensureUserProfile(user){
+  const ref=db.collection('users').doc(user.uid);
+  const snap=await ref.get();
+  const now=firebase.firestore.FieldValue.serverTimestamp();
+  if(!snap.exists){
+    await ref.set({email:user.email||'',createdAt:now,lastLogin:now,active:true},{merge:true});
+  }else{
+    await ref.set({email:user.email||snap.data().email||'',lastLogin:now},{merge:true});
+  }
+}
+function fmtDate(v){
+  if(!v)return '—';
+  try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}catch(e){return '—'}
+}
+function showLogin(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appRoot').style.display='none';
+}
+function showApp(user){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appRoot').style.display='flex';
+  document.getElementById('userEmail').textContent=user.email||'';
+}
+function setLoginError(msg){
+  const x=document.getElementById('loginError');
+  x.textContent=msg;
+  x.style.color='#b91c1c';
+  x.style.background='#fee2e2';
+  x.style.display=msg?'block':'none';
+}
+function showCreateAccount(){
+  document.getElementById('signupBox').style.display='block';
+  document.getElementById('loginBtn').style.display='none';
+  document.getElementById('createAccountBtn').style.display='none';
+  document.getElementById('forgotBtn').style.display='none';
+  setLoginError('');
+}
+function showLoginForm(){
+  document.getElementById('signupBox').style.display='none';
+  document.getElementById('loginBtn').style.display='block';
+  document.getElementById('createAccountBtn').style.display='block';
+  document.getElementById('forgotBtn').style.display='block';
+  setLoginError('');
+}
+async function createAccount(){
+  const email=document.getElementById('signupEmail').value.trim();
+  const password=document.getElementById('signupPassword').value;
+  const confirm=document.getElementById('signupConfirm').value;
+  setLoginError('');
+  if(!email||!password||!confirm){setLoginError('Please fill all fields.');return}
+  if(password.length<6){setLoginError('Password must be at least 6 characters.');return}
+  if(password!==confirm){setLoginError('Passwords do not match.');return}
+  const btn=document.getElementById('signupBtn');
+  btn.disabled=true;btn.textContent='Creating account...';
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    await ensureUserProfile(cred.user);
+    await auth.signOut();
+    document.getElementById('loginEmail').value=email;
+    document.getElementById('loginPassword').value='';
+    document.getElementById('signupEmail').value='';
+    document.getElementById('signupPassword').value='';
+    document.getElementById('signupConfirm').value='';
+    showLoginForm();
+    setLoginError('Account created successfully. Now login with your email and password.');
+    document.getElementById('loginError').style.color='#15803d';
+    document.getElementById('loginError').style.background='#dcfce7';
+  }catch(err){
+    const map={
+      'auth/email-already-in-use':'An account already exists with this email.',
+      'auth/invalid-email':'Please enter a valid email address.',
+      'auth/weak-password':'Password is too weak. Use at least 6 characters.'
+    };
+    setLoginError(map[err.code]||err.message||'Account creation failed.');
+  }finally{btn.disabled=false;btn.textContent='Create Account'}
+}
+async function loginUser(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password=document.getElementById('loginPassword').value;
+  setLoginError('');
+  if(!email||!password){setLoginError('Please enter email and password.');return}
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+    if(!cred || !cred.user) throw new Error('Firebase did not return a signed-in user.');
+  }catch(err){
+    const code=err && err.code ? err.code : '';
+    const map={
+      'auth/invalid-credential':'Firebase rejected these credentials. Use Forgot password to set a new password.',
+      'auth/user-not-found':'No Firebase account exists for this email.',
+      'auth/wrong-password':'The password does not match this Firebase account.',
+      'auth/too-many-requests':'Too many login attempts. Wait a few minutes and try again.',
+      'auth/network-request-failed':'Network error. Check your internet connection and reload.',
+      'auth/invalid-api-key':'Firebase configuration error: wrong/invalid API key.',
+      'auth/app-not-authorized':'This website domain is not authorized in Firebase Authentication.',
+      'auth/operation-not-allowed':'Email/Password sign-in is disabled in Firebase Authentication.'
+    };
+    setLoginError((map[code]||err.message||'Login failed.') + (code ? ' ['+code+']' : ''));
+    console.error('RoomFlow login error:', err);
+  }finally{
+    btn.disabled=false;btn.textContent='Login';
+  }
+}
+async function resetPassword(){
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!email){setLoginError('Enter your email first, then click Forgot password.');return}
+  try{await auth.sendPasswordResetEmail(email);setLoginError('Password reset email sent. Check your inbox.');document.getElementById('loginError').style.color='#15803d';document.getElementById('loginError').style.background='#dcfce7'}
+  catch(err){setLoginError(err.message||'Could not send reset email.')}
+}
+async function logoutUser(){
+  if(confirm('Logout from RoomFlow?')) await auth.signOut();
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent=document.querySelector(`#${id}`)?.querySelector('h1,h3')?.textContent||'Dashboard';
+  document.getElementById('sidebar').classList.remove('open');
+  renderAll();
+}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open')}
+function toggleTheme(){
+  document.body.dataset.dark=document.body.dataset.dark?'':'1';
+  if(document.body.dataset.dark){
+    document.documentElement.style.setProperty('--bg','#0b1220');
+    document.documentElement.style.setProperty('--card','#111827');
+    document.documentElement.style.setProperty('--text','#f8fafc');
+    document.documentElement.style.setProperty('--muted','#94a3b8');
+    document.documentElement.style.setProperty('--line','#263244');
+  }else{
+    location.reload();
+    return;
+  }
+  localStorage.setItem(KEY.theme,document.body.dataset.dark?'dark':'light');
+}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+
+function openRent(id){
+  let r=rents.find(x=>x.id===id);
+  document.getElementById('rentForm').reset();
+  document.getElementById('rentId').value=r?.id||'';
+  document.getElementById('rentMonth').value=r?.month||monthNow();
+  document.getElementById('rentAmount').value=r?.amount??settings.rent;
+  document.getElementById('rentDue').value=r?.dueDate||new Date(new Date().getFullYear(),new Date().getMonth(),settings.dueDay).toISOString().slice(0,10);
+  document.getElementById('rentStat').value=r?.status||'Pending';
+  document.getElementById('rentPaid').value=r?.paidOn||'';
+  document.getElementById('rentNote').value=r?.notes||'';
+  document.getElementById('rentModalTitle').textContent=r?'Edit Rent':'Add Rent';
+  document.getElementById('rentModal').classList.add('show')
+}
+async function saveRent(e){
+  e.preventDefault();
+  let id=document.getElementById('rentId').value;
+  let obj={id:id||crypto.randomUUID(),month:document.getElementById('rentMonth').value,amount:Number(document.getElementById('rentAmount').value),dueDate:document.getElementById('rentDue').value,status:document.getElementById('rentStat').value,paidOn:document.getElementById('rentPaid').value,notes:document.getElementById('rentNote').value,createdAt:new Date().toISOString()};
+  let i=rents.findIndex(x=>x.id===id);if(i>=0)rents[i]=obj;else rents.push(obj);
+  try{await saveAll();closeModal('rentModal');renderAll();toast('Rent saved')}catch(err){toast('Cloud save failed: '+err.message)}
+}
+async function markRent(id){
+  let r=rents.find(x=>x.id===id);if(!r)return;
+  r.status='Paid';r.paidOn=today();
+  try{await saveAll();renderAll();toast('Rent marked paid')}catch(err){toast('Cloud save failed')}
+}
+async function deleteRent(id){
+  if(confirm('Delete this rent record?')){
+    rents=rents.filter(x=>x.id!==id);
+    try{await saveAll();renderAll();toast('Rent deleted')}catch(err){toast('Cloud save failed')}
+  }
+}
+function renderRent(){
+  let q=(document.getElementById('rentSearch')?.value||'').toLowerCase(),st=document.getElementById('rentStatus')?.value||'';
+  let arr=rents.filter(r=>(!q||(r.month+' '+r.notes).toLowerCase().includes(q))&&(!st||r.status===st)).sort((a,b)=>b.month.localeCompare(a.month));
+  document.getElementById('rentTable').innerHTML=arr.length?arr.map(r=>`<tr><td>${r.month}</td><td>${money(r.amount)}</td><td>${r.dueDate}</td><td>${badge(r.status)}</td><td>${r.paidOn||'—'}</td><td><button class="btn" onclick="openRent('${r.id}')">Edit</button> <button class="btn success" onclick="markRent('${r.id}')">Paid</button> <button class="btn danger" onclick="deleteRent('${r.id}')">Delete</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty">No rent records found.</td></tr>`
+}
+function autoPrev(){
+  let m=document.getElementById('elecMonth').value;
+  let prev=electricity.filter(x=>x.month<m).sort((a,b)=>b.month.localeCompare(a.month))[0];
+  if(prev&&!document.getElementById('elecId').value)document.getElementById('elecPrev').value=prev.currentReading;
+  previewElec()
+}
+function previewElec(){
+  let p=Number(document.getElementById('elecPrev').value||0),c=Number(document.getElementById('elecCurr').value||0),r=Number(document.getElementById('elecRate').value||0);
+  document.getElementById('pvUnits').textContent=Math.max(0,c-p);
+  document.getElementById('pvBill').textContent=money(Math.max(0,c-p)*r)
+}
+function openElectricity(id){
+  let x=electricity.find(a=>a.id===id);
+  document.getElementById('elecForm').reset();
+  document.getElementById('elecId').value=x?.id||'';
+  document.getElementById('elecMonth').value=x?.month||monthNow();
+  document.getElementById('elecDate').value=x?.readingDate||today();
+  document.getElementById('elecPrev').value=x?.previousReading??'';
+  document.getElementById('elecCurr').value=x?.currentReading??'';
+  document.getElementById('elecRate').value=x?.unitRate??settings.unitRate;
+  document.getElementById('elecStat').value=x?.status||'Pending';
+  document.getElementById('elecPaid').value=x?.paidOn||'';
+  document.getElementById('elecNote').value=x?.notes||'';
+  document.getElementById('elecModalTitle').textContent=x?'Edit Meter Reading':'Add Meter Reading';
+  document.getElementById('elecModal').classList.add('show');
+  if(!x)autoPrev();
+  previewElec()
+}
+async function saveElec(e){
+  e.preventDefault();
+  let p=Number(document.getElementById('elecPrev').value),c=Number(document.getElementById('elecCurr').value);
+  if(c<p){toast('Current reading cannot be less than previous reading');return}
+  let id=document.getElementById('elecId').value;
+  let obj={id:id||crypto.randomUUID(),month:document.getElementById('elecMonth').value,previousReading:p,currentReading:c,unitRate:Number(document.getElementById('elecRate').value),readingDate:document.getElementById('elecDate').value,status:document.getElementById('elecStat').value,paidOn:document.getElementById('elecPaid').value,notes:document.getElementById('elecNote').value,createdAt:new Date().toISOString()};
+  let i=electricity.findIndex(x=>x.id===id);if(i>=0)electricity[i]=obj;else electricity.push(obj);
+  try{await saveAll();closeModal('elecModal');renderAll();toast('Meter reading saved')}catch(err){toast('Cloud save failed: '+err.message)}
+}
+async function markElec(id){
+  let x=electricity.find(a=>a.id===id);if(!x)return;
+  x.status='Paid';x.paidOn=today();
+  try{await saveAll();renderAll();toast('Electricity marked paid')}catch(err){toast('Cloud save failed')}
+}
+async function deleteElec(id){
+  if(confirm('Delete this meter record?')){
+    electricity=electricity.filter(x=>x.id!==id);
+    try{await saveAll();renderAll();toast('Meter record deleted')}catch(err){toast('Cloud save failed')}
+  }
+}
+function renderElec(){
+  let q=(document.getElementById('elecSearch')?.value||'').toLowerCase(),st=document.getElementById('elecStatus')?.value||'';
+  let arr=electricity.filter(x=>(!q||(x.month+' '+x.notes).toLowerCase().includes(q))&&(!st||x.status===st)).sort((a,b)=>b.month.localeCompare(a.month));
+  document.getElementById('elecTable').innerHTML=arr.length?arr.map(x=>`<tr><td>${x.month}</td><td>${x.previousReading}</td><td>${x.currentReading}</td><td>${units(x)}</td><td>${money(x.unitRate)}</td><td>${money(bill(x))}</td><td>${badge(x.status)}</td><td><button class="btn" onclick="openElectricity('${x.id}')">Edit</button> <button class="btn success" onclick="markElec('${x.id}')">Paid</button> <button class="btn danger" onclick="deleteElec('${x.id}')">Delete</button></td></tr>`).join(''):`<tr><td colspan="8" class="empty">No electricity records found.</td></tr>`
+}
+function renderHistory(){
+  let arr=[...rents.map(x=>({type:'Rent',month:x.month,amount:x.amount,paidOn:x.paidOn,status:x.status})),...electricity.map(x=>({type:'Electricity',month:x.month,amount:bill(x),paidOn:x.paidOn,status:x.status}))].sort((a,b)=>b.month.localeCompare(a.month));
+  document.getElementById('historyTable').innerHTML=arr.length?arr.map(x=>`<tr><td>${x.type}</td><td>${x.month}</td><td>${money(x.amount)}</td><td>${x.paidOn||'—'}</td><td>${badge(x.status)}</td></tr>`).join(''):`<tr><td colspan="5" class="empty">No payment history.</td></tr>`
+}
+function renderReminders(){
+  let arr=[...rents.filter(x=>x.status!=='Paid').map(x=>({type:'Rent',id:x.id,month:x.month,amount:x.amount,status:x.status})),...electricity.filter(x=>x.status!=='Paid').map(x=>({type:'Electricity',id:x.id,month:x.month,amount:bill(x),status:x.status}))];
+  document.getElementById('reminderTable').innerHTML=arr.length?arr.map(x=>`<tr><td>${x.type}</td><td>${x.month}</td><td>${money(x.amount)}</td><td>${badge(x.status)}</td><td><button class="btn success" onclick="${x.type==='Rent'?`markRent('${x.id}')`:`markElec('${x.id}')`}">Mark Paid</button></td></tr>`).join(''):`<tr><td colspan="5" class="empty">No pending reminders 🎉</td></tr>`
+}
+function renderDashboard(){
+  let m=monthNow(),r=rents.find(x=>x.month===m),e=electricity.find(x=>x.month===m);
+  let rent=r?.amount||0,eb=e?bill(e):0,pending=(r&&r.status!=='Paid'?rent:0)+(e&&e.status!=='Paid'?eb:0);
+  document.getElementById('monthLabel').textContent='Current month: '+m;
+  document.getElementById('dashRent').textContent=money(rent);
+  document.getElementById('dashElec').textContent=money(eb);
+  document.getElementById('dashTotal').textContent=money(rent+eb);
+  document.getElementById('dashPending').textContent=money(pending);
+  document.getElementById('dashUnits').textContent=e?units(e):0;
+  document.getElementById('mPrev').textContent=e?e.previousReading:'—';
+  document.getElementById('mCurr').textContent=e?e.currentReading:'—';
+  document.getElementById('mUnits').textContent=e?units(e):'—';
+  document.getElementById('mBill').textContent=e?money(eb):'₹0';
+  document.getElementById('mStatus').innerHTML=e?badge(e.status):'<span class="muted">No reading for this month</span>'
+}
+function renderReports(){
+  let rp=rents.reduce((a,x)=>a+Number(x.amount),0),paid=rents.filter(x=>x.status==='Paid').reduce((a,x)=>a+Number(x.amount),0),u=electricity.reduce((a,x)=>a+units(x),0),ex=electricity.reduce((a,x)=>a+bill(x),0);
+  document.getElementById('rCount').textContent=rents.length;
+  document.getElementById('rPaid').textContent=money(paid);
+  document.getElementById('eUnits').textContent=u;
+  document.getElementById('eExpense').textContent=money(ex);
+  document.getElementById('reportText').textContent=`Total rent recorded: ${money(rp)} | Total electricity expense: ${money(ex)} | Combined expense: ${money(rp+ex)} | Pending items: ${rents.filter(x=>x.status!=='Paid').length+electricity.filter(x=>x.status!=='Paid').length}`
+}
+function renderSettings(){
+  document.getElementById('setRent').value=settings.rent;
+  document.getElementById('setDue').value=settings.dueDay;
+  document.getElementById('setRate').value=settings.unitRate;
+  document.getElementById('setReminder').value=settings.reminderDays
+}
+async function saveSettings(){
+  settings={rent:Number(document.getElementById('setRent').value),dueDay:Number(document.getElementById('setDue').value),unitRate:Number(document.getElementById('setRate').value),reminderDays:Number(document.getElementById('setReminder').value)};
+  try{await saveAll();toast('Settings saved')}catch(err){toast('Cloud save failed: '+err.message)}
+}
+function renderAll(){renderDashboard();renderRent();renderElec();renderHistory();renderReminders();renderReports();renderSettings()}
+function download(name,text,type='text/plain'){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportJSON(){download('roomflow-backup.json',JSON.stringify({settings,rents,electricity},null,2),'application/json');toast('Backup downloaded')}
+function importJSON(e){
+  let f=e.target.files[0];if(!f)return;
+  let r=new FileReader();
+  r.onload=async()=>{
+    try{
+      let d=JSON.parse(r.result);
+      if(d.settings)settings=d.settings;
+      if(Array.isArray(d.rents))rents=d.rents;
+      if(Array.isArray(d.electricity))electricity=d.electricity;
+      await saveAll();renderAll();toast('Backup imported to Firebase');
+    }catch(err){toast('Invalid backup file or cloud save failed')}
+  };
+  r.readAsText(f)
+}
+function csv(rows){return rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n')}
+function exportRentCSV(){let rows=[['Month','Amount','Due Date','Status','Paid On','Notes'],...rents.map(x=>[x.month,x.amount,x.dueDate,x.status,x.paidOn,x.notes])];download('rent-records.csv',csv(rows),'text/csv')}
+function exportElecCSV(){let rows=[['Month','Previous','Current','Units','Rate','Bill','Reading Date','Status','Paid On','Notes'],...electricity.map(x=>[x.month,x.previousReading,x.currentReading,units(x),x.unitRate,bill(x),x.readingDate,x.status,x.paidOn,x.notes])];download('electricity-records.csv',csv(rows),'text/csv')}
+async function clearData(){
+  if(!confirm('Are you sure? This will delete all RoomFlow data from your Firebase account.'))return;
+  try{
+    settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+    rents=[];electricity=[];
+    if(cloudReady&&auth.currentUser){
+      await userRoot().collection('settings').doc('main').delete().catch(()=>{});
+      await syncCollection('rents',[]);
+      await syncCollection('electricity',[]);
+    }
+    localSave();renderAll();toast('All data deleted');
+  }catch(err){toast('Delete failed: '+err.message)}
+}
+
+if(localStorage.getItem(KEY.theme)==='dark'){
+  document.body.dataset.dark='1';
+  document.documentElement.style.setProperty('--bg','#0b1220');
+  document.documentElement.style.setProperty('--card','#111827');
+  document.documentElement.style.setProperty('--text','#f8fafc');
+  document.documentElement.style.setProperty('--muted','#94a3b8');
+  document.documentElement.style.setProperty('--line','#263244')
+}
+
+document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')loginUser()});
+
+auth.onAuthStateChanged(async user=>{
+  if(!user){
+    cloudReady=false;
+    settings={rent:8000,dueDay:5,unitRate:8,reminderDays:3};
+    rents=[];
+    electricity=[];
+    localStorage.removeItem(KEY.settings);
+    localStorage.removeItem(KEY.rents);
+    localStorage.removeItem(KEY.elec);
+    showLogin();
+    return;
+  }
+  try{
+    await ensureUserProfile(user);
+    showApp(user);
+    await loadCloudData();
+    renderAll();
+  }catch(err){
+    console.error('RoomFlow startup error:',err);
+    showLogin();
+    setLoginError('Could not load your account data: '+err.message);
+    await auth.signOut().catch(()=>{});
+  }
+});
+</script>
+
+</body>
+</html>
