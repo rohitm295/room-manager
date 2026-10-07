@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoomFlow — Smart Room & Rent Management</title>
+<meta name="description" content="RoomFlow makes rent, electricity, payments and room expenses simple to manage.">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#f8fafc;
+  color:#0f172a;
+  line-height:1.6;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+button{
+  font:inherit;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid #e2e8f0;
+}
+
+.nav{
+  max-width:1180px;
+  margin:auto;
+  height:72px;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  font-size:21px;
+}
+
+.logo-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  color:white;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  box-shadow:0 8px 20px rgba(37,99,235,.25);
+}
+
+.logo span{
+  color:#2563eb;
+}
+
+.nav-links{
+  display:flex;
+  gap:28px;
+  align-items:center;
+  color:#475569;
+  font-size:14px;
+  font-weight:600;
+}
+
+.nav-links a:hover{
+  color:#2563eb;
+}
+
+.nav-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.btn{
+  border:0;
+  cursor:pointer;
+  border-radius:11px;
+  padding:11px 18px;
+  font-weight:700;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.btn-outline{
+  background:white;
+  color:#1e293b;
+  border:1px solid #dbe3ee;
+}
+
+.btn-primary{
+  color:white;
+  background:linear-gradient(135deg,#2563eb,#0891b2);
+  box-shadow:0 8px 20px rgba(37,99,235,.2);
+}
+
+.mobile-menu{
+  display:none;
+  border:0;
+  background:white;
+  font-size:25px;
+  cursor:pointer;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+  overflow:hidden;
+  padding:78px 22px 85px;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(37,99,235,.10),transparent 30%),
+    radial-gradient(circle at 90% 20%,rgba(6,182,212,.10),transparent 28%),
+    #f8fafc;
+}
+
+.hero-inner{
+  max-width:1180px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:55px;
+  align-items:center;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#2563eb;
+  border:1px solid #dbeafe;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.hero h1{
+  font-size:clamp(40px,5vw,65px);
+  line-height:1.05;
+  letter-spacing:-2.5px;
+  max-width:650px;
+}
+
+.hero h1 span{
+  color:#2563eb;
+}
+
+.hero p{
+  margin-top:22px;
+  max-width:590px;
+  color:#64748b;
+  font-size:18px;
+}
+
+.hero-buttons{
+  display:flex;
+  gap:12px;
+  margin-top:30px;
+  flex-wrap:wrap;
+}
+
+.hero-note{
+  margin-top:18px;
+  color:#64748b;
+  font-size:13px;
+}
+
+/* dashboard mockup */
+
+.dashboard-wrap{
+  position:relative;
+}
+
+.dashboard{
+  background:white;
+  border:1px solid #e2e8f0;
+  border-radius:22px;
+  padding:17px;
+  box-shadow:0 30px 70px rgba(15,23,42,.13);
+  transform:rotate(1deg);
+}
+
+.dash-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.dash-title{
+  font-weight:800;
+}
+
+.dash-user{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:#dbeafe;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+  font-weight:800;
+  color:#2563eb;
+}
+
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.stat{
+  border:1px solid #edf2f7;
+  border-radius:13px;
+  padding:13px;
+  background:#fbfdff;
+}
+
+.stat small{
+  color:#64748b;
+  font-size:11px;
+}
+
+.stat strong{
+  display:block;
+  margin-top:4px;
+  font-size:18px;
+}
+
+.stat.green strong{
+  color:#059669;
+}
+
+.stat.orange strong{
+  color:#d97706;
+}
+
+.chart{
+  margin-top:12px;
+  height:155px;
+  border-radius:14px;
+  background:#f8fafc;
+  border:1px solid #edf2f7;
+  padding:15px;
+  position:relative;
+  overflow:hidden;
+}
+
+.chart-title{
+  font-size:12px;
+  font-weight:700;
+}
+
+.bars{
+  height:90px;
+  display:flex;
+  align-items:end;
+  gap:10px;
+  margin-top:15px;
+}
+
+.bar{
+  flex:1;
+  border-radius:6px 6px 2px 2px;
+  background:linear-gradient(to top,#2563eb,#60a5fa);
+}
+
+.bar:nth-child(1){height:35%}
+.bar:nth-child(2){height:52%}
+.bar:nth-child(3){height:42%}
+.bar:nth-child(4){height:70%}
+.bar:nth-child(5){height:60%}
+.bar:nth-child(6){height:85%}
+.bar:nth-child(7){height:72%}
+
+.floating-card{
+  position:absolute;
+  right:-25px;
+  bottom:20px;
+  background:white;
+  border:1px solid #e2e8f0;
+  border-radius:15px;
+  padding:12px 15px;
+  box-shadow:0 15px 35px rgba(15,23,42,.13);
+  font-size:12px;
+}
+
+.floating-card strong{
+  display:block;
+  color:#059669;
+}
+
+/* ================= TRUST ================= */
+
+.trust{
+  padding:20px 22px 60px;
+  text-align:center;
+}
+
+.trust p{
+  color:#64748b;
+  font-size:14px;
+}
+
+.trust-row{
+  max-width:900px;
+  margin:25px auto 0;
+  display:flex;
+  justify-content:center;
+  gap:45px;
+  flex-wrap:wrap;
+  color:#94a3b8;
+  font-weight:700;
+}
+
+/* ================= SECTION ================= */
+
+.section{
+  padding:90px 22px;
+}
+
+.section-inner{
+  max-width:1180px;
+  margin:auto;
+}
+
+.section-heading{
+  text-align:center;
+  max-width:700px;
+  margin:0 auto 50px;
+}
+
+.eyebrow{
+  color:#2563eb;
+  font-size:13px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+}
+
+.section-heading h2{
+  margin-top:10px;
+  font-size:clamp(30px,4vw,44px);
+  line-height:1.15;
+  letter-spacing:-1px;
+}
+
+.section-heading p{
+  margin-top:15px;
+  color:#64748b;
+}
+
+/* ================= FEATURES ================= */
+
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.feature{
+  background:white;
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+  padding:27px;
+  transition:.25s;
+}
+
+.feature:hover{
+  transform:translateY(-5px);
+  box-shadow:0 18px 40px rgba(15,23,42,.08);
+}
+
+.feature-icon{
+  width:48px;
+  height:48px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  background:#eff6ff;
+  font-size:23px;
+}
+
+.feature h3{
+  margin-top:18px;
+  font-size:19px;
+}
+
+.feature p{
+  margin-top:8px;
+  color:#64748b;
+  font-size:14px;
+}
+
+/* ================= WHO ================= */
+
+.who{
+  background:#0f172a;
+  color:white;
+}
+
+.who .section-heading p{
+  color:#94a3b8;
+}
+
+.audience{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.audience-card{
+  padding:32px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+}
+
+.audience-card .icon{
+  font-size:32px;
+}
+
+.audience-card h3{
+  margin-top:15px;
+  font-size:23px;
+}
+
+.audience-card p{
+  color:#94a3b8;
+  margin-top:8px;
+}
+
+.audience-card ul{
+  margin-top:20px;
+  list-style:none;
+}
+
+.audience-card li{
+  padding:7px 0;
+  color:#cbd5e1;
+}
+
+.audience-card li::before{
+  content:"✓";
+  color:#38bdf8;
+  margin-right:9px;
+}
+
+/* ================= HOW ================= */
+
+.steps{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.step{
+  text-align:center;
+  padding:20px;
+}
+
+.step-number{
+  width:52px;
+  height:52px;
+  margin:auto;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#2563eb;
+  color:white;
+  font-weight:800;
+  font-size:18px;
+}
+
+.step h3{
+  margin-top:17px;
+}
+
+.step p{
+  color:#64748b;
+  font-size:14px;
+  margin-top:7px;
+}
+
+/* ================= CTA ================= */
+
+.cta{
+  padding:30px 22px 90px;
+}
+
+.cta-box{
+  max-width:1100px;
+  margin:auto;
+  border-radius:25px;
+  padding:55px 30px;
+  text-align:center;
+  color:white;
+  background:linear-gradient(135deg,#1d4ed8,#0891b2);
+  box-shadow:0 25px 60px rgba(37,99,235,.22);
+}
+
+.cta-box h2{
+  font-size:clamp(30px,4vw,43px);
+}
+
+.cta-box p{
+  max-width:600px;
+  margin:12px auto 25px;
+  color:#dbeafe;
+}
+
+.cta-box .btn{
+  background:white;
+  color:#1d4ed8;
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+  background:#020617;
+  color:#94a3b8;
+  padding:45px 22px 25px;
+}
+
+.footer-inner{
+  max-width:1180px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  flex-wrap:wrap;
+}
+
+.footer-brand{
+  max-width:350px;
+}
+
+.footer-brand .logo{
+  color:white;
+}
+
+.footer-brand p{
+  margin-top:12px;
+  font-size:14px;
+}
+
+.footer-links{
+  display:flex;
+  gap:45px;
+}
+
+.footer-col h4{
+  color:white;
+  margin-bottom:10px;
+}
+
+.footer-col a{
+  display:block;
+  font-size:13px;
+  margin:7px 0;
+}
+
+.footer-col a:hover{
+  color:white;
+}
+
+.copyright{
+  max-width:1180px;
+  margin:35px auto 0;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-size:12px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:850px){
+
+  .nav-links,
+  .nav-actions .btn-outline{
+    display:none;
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .hero-inner{
+    grid-template-columns:1fr;
+    gap:45px;
+  }
+
+  .hero{
+    padding-top:55px;
+  }
+
+  .hero h1{
+    font-size:45px;
+  }
+
+  .features{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .audience{
+    grid-template-columns:1fr;
+  }
+
+  .steps{
+    grid-template-columns:1fr;
+  }
+
+  .dashboard{
+    transform:none;
+  }
+}
+
+@media(max-width:560px){
+
+  .nav{
+    height:64px;
+    padding:0 16px;
+  }
+
+  .logo{
+    font-size:18px;
+  }
+
+  .logo-icon{
+    width:34px;
+    height:34px;
+  }
+
+  .hero{
+    padding:45px 16px 65px;
+  }
+
+  .hero h1{
+    font-size:39px;
+    letter-spacing:-1.7px;
+  }
+
+  .hero p{
+    font-size:16px;
+  }
+
+  .hero-buttons{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .hero-buttons .btn{
+    width:100%;
+  }
+
+  .dashboard{
+    padding:12px;
+    border-radius:17px;
+  }
+
+  .dash-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .dash-grid .stat:last-child{
+    display:none;
+  }
+
+  .floating-card{
+    right:8px;
+    bottom:10px;
+  }
+
+  .section{
+    padding:65px 16px;
+  }
+
+  .features{
+    grid-template-columns:1fr;
+  }
+
+  .feature{
+    padding:22px;
+  }
+
+  .trust-row{
+    gap:20px;
+  }
+
+  .cta{
+    padding:10px 16px 65px;
+  }
+
+  .cta-box{
+    padding:40px 20px;
+  }
+
+  .footer-inner{
+    display:block;
+  }
+
+  .footer-links{
+    margin-top:30px;
+    gap:35px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="header">
+  <nav class="nav">
+
+    <a href="home.html" class="logo">
+      <div class="logo-icon">R</div>
+      Room<span>Flow</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#who">For You</a>
+      <a href="#how">How It Works</a>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Existing app -->
+      <a href="index.html" class="btn btn-outline">Login</a>
+      <a href="index.html" class="btn btn-primary">Get Started</a>
+      <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+    </div>
+
+  </nav>
+</header>
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero">
+
+  <div class="hero-inner">
+
+    <div>
+
+      <div class="badge">
+        ✨ Simple room management
+      </div>
+
+      <h1>
+        Manage your room life
+        <span>smarter.</span>
+      </h1>
+
+      <p>
+        Keep rent, electricity, meter readings, payments and reminders
+        organized in one simple place with RoomFlow.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="index.html" class="btn btn-primary">
+          Get Started →
+        </a>
+
+        <a href="#features" class="btn btn-outline">
+          Explore Features
+        </a>
+      </div>
+
+      <div class="hero-note">
+        ✓ Easy to use &nbsp; ✓ Cloud connected &nbsp; ✓ Mobile friendly
+      </div>
+
+    </div>
+
+
+    <!-- Dashboard Preview -->
+
+    <div class="dashboard-wrap">
+
+      <div class="dashboard">
+
+        <div class="dash-top">
+          <div class="dash-title">RoomFlow Dashboard</div>
+          <div class="dash-user">RF</div>
+        </div>
+
+        <div class="dash-grid">
+
+          <div class="stat">
+            <small>Monthly Rent</small>
+            <strong>₹8,000</strong>
+          </div>
+
+          <div class="stat green">
+            <small>Electricity</small>
+            <strong>₹640</strong>
+          </div>
+
+          <div class="stat orange">
+            <small>Pending</small>
+            <strong>₹640</strong>
+          </div>
+
+        </div>
+
+        <div class="chart">
+
+          <div class="chart-title">
+            Monthly Overview
+          </div>
+
+          <div class="bars">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="floating-card">
+        ⚡ Electricity
+        <strong>640 Units tracked</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= TRUST ================= -->
+
+<section class="trust">
+
+  <p>Everything you need to keep your room expenses organized.</p>
+
+  <div class="trust-row">
+    <span>RENT</span>
+    <span>ELECTRICITY</span>
+    <span>PAYMENTS</span>
+    <span>REMINDERS</span>
+    <span>REPORTS</span>
+  </div>
+
+</section>
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="section" id="features">
+
+  <div class="section-inner">
+
+    <div class="section-heading">
+
+      <div class="eyebrow">Powerful but simple</div>
+
+      <h2>
+        Everything for your room,
+        in one place.
+      </h2>
+
+      <p>
+        Stop keeping rent dates, meter readings and payments
+        scattered across notes and apps.
+      </p>
+
+    </div>
+
+
+    <div class="features">
+
+      <div class="feature">
+
+        <div class="feature-icon">🏠</div>
+
+        <h3>Rent Management</h3>
+
+        <p>
+          Track monthly rent, due dates, paid status
+          and pending amounts easily.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <div class="feature-icon">⚡</div>
+
+        <h3>Electricity & Meter</h3>
+
+        <p>
+          Record previous and current meter readings,
+          units, rate and electricity bill.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <div class="feature-icon">💳</div>
+
+        <h3>Payment History</h3>
+
+        <p>
+          Keep a clean record of your rent and
+          electricity payments.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <div class="feature-icon">🔔</div>
+
+        <h3>Reminders</h3>
+
+        <p>
+          Keep track of upcoming rent dues and
+          pending payments.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <div class="feature-icon">📊</div>
+
+        <h3>Reports</h3>
+
+        <p>
+          Understand your monthly room expenses
+          with simple summaries.
+        </p>
+
+      </div>
+
+
+      <div class="feature">
+
+        <div class="feature-icon">☁️</div>
+
+        <h3>Cloud Access</h3>
+
+        <p>
+          Sign in to access your RoomFlow data
+          across supported devices.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= WHO ================= -->
+
+<section class="section who" id="who">
+
+  <div class="section-inner">
+
+    <div class="section-heading">
+
+      <div class="eyebrow">Built for both</div>
+
+      <h2>
+        RoomFlow grows with your needs.
+      </h2>
+
+      <p>
+        Start as a simple personal room manager.
+        Later, use dedicated tools for property management.
+      </p>
+
+    </div>
+
+
+    <div class="audience">
+
+      <div class="audience-card">
+
+        <div class="icon">👤</div>
+
+        <h3>For Tenants</h3>
+
+        <p>
+          Manage your own room expenses without
+          complicated spreadsheets.
+        </p>
+
+        <ul>
+          <li>Monthly rent tracking</li>
+          <li>Electricity meter readings</li>
+          <li>Payment history</li>
+          <li>Due-date reminders</li>
+        </ul>
+
+      </div>
+
+
+      <div class="audience-card">
+
+        <div class="icon">🏢</div>
+
+        <h3>For Landlords</h3>
+
+        <p>
+          A future dedicated workspace for managing
+          rooms, tenants and collections.
+        </p>
+
+        <ul>
+          <li>Multiple rooms</li>
+          <li>Tenant management</li>
+          <li>Rent collection</li>
+          <li>Property reports</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= HOW IT WORKS ================= -->
+
+<section class="section" id="how">
+
+  <div class="section-inner">
+
+    <div class="section-heading">
+
+      <div class="eyebrow">How it works</div>
+
+      <h2>
+        Get organized in three simple steps.
+      </h2>
+
+    </div>
+
+
+    <div class="steps">
+
+      <div class="step">
+
+        <div class="step-number">1</div>
+
+        <h3>Create your account</h3>
+
+        <p>
+          Sign up and create your personal RoomFlow account.
+        </p>
+
+      </div>
+
+
+      <div class="step">
+
+        <div class="step-number">2</div>
+
+        <h3>Add your details</h3>
+
+        <p>
+          Add rent amount, due date and electricity readings.
+        </p>
+
+      </div>
+
+
+      <div class="step">
+
+        <div class="step-number">3</div>
+
+        <h3>Stay organized</h3>
+
+        <p>
+          Track payments, pending amounts and monthly expenses.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= CTA ================= -->
+
+<section class="cta">
+
+  <div class="cta-box">
+
+    <h2>
+      Ready to simplify your room management?
+    </h2>
+
+    <p>
+      Start managing rent, electricity and payments
+      with RoomFlow today.
+    </p>
+
+    <a href="index.html" class="btn">
+      Get Started with RoomFlow →
+    </a>
+
+  </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+
+      <div class="logo">
+        <div class="logo-icon">R</div>
+        Room<span>Flow</span>
+      </div>
+
+      <p>
+        A simple way to manage room rent,
+        electricity and everyday room expenses.
+      </p>
+
+    </div>
+
+
+    <div class="footer-links">
+
+      <div class="footer-col">
+
+        <h4>Product</h4>
+
+        <a href="#features">Features</a>
+        <a href="#how">How It Works</a>
+        <a href="index.html">Login</a>
+
+      </div>
+
+
+      <div class="footer-col">
+
+        <h4>For You</h4>
+
+        <a href="#who">Tenants</a>
+        <a href="#who">Landlords</a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="copyright">
+    © 2026 RoomFlow. All rights reserved.
+  </div>
+
+</footer>
+
+
+<script>
+
+function toggleMenu(){
+
+  const links = document.querySelector('.nav-links');
+
+  if(links.style.display === 'flex'){
+    links.style.display = 'none';
+  }else{
+
+    links.style.display = 'flex';
+    links.style.position = 'absolute';
+    links.style.top = '64px';
+    links.style.left = '0';
+    links.style.right = '0';
+    links.style.padding = '18px';
+    links.style.background = 'white';
+    links.style.flexDirection = 'column';
+    links.style.borderBottom = '1px solid #e2e8f0';
+    links.style.boxShadow = '0 10px 25px rgba(0,0,0,.08)';
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
