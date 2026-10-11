@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tenant Manager | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .tenant-wrap{max-width:1250px;margin:auto;padding:24px}
+    .tenant-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+    .tenant-header h1{margin:0 0 6px}
+    .muted{color:var(--muted,#777);font-size:13px}
+    .tenant-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+    .tenant-card,.tenant-panel{background:var(--card,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:18px}
+    .stat-number{font-size:27px;font-weight:700;margin-top:8px}
+    .tenant-layout{display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:20px;align-items:start}
+    .tenant-panel h2{font-size:19px;margin:0 0 16px}
+    .tenant-form label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}
+    .tenant-form input,.tenant-form select,.tenant-form textarea,.tenant-filters input,.tenant-filters select{
+      width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--border,#d1d5db);
+      border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit
+    }
+    .tenant-form textarea{min-height:70px;resize:vertical}
+    .tenant-btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600;background:var(--primary,#2563eb);color:#fff}
+    .tenant-btn.secondary{background:#64748b}
+    .tenant-btn.danger{background:#dc2626}
+    .tenant-btn.small{padding:6px 9px;font-size:12px;margin:2px}
+    .tenant-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .tenant-filters{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:15px}
+    .tenant-table-wrap{overflow-x:auto}
+    .tenant-table{width:100%;border-collapse:collapse;min-width:850px}
+    .tenant-table th,.tenant-table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border,#e5e7eb);font-size:13px;vertical-align:top}
+    .tenant-table th{font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    .tenant-badge{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+    .badge-active{background:#dcfce7;color:#166534}
+    .badge-inactive{background:#e2e8f0;color:#334155}
+    .tenant-empty{text-align:center;padding:32px 10px;color:var(--muted,#777)}
+    #tenantMessage{margin-bottom:14px;font-size:14px}
+    #tenantMessage.error{color:#dc2626}
+    #tenantMessage.success{color:#15803d}
+    .tenant-note{font-size:12px;line-height:1.5;color:var(--muted,#777);margin-top:12px}
+    @media(max-width:900px){.tenant-layout{grid-template-columns:1fr}.tenant-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:480px){.tenant-wrap{padding:14px}.tenant-card{padding:12px}.stat-number{font-size:22px}.tenant-filters{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="tenant-wrap">
+    <header class="tenant-header">
+      <div>
+        <h1>Tenant Manager</h1>
+        <div class="muted">Manage tenant information and room occupancy.</div>
+      </div>
+      <div class="tenant-actions">
+        <button class="tenant-btn secondary" id="exportBtn" type="button">Export CSV</button>
+        <button class="tenant-btn secondary" id="refreshBtn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <div id="tenantMessage" role="status" aria-live="polite"></div>
+
+    <section class="tenant-stats">
+      <div class="tenant-card">
+        <div class="muted">Total Tenants</div>
+        <div class="stat-number" id="totalCount">0</div>
+      </div>
+      <div class="tenant-card">
+        <div class="muted">Active Tenants</div>
+        <div class="stat-number" id="activeCount">0</div>
+      </div>
+      <div class="tenant-card">
+        <div class="muted">Inactive Tenants</div>
+        <div class="stat-number" id="inactiveCount">0</div>
+      </div>
+      <div class="tenant-card">
+        <div class="muted">Monthly Rent Total</div>
+        <div class="stat-number" id="rentTotal">₹0</div>
+      </div>
+    </section>
+
+    <section class="tenant-layout">
+      <div class="tenant-panel">
+        <h2 id="formTitle">Add Tenant</h2>
+        <form class="tenant-form" id="tenantForm">
+          <input type="hidden" id="tenantId">
+
+          <label for="tenantName">Full Name *</label>
+          <input id="tenantName" maxlength="120" required placeholder="Tenant's full name">
+
+          <label for="tenantPhone">Mobile Number</label>
+          <input id="tenantPhone" type="tel" maxlength="20" placeholder="Mobile number">
+
+          <label for="tenantEmail">Email Address</label>
+          <input id="tenantEmail" type="email" maxlength="150" placeholder="name@example.com">
+
+          <label for="tenantProperty">Property</label>
+          <select id="tenantProperty">
+            <option value="">None / Not linked</option>
+          </select>
+
+          <label for="tenantRoom">Room</label>
+          <select id="tenantRoom">
+            <option value="">None / Not linked</option>
+          </select>
+
+          <label for="tenantRent">Monthly Rent (₹) *</label>
+          <input id="tenantRent" type="number" min="0" max="100000000" step="0.01" required value="0">
+
+          <label for="tenantDeposit">Security Deposit (₹)</label>
+          <input id="tenantDeposit" type="number" min="0" max="100000000" step="0.01" value="0">
+
+          <label for="tenantJoinDate">Move-in Date</label>
+          <input id="tenantJoinDate" type="date">
+
+          <label for="tenantMoveOutDate">Move-out Date</label>
+          <input id="tenantMoveOutDate" type="date">
+
+          <label for="tenantStatus">Status</label>
+          <select id="tenantStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+
+          <label for="tenantNotes">Notes</label>
+          <textarea id="tenantNotes" maxlength="2000" placeholder="Additional details"></textarea>
+
+          <div class="tenant-actions">
+            <button class="tenant-btn" id="saveBtn" type="submit">Save Tenant</button>
+            <button class="tenant-btn secondary" id="cancelBtn" type="button" hidden>Cancel Edit</button>
+          </div>
+          <p class="tenant-note">Tenant records are stored in your signed-in account. This page does not automatically create rent bills, payments, or room occupancy updates.</p>
+        </form>
+      </div>
+
+      <div class="tenant-panel">
+        <h2>Your Tenants</h2>
+        <div class="tenant-filters">
+          <input id="searchInput" type="search" placeholder="Search name, phone, email, room...">
+          <select id="statusFilter">
+            <option value="">All statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="tenant-table-wrap">
+          <table class="tenant-table">
+            <thead>
+              <tr>
+                <th>Tenant</th>
+                <th>Property / Room</th>
+                <th>Monthly Rent</th>
+                <th>Dates</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tenantsBody">
+              <tr><td colspan="6" class="tenant-empty">Checking login...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, doc,
+      updateDoc, deleteDoc, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let tenants = [];
+    let properties = [];
+    let rooms = [];
+
+    const $ = id => document.getElementById(id);
+    const tenantsRef = () => collection(db, "users", currentUser.uid, "tenants");
+
+    function showMessage(message, type = "") {
+      $("tenantMessage").textContent = message;
+      $("tenantMessage").className = type;
+    }
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency", currency: "INR", maximumFractionDigits: 2
+      }).format(Number(value) || 0);
+    }
+
+    function fillSelect(selectId, items, labelFn) {
+      const select = $(selectId);
+      const previous = select.value;
+      select.replaceChildren(new Option("None / Not linked", ""));
+      items.forEach(item => select.add(new Option(labelFn(item), item.id)));
+      if ([...select.options].some(option => option.value === previous)) {
+        select.value = previous;
+      }
+    }
+
+    async function loadRelatedRecords() {
+      const [propertySnap, roomSnap] = await Promise.all([
+        getDocs(collection(db, "users", currentUser.uid, "properties")),
+        getDocs(collection(db, "users", currentUser.uid, "rooms"))
+      ]);
+
+      properties = propertySnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      rooms = roomSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      fillSelect("tenantProperty", properties, p =>
+        p.name || p.propertyName || "Unnamed property"
+      );
+
+      updateRoomOptions();
+    }
+
+    function updateRoomOptions() {
+      const propertyId = $("tenantProperty").value;
+      const previousRoom = $("tenantRoom").value;
+
+      const availableRooms = propertyId
+        ? rooms.filter(room =>
+            !room.propertyId || room.propertyId === propertyId
+          )
+        : rooms;
+
+      fillSelect("tenantRoom", availableRooms, room =>
+        room.name || room.roomName || "Unnamed room"
+      );
+
+      if (availableRooms.some(room => room.id === previousRoom)) {
+        $("tenantRoom").value = previousRoom;
+      }
+    }
+
+    async function loadTenants() {
+      $("tenantsBody").innerHTML =
+        '<tr><td colspan="6" class="tenant-empty">Loading tenants...</td></tr>';
+
+      const snapshot = await getDocs(
+        query(tenantsRef(), orderBy("createdAt", "desc"))
+      );
+
+      tenants = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTenants();
+    }
+
+    function renderTenants() {
+      const search = $("searchInput").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+
+      const filtered = tenants.filter(tenant => {
+        const text = [
+          tenant.name, tenant.phone, tenant.email,
+          tenant.propertyName, tenant.roomName, tenant.notes
+        ].join(" ").toLowerCase();
+
+        return text.includes(search) &&
+          (!status || (tenant.status || "Active") === status);
+      });
+
+      $("totalCount").textContent = tenants.length;
+      $("activeCount").textContent =
+        tenants.filter(t => (t.status || "Active") === "Active").length;
+      $("inactiveCount").textContent =
+        tenants.filter(t => t.status === "Inactive").length;
+
+      const totalRent = tenants
+        .filter(t => (t.status || "Active") === "Active")
+        .reduce((sum, t) => sum + (Number(t.monthlyRent) || 0), 0);
+
+      $("rentTotal").textContent = money(totalRent);
+
+      if (!filtered.length) {
+        $("tenantsBody").innerHTML =
+          '<tr><td colspan="6" class="tenant-empty">No tenants found. Add your first tenant.</td></tr>';
+        return;
+      }
+
+      $("tenantsBody").innerHTML = filtered.map(tenant => {
+        const status = tenant.status || "Active";
+        const phone = String(tenant.phone || "");
+        const phoneLink = /^[+\d][\d\s()-]{5,19}$/.test(phone)
+          ? `<div><a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a></div>`
+          : `<div>${escapeHtml(phone || "No phone")}</div>`;
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(tenant.name || "Unnamed")}</strong>
+              ${phoneLink}
+              <div class="muted">${escapeHtml(tenant.email || "")}</div>
+            </td>
+            <td>
+              ${escapeHtml(tenant.propertyName || "—")}
+              <div class="muted">${escapeHtml(tenant.roomName || "No room linked")}</div>
+            </td>
+            <td>
+              <strong>${escapeHtml(money(tenant.monthlyRent))}</strong>
+              <div class="muted">Deposit: ${escapeHtml(money(tenant.securityDeposit))}</div>
+            </td>
+            <td>
+              <div>In: ${escapeHtml(tenant.moveInDate || "—")}</div>
+              <div class="muted">Out: ${escapeHtml(tenant.moveOutDate || "—")}</div>
+            </td>
+            <td>
+              <span class="tenant-badge ${status === "Active" ? "badge-active" : "badge-inactive"}">
+                ${escapeHtml(status)}
+              </span>
+            </td>
+            <td>
+              <button class="tenant-btn secondary small" data-edit="${escapeHtml(tenant.id)}" type="button">Edit</button>
+              <button class="tenant-btn danger small" data-delete="${escapeHtml(tenant.id)}" type="button">Delete</button>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+
+    function resetForm() {
+      $("tenantForm").reset();
+      $("tenantId").value = "";
+      $("tenantRent").value = "0";
+      $("tenantDeposit").value = "0";
+      $("tenantStatus").value = "Active";
+      $("formTitle").textContent = "Add Tenant";
+      $("saveBtn").textContent = "Save Tenant";
+      $("cancelBtn").hidden = true;
+      updateRoomOptions();
+    }
+
+    function editTenant(id) {
+      const tenant = tenants.find(t => t.id === id);
+      if (!tenant) return;
+
+      $("tenantId").value = tenant.id;
+      $("tenantName").value = tenant.name || "";
+      $("tenantPhone").value = tenant.phone || "";
+      $("tenantEmail").value = tenant.email || "";
+      $("tenantProperty").value = tenant.propertyId || "";
+      updateRoomOptions();
+      $("tenantRoom").value = tenant.roomId || "";
+      $("tenantRent").value = Number(tenant.monthlyRent) || 0;
+      $("tenantDeposit").value = Number(tenant.securityDeposit) || 0;
+      $("tenantJoinDate").value = tenant.moveInDate || "";
+      $("tenantMoveOutDate").value = tenant.moveOutDate || "";
+      $("tenantStatus").value = tenant.status || "Active";
+      $("tenantNotes").value = tenant.notes || "";
+
+      $("formTitle").textContent = "Edit Tenant";
+      $("saveBtn").textContent = "Update Tenant";
+      $("cancelBtn").hidden = false;
+      $("tenantName").focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    $("tenantProperty").addEventListener("change", updateRoomOptions);
+
+    $("tenantForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const id = $("tenantId").value;
+      const name = $("tenantName").value.trim();
+      const phone = $("tenantPhone").value.trim();
+      const email = $("tenantEmail").value.trim();
+      const monthlyRent = Number($("tenantRent").value);
+      const securityDeposit = Number($("tenantDeposit").value);
+      const moveInDate = $("tenantJoinDate").value;
+      const moveOutDate = $("tenantMoveOutDate").value;
+
+      if (!name) {
+        showMessage("Please enter the tenant's name.", "error");
+        return;
+      }
+
+      if (!Number.isFinite(monthlyRent) || monthlyRent < 0 ||
+          !Number.isFinite(securityDeposit) || securityDeposit < 0) {
+        showMessage("Rent and deposit must be valid non-negative amounts.", "error");
+        return;
+      }
+
+      if (moveInDate && moveOutDate && moveOutDate < moveInDate) {
+        showMessage("Move-out date cannot be before move-in date.", "error");
+        return;
+      }
+
+      const propertyId = $("tenantProperty").value;
+      const roomId = $("tenantRoom").value;
+      const property = properties.find(p => p.id === propertyId);
+      const room = rooms.find(r => r.id === roomId);
+
+      const payload = {
+        name,
+        phone,
+        email,
+        propertyId,
+        propertyName: property
+          ? (property.name || property.propertyName || "")
+          : "",
+        roomId,
+        roomName: room ? (room.name || room.roomName || "") : "",
+        monthlyRent,
+        securityDeposit,
+        moveInDate,
+        moveOutDate,
+        status: $("tenantStatus").value,
+        notes: $("tenantNotes").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      $("saveBtn").disabled = true;
+
+      try {
+        if (id) {
+          await updateDoc(
+            doc(db, "users", currentUser.uid, "tenants", id),
+            payload
+          );
+          showMessage("Tenant updated successfully.", "success");
+        } else {
+          await addDoc(tenantsRef(), {
+            ...payload,
+            createdAt: serverTimestamp()
+          });
+          showMessage("Tenant added successfully.", "success");
+        }
+
+        resetForm();
+        await loadTenants();
+      } catch (error) {
+        console.error(error);
+        showMessage(
+          "Could not save tenant. Check your Firestore rules and connection.",
+          "error"
+        );
+      } finally {
+        $("saveBtn").disabled = false;
+      }
+    });
+
+    $("tenantsBody").addEventListener("click", async event => {
+      const editButton = event.target.closest("[data-edit]");
+      const deleteButton = event.target.closest("[data-delete]");
+
+      if (editButton) {
+        editTenant(editButton.dataset.edit);
+        return;
+      }
+
+      if (deleteButton) {
+        const id = deleteButton.dataset.delete;
+        const tenant = tenants.find(t => t.id === id);
+        if (!tenant) return;
+
+        if (!confirm(
+          `Delete tenant "${tenant.name || "Unnamed"}"? This cannot be undone.`
+        )) return;
+
+        try {
+          await deleteDoc(
+            doc(db, "users", currentUser.uid, "tenants", id)
+          );
+          showMessage("Tenant deleted successfully.", "success");
+          await loadTenants();
+        } catch (error) {
+          console.error(error);
+          showMessage("Could not delete tenant. Check Firestore rules.", "error");
+        }
+      }
+    });
+
+    $("cancelBtn").addEventListener("click", resetForm);
+    $("searchInput").addEventListener("input", renderTenants);
+    $("statusFilter").addEventListener("change", renderTenants);
+
+    $("refreshBtn").addEventListener("click", async () => {
+      try {
+        await loadRelatedRecords();
+        await loadTenants();
+        showMessage("Tenant list refreshed.", "success");
+      } catch (error) {
+        console.error(error);
+        showMessage("Refresh failed. Check your connection and Firestore rules.", "error");
+      }
+    });
+
+    function csvCell(value) {
+      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    }
+
+    $("exportBtn").addEventListener("click", () => {
+      const rows = [
+        [
+          "Name", "Phone", "Email", "Property", "Room",
+          "Monthly Rent", "Security Deposit", "Move-in Date",
+          "Move-out Date", "Status", "Notes"
+        ],
+        ...tenants.map(t => [
+          t.name, t.phone, t.email, t.propertyName, t.roomName,
+          t.monthlyRent, t.securityDeposit, t.moveInDate,
+          t.moveOutDate, t.status || "Active", t.notes
+        ])
+      ];
+
+      const csv = "\uFEFF" +
+        rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "roomflow-tenants.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+        await Promise.all([loadRelatedRecords(), loadTenants()]);
+      } catch (error) {
+        console.error(error);
+        $("tenantsBody").innerHTML =
+          '<tr><td colspan="6" class="tenant-empty">Could not load tenants. Check Firestore setup and security rules.</td></tr>';
+        showMessage(
+          "Loading failed. Check your Firestore database and security rules.",
+          "error"
+        );
+      }
+    });
+  </script>
+</body>
+</html>
