@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Manager | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .doc-wrap{max-width:1200px;margin:auto;padding:24px}
+    .doc-header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+    .doc-header h1{margin:0 0 6px}
+    .muted{color:var(--muted,#777);font-size:14px}
+    .doc-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+    .doc-card,.doc-panel{background:var(--card,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:18px}
+    .doc-stat-number{font-size:26px;font-weight:700;margin-top:8px}
+    .doc-layout{display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:20px;align-items:start}
+    .doc-panel h2{font-size:19px;margin:0 0 16px}
+    .doc-form label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}
+    .doc-form input,.doc-form select,.doc-form textarea,.doc-filters input,.doc-filters select{
+      width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--border,#d1d5db);
+      border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit
+    }
+    .doc-form textarea{min-height:75px;resize:vertical}
+    .doc-btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600;background:var(--primary,#2563eb);color:#fff}
+    .doc-btn.secondary{background:#64748b}
+    .doc-btn.danger{background:#dc2626}
+    .doc-btn.small{padding:6px 9px;font-size:12px;margin:2px}
+    .doc-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .doc-filters{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:15px}
+    .doc-table-wrap{overflow-x:auto}
+    .doc-table{width:100%;border-collapse:collapse;min-width:720px}
+    .doc-table th,.doc-table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border,#e5e7eb);font-size:13px;vertical-align:top}
+    .doc-table th{font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    .doc-badge{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+    .doc-valid{background:#dcfce7;color:#166534}
+    .doc-soon{background:#fef3c7;color:#92400e}
+    .doc-expired{background:#fee2e2;color:#991b1b}
+    .doc-neutral{background:#e2e8f0;color:#334155}
+    .doc-link{color:var(--primary,#2563eb);font-weight:600;text-decoration:none}
+    .doc-empty{text-align:center;padding:35px 10px;color:var(--muted,#777)}
+    #docMessage{margin-bottom:14px;font-size:14px}
+    #docMessage.error{color:#dc2626}
+    #docMessage.success{color:#15803d}
+    .doc-note{font-size:12px;line-height:1.5;color:var(--muted,#777);margin-top:12px}
+    @media(max-width:850px){.doc-layout{grid-template-columns:1fr}.doc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:480px){.doc-wrap{padding:14px}.doc-stats{gap:8px}.doc-card{padding:12px}.doc-stat-number{font-size:22px}.doc-filters{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="doc-wrap">
+    <header class="doc-header">
+      <div>
+        <h1>Document Manager</h1>
+        <div class="muted">Store and track your room-related document details.</div>
+      </div>
+      <div class="doc-actions">
+        <button class="doc-btn secondary" id="exportBtn" type="button">Export CSV</button>
+        <button class="doc-btn secondary" id="refreshBtn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <div id="docMessage" role="status" aria-live="polite"></div>
+
+    <section class="doc-stats">
+      <div class="doc-card">
+        <div class="muted">Total Documents</div>
+        <div class="doc-stat-number" id="totalCount">0</div>
+      </div>
+      <div class="doc-card">
+        <div class="muted">Valid</div>
+        <div class="doc-stat-number" id="validCount">0</div>
+      </div>
+      <div class="doc-card">
+        <div class="muted">Expiring Soon</div>
+        <div class="doc-stat-number" id="soonCount">0</div>
+      </div>
+      <div class="doc-card">
+        <div class="muted">Expired</div>
+        <div class="doc-stat-number" id="expiredCount">0</div>
+      </div>
+    </section>
+
+    <section class="doc-layout">
+      <div class="doc-panel">
+        <h2 id="formTitle">Add Document</h2>
+        <form class="doc-form" id="documentForm">
+          <input type="hidden" id="documentId">
+
+          <label for="docName">Document Name *</label>
+          <input id="docName" maxlength="120" required placeholder="e.g. Room Rent Agreement">
+
+          <label for="docCategory">Category *</label>
+          <select id="docCategory" required>
+            <option value="Rent Agreement">Rent Agreement</option>
+            <option value="ID Proof">ID Proof</option>
+            <option value="Rent Receipt">Rent Receipt</option>
+            <option value="Electricity Bill">Electricity Bill</option>
+            <option value="Payment Proof">Payment Proof</option>
+            <option value="Property Document">Property Document</option>
+            <option value="Other">Other</option>
+          </select>
+
+          <label for="docProperty">Related Property</label>
+          <select id="docProperty">
+            <option value="">None / Not linked</option>
+          </select>
+
+          <label for="docRoom">Related Room</label>
+          <select id="docRoom">
+            <option value="">None / Not linked</option>
+          </select>
+
+          <label for="docIssueDate">Issue Date</label>
+          <input id="docIssueDate" type="date">
+
+          <label for="docExpiryDate">Expiry Date</label>
+          <input id="docExpiryDate" type="date">
+
+          <label for="docUrl">Document URL</label>
+          <input id="docUrl" type="url" maxlength="1500" placeholder="https://...">
+
+          <label for="docNotes">Notes</label>
+          <textarea id="docNotes" maxlength="2000" placeholder="Add any useful details"></textarea>
+
+          <div class="doc-actions">
+            <button class="doc-btn" id="saveBtn" type="submit">Save Document</button>
+            <button class="doc-btn secondary" id="cancelBtn" type="button" hidden>Cancel Edit</button>
+          </div>
+          <p class="doc-note">This page saves document details and links, not the actual file. Upload the file to a trusted storage service first, then paste its URL. Avoid public links for IDs and other sensitive documents.</p>
+        </form>
+      </div>
+
+      <div class="doc-panel">
+        <h2>Your Documents</h2>
+        <div class="doc-filters">
+          <input id="searchInput" type="search" placeholder="Search documents...">
+          <select id="statusFilter">
+            <option value="">All statuses</option>
+            <option value="Valid">Valid</option>
+            <option value="Expiring Soon">Expiring Soon</option>
+            <option value="Expired">Expired</option>
+            <option value="No Expiry">No Expiry</option>
+          </select>
+        </div>
+        <div class="doc-table-wrap">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Category</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="documentsBody">
+              <tr><td colspan="5" class="doc-empty">Checking login...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, doc, updateDoc,
+      deleteDoc, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let documents = [];
+    let properties = [];
+    let rooms = [];
+
+    const $ = id => document.getElementById(id);
+    const recordsRef = () => collection(db, "users", currentUser.uid, "documents");
+
+    function showMessage(message, type = "") {
+      $("docMessage").textContent = message;
+      $("docMessage").className = type;
+    }
+
+    function escapeHtml(value = "") {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(value);
+        return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+      } catch {
+        return "";
+      }
+    }
+
+    function getStatus(item) {
+      if (!item.expiryDate) return "No Expiry";
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const expiry = new Date(item.expiryDate + "T00:00:00");
+      if (Number.isNaN(expiry.getTime())) return "No Expiry";
+      if (expiry < today) return "Expired";
+      const days = Math.ceil((expiry - today) / 86400000);
+      if (days <= 30) return "Expiring Soon";
+      return "Valid";
+    }
+
+    function badgeClass(status) {
+      if (status === "Valid") return "doc-valid";
+      if (status === "Expiring Soon") return "doc-soon";
+      if (status === "Expired") return "doc-expired";
+      return "doc-neutral";
+    }
+
+    function fillSelect(selectId, items, labelFn) {
+      const select = $(selectId);
+      const previous = select.value;
+      select.replaceChildren(new Option("None / Not linked", ""));
+      items.forEach(item => select.add(new Option(labelFn(item), item.id)));
+      if ([...select.options].some(option => option.value === previous)) {
+        select.value = previous;
+      }
+    }
+
+    async function loadRelatedRecords() {
+      const [propertySnap, roomSnap] = await Promise.all([
+        getDocs(collection(db, "users", currentUser.uid, "properties")),
+        getDocs(collection(db, "users", currentUser.uid, "rooms"))
+      ]);
+
+      properties = propertySnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      rooms = roomSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      fillSelect("docProperty", properties, p => p.name || p.propertyName || "Unnamed property");
+      fillSelect("docRoom", rooms, r => r.name || r.roomName || "Unnamed room");
+    }
+
+    async function loadDocuments() {
+      $("documentsBody").innerHTML =
+        '<tr><td colspan="5" class="doc-empty">Loading documents...</td></tr>';
+
+      const snapshot = await getDocs(
+        query(recordsRef(), orderBy("createdAt", "desc"))
+      );
+
+      documents = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderDocuments();
+    }
+
+    function renderDocuments() {
+      const search = $("searchInput").value.trim().toLowerCase();
+      const statusFilter = $("statusFilter").value;
+
+      const filtered = documents.filter(item => {
+        const status = getStatus(item);
+        const text = [
+          item.name, item.category, item.notes,
+          item.propertyName, item.roomName
+        ].join(" ").toLowerCase();
+
+        return text.includes(search) &&
+          (!statusFilter || status === statusFilter);
+      });
+
+      $("totalCount").textContent = documents.length;
+      $("validCount").textContent = documents.filter(d => getStatus(d) === "Valid").length;
+      $("soonCount").textContent = documents.filter(d => getStatus(d) === "Expiring Soon").length;
+      $("expiredCount").textContent = documents.filter(d => getStatus(d) === "Expired").length;
+
+      if (!filtered.length) {
+        $("documentsBody").innerHTML =
+          '<tr><td colspan="5" class="doc-empty">No documents found. Add your first document.</td></tr>';
+        return;
+      }
+
+      $("documentsBody").innerHTML = filtered.map(item => {
+        const status = getStatus(item);
+        const url = safeUrl(item.url || "");
+        const link = url
+          ? `<div><a class="doc-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Open link ↗</a></div>`
+          : "";
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.name || "Untitled")}</strong>
+              ${link}
+              <div class="muted">${escapeHtml(item.propertyName || "")}</div>
+            </td>
+            <td>${escapeHtml(item.category || "Other")}</td>
+            <td>${escapeHtml(item.expiryDate || "—")}</td>
+            <td><span class="doc-badge ${badgeClass(status)}">${escapeHtml(status)}</span></td>
+            <td>
+              <button class="doc-btn secondary small" data-edit="${escapeHtml(item.id)}" type="button">Edit</button>
+              <button class="doc-btn danger small" data-delete="${escapeHtml(item.id)}" type="button">Delete</button>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+
+    function resetForm() {
+      $("documentForm").reset();
+      $("documentId").value = "";
+      $("formTitle").textContent = "Add Document";
+      $("saveBtn").textContent = "Save Document";
+      $("cancelBtn").hidden = true;
+    }
+
+    function editDocument(id) {
+      const item = documents.find(d => d.id === id);
+      if (!item) return;
+
+      $("documentId").value = item.id;
+      $("docName").value = item.name || "";
+      $("docCategory").value = item.category || "Other";
+      $("docProperty").value = item.propertyId || "";
+      $("docRoom").value = item.roomId || "";
+      $("docIssueDate").value = item.issueDate || "";
+      $("docExpiryDate").value = item.expiryDate || "";
+      $("docUrl").value = item.url || "";
+      $("docNotes").value = item.notes || "";
+      $("formTitle").textContent = "Edit Document";
+      $("saveBtn").textContent = "Update Document";
+      $("cancelBtn").hidden = false;
+      $("docName").focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    $("docProperty").addEventListener("change", () => {
+      const propertyId = $("docProperty").value;
+      const previousRoom = $("docRoom").value;
+      const relatedRooms = propertyId
+        ? rooms.filter(room => room.propertyId === propertyId)
+        : rooms;
+
+      fillSelect("docRoom", relatedRooms, r => r.name || r.roomName || "Unnamed room");
+      if (relatedRooms.some(room => room.id === previousRoom)) {
+        $("docRoom").value = previousRoom;
+      }
+    });
+
+    $("documentForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const id = $("documentId").value;
+      const name = $("docName").value.trim();
+      const url = $("docUrl").value.trim();
+
+      if (!name) {
+        showMessage("Please enter a document name.", "error");
+        return;
+      }
+
+      if (url && !safeUrl(url)) {
+        showMessage("Please enter a valid HTTP or HTTPS document URL.", "error");
+        return;
+      }
+
+      const issueDate = $("docIssueDate").value;
+      const expiryDate = $("docExpiryDate").value;
+
+      if (issueDate && expiryDate && expiryDate < issueDate) {
+        showMessage("Expiry date cannot be before issue date.", "error");
+        return;
+      }
+
+      const propertyId = $("docProperty").value;
+      const roomId = $("docRoom").value;
+      const property = properties.find(p => p.id === propertyId);
+      const room = rooms.find(r => r.id === roomId);
+
+      const payload = {
+        name,
+        category: $("docCategory").value,
+        propertyId,
+        propertyName: property ? (property.name || property.propertyName || "") : "",
+        roomId,
+        roomName: room ? (room.name || room.roomName || "") : "",
+        issueDate,
+        expiryDate,
+        url,
+        notes: $("docNotes").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      $("saveBtn").disabled = true;
+
+      try {
+        if (id) {
+          await updateDoc(doc(db, "users", currentUser.uid, "documents", id), payload);
+          showMessage("Document updated successfully.", "success");
+        } else {
+          await addDoc(recordsRef(), {
+            ...payload,
+            createdAt: serverTimestamp()
+          });
+          showMessage("Document saved successfully.", "success");
+        }
+
+        resetForm();
+        await loadDocuments();
+      } catch (error) {
+        console.error(error);
+        showMessage("Could not save document. Check your Firestore rules and connection.", "error");
+      } finally {
+        $("saveBtn").disabled = false;
+      }
+    });
+
+    $("documentsBody").addEventListener("click", async event => {
+      const editButton = event.target.closest("[data-edit]");
+      const deleteButton = event.target.closest("[data-delete]");
+
+      if (editButton) {
+        editDocument(editButton.dataset.edit);
+        return;
+      }
+
+      if (deleteButton) {
+        const id = deleteButton.dataset.delete;
+        const item = documents.find(d => d.id === id);
+        if (!item || !confirm(`Delete "${item.name || "this document"}"? This cannot be undone.`)) return;
+
+        try {
+          await deleteDoc(doc(db, "users", currentUser.uid, "documents", id));
+          showMessage("Document deleted.", "success");
+          await loadDocuments();
+        } catch (error) {
+          console.error(error);
+          showMessage("Could not delete document. Check Firestore rules.", "error");
+        }
+      }
+    });
+
+    $("cancelBtn").addEventListener("click", resetForm);
+    $("searchInput").addEventListener("input", renderDocuments);
+    $("statusFilter").addEventListener("change", renderDocuments);
+
+    $("refreshBtn").addEventListener("click", async () => {
+      try {
+        await loadRelatedRecords();
+        await loadDocuments();
+        showMessage("Documents refreshed.", "success");
+      } catch (error) {
+        console.error(error);
+        showMessage("Refresh failed. Please check your internet and Firestore rules.", "error");
+      }
+    });
+
+    function csvCell(value) {
+      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    }
+
+    $("exportBtn").addEventListener("click", () => {
+      const rows = [
+        ["Name", "Category", "Property", "Room", "Issue Date", "Expiry Date", "Status", "URL", "Notes"],
+        ...documents.map(item => [
+          item.name, item.category, item.propertyName, item.roomName,
+          item.issueDate, item.expiryDate, getStatus(item), item.url, item.notes
+        ])
+      ];
+
+      const csv = "\uFEFF" + rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "roomflow-documents.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+        await Promise.all([loadRelatedRecords(), loadDocuments()]);
+      } catch (error) {
+        console.error(error);
+        $("documentsBody").innerHTML =
+          '<tr><td colspan="5" class="doc-empty">Could not load documents. Check Firestore setup and security rules.</td></tr>';
+        showMessage("Loading failed. Check your Firestore database and security rules.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
