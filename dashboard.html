@@ -1,1 +1,240 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard | RoomFlow</title>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
+    header{background:#fff;border-bottom:1px solid #e5eaf1;padding:17px 5%;
+      display:flex;justify-content:space-between;align-items:center;gap:15px}
+    .logo{font-size:24px;font-weight:800;color:#2563eb}
+    button,.btn{border:0;border-radius:9px;padding:11px 16px;
+      cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
+    .logout{background:#fee2e2;color:#b91c1c}
+    main{max-width:1100px;margin:35px auto;padding:0 20px}
+    .welcome{margin-bottom:25px}
+    .welcome h1{font-size:29px;margin-bottom:9px}
+    .muted{color:#64748b;font-size:14px;line-height:1.6}
+    .role{display:inline-block;background:#dbeafe;color:#1d4ed8;
+      padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .card{background:#fff;border:1px solid #e8edf4;border-radius:15px;
+      padding:23px;box-shadow:0 5px 18px #17203306}
+    .card .emoji{font-size:26px;margin-bottom:15px}
+    .card h3{font-size:16px;margin-bottom:9px}
+    .card p{font-size:14px;color:#64748b;line-height:1.6}
+    .section{margin:30px 0 15px;font-size:20px}
+    .notice{margin-top:24px;background:#eff6ff;border-radius:12px;
+      padding:17px;color:#1e40af;font-size:14px;line-height:1.6}
+    .error{color:#b91c1c;background:#fef2f2;padding:14px;border-radius:10px;margin:15px 0}
+    footer{text-align:center;color:#64748b;padding:30px 15px;font-size:12px}
+    .hidden{display:none}
+    @media(max-width:700px){
+      .grid{grid-template-columns:1fr}
+      main{margin-top:25px}
+      .welcome h1{font-size:24px}
+      header{padding:15px 18px}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">RoomFlow</div>
+    <button id="logoutBtn" class="logout">Log out</button>
+  </header>
+
+  <main>
+    <div id="loading">Loading your dashboard...</div>
+    <div id="errorBox" class="error hidden" role="alert"></div>
+
+    <div id="dashboard" class="hidden">
+      <section class="welcome">
+        <h1 id="welcomeText">Welcome!</h1>
+        <p class="muted">Your room and property management space.</p>
+        <span id="roleBadge" class="role"></span>
+      </section>
+
+      <section id="tenantView" class="hidden">
+        <h2 class="section">Your rental details</h2>
+        <div class="grid">
+          <article class="card">
+            <div class="emoji">🏠</div>
+            <h3>My Room</h3>
+            <p>View your linked property and room details once your landlord connects your account.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">💳</div>
+            <h3>Rent & Payments</h3>
+            <p>Your monthly rent, due dates and payment records will appear here when available.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">⚡</div>
+            <h3>Electricity Bills</h3>
+            <p>Check your meter readings and electricity bills shared with your account.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">📄</div>
+            <h3>Rental Agreement</h3>
+            <p>View your rental agreement and expiry details when your landlord shares them.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">🛠️</div>
+            <h3>Maintenance</h3>
+            <p>Maintenance request functionality will be connected in the next development stage.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">👤</div>
+            <h3>My Account</h3>
+            <p id="tenantEmail"></p>
+          </article>
+        </div>
+      </section>
+
+      <section id="landlordView" class="hidden">
+        <h2 class="section">Property management</h2>
+        <div class="grid">
+          <article class="card">
+            <div class="emoji">🏢</div>
+            <h3>My Properties</h3>
+            <p>Property and room management will be available here.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">👥</div>
+            <h3>My Tenants</h3>
+            <p>Add tenants and connect their accounts after the tenant management module is built.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">💰</div>
+            <h3>Rent Collection</h3>
+            <p>Track rent due dates and record cash, UPI or bank payments when billing is connected.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">⚡</div>
+            <h3>Electricity</h3>
+            <p>Meter readings and electricity billing will be connected in a later module.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">📊</div>
+            <h3>Reports</h3>
+            <p>View collection, pending dues and property expenses when reporting is implemented.</p>
+          </article>
+          <article class="card">
+            <div class="emoji">👤</div>
+            <h3>My Account</h3>
+            <p id="landlordEmail"></p>
+          </article>
+        </div>
+      </section>
+
+      <div class="notice">
+        <strong>RoomFlow is getting ready!</strong><br>
+        This dashboard is the starting interface. Property records, bills and payments
+        are not yet implemented by these cards. Your private account profile is loaded
+        from Firebase.
+      </div>
+    </div>
+  </main>
+
+  <footer>RoomFlow — Powered by Jatav Industries</footer>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+    import {
+      getAuth, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    import {
+      getFirestore, doc, getDoc
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loading = document.getElementById("loading");
+    const dashboard = document.getElementById("dashboard");
+    const errorBox = document.getElementById("errorBox");
+
+    function showError(text) {
+      loading.classList.add("hidden");
+      dashboard.classList.add("hidden");
+      errorBox.textContent = text;
+      errorBox.classList.remove("hidden");
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        location.replace("login.html");
+        return;
+      }
+
+      try {
+        const profileRef = doc(db, "users", user.uid);
+        const profileSnap = await getDoc(profileRef);
+
+        if (!profileSnap.exists()) {
+          showError(
+            "Your account profile was not found. Please contact support."
+          );
+          return;
+        }
+
+        const profile = profileSnap.data();
+
+        document.getElementById("welcomeText").textContent =
+          "Welcome, " + (profile.fullName || user.displayName || "User");
+
+        document.getElementById("roleBadge").textContent =
+          profile.role === "landlord" ? "LANDLORD ACCOUNT" :
+          profile.role === "tenant" ? "TENANT ACCOUNT" : "ACCOUNT";
+
+        if (profile.role === "tenant") {
+          document.getElementById("tenantView").classList.remove("hidden");
+          document.getElementById("tenantEmail").textContent = user.email || "";
+        } else if (profile.role === "landlord") {
+          document.getElementById("landlordView").classList.remove("hidden");
+          document.getElementById("landlordEmail").textContent = user.email || "";
+        } else {
+          showError("Your account role is invalid. Please contact support.");
+          return;
+        }
+
+        loading.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+      } catch (error) {
+        console.error(error);
+        showError(
+          "Dashboard could not load. Check your internet connection and Firestore security rules."
+        );
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        location.replace("login.html");
+      } catch (error) {
+        showError("Logout failed. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>
