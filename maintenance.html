@@ -1,0 +1,556 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maintenance Manager | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .wrap{max-width:1200px;margin:auto;padding:24px}
+    .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+    .muted{opacity:.7;font-size:13px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+    .stat,.panel{border:1px solid var(--border-color,#ddd);border-radius:14px;padding:18px;background:var(--card-bg,#fff)}
+    .stat strong{display:block;font-size:25px;margin-top:8px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    input,select,textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit}
+    .toolbar input{flex:1;min-width:200px}
+    .toolbar select{width:auto;min-width:145px}
+    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;font:inherit}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .primary{background:#2563eb;color:white}
+    .secondary{background:#e5e7eb;color:#111827}
+    .danger{background:#fee2e2;color:#991b1b}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;min-width:920px}
+    th,td{padding:13px 10px;border-bottom:1px solid var(--border-color,#ddd);text-align:left;vertical-align:top}
+    th{font-size:12px;opacity:.7}
+    .pill{display:inline-block;border-radius:20px;padding:5px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+    .pending{background:#fef3c7;color:#92400e}
+    .inprogress{background:#dbeafe;color:#1d4ed8}
+    .completed{background:#dcfce7;color:#166534}
+    .cancelled{background:#e5e7eb;color:#374151}
+    .low{background:#e5e7eb;color:#374151}
+    .medium{background:#dbeafe;color:#1d4ed8}
+    .high{background:#ffedd5;color:#9a3412}
+    .urgent{background:#fee2e2;color:#991b1b}
+    .actions{display:flex;gap:6px}
+    .actions button{padding:7px 9px;font-size:12px}
+    .empty{text-align:center;padding:32px;opacity:.7}
+    .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:999}
+    .modal.open{display:flex}
+    .modal-card{width:min(700px,100%);max-height:90vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-color,inherit);border-radius:16px;padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+    .full{grid-column:1/-1}
+    .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+    #notice{margin-bottom:14px}
+    .error{color:#b91c1c}
+    .success{color:#15803d}
+    @media(max-width:800px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:14px}}
+    @media(max-width:520px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.head button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div>
+        <p class="muted">ROOMFLOW / PROPERTY CARE</p>
+        <h1>Maintenance Manager</h1>
+        <p class="muted">Track repairs, maintenance requests and expenses.</p>
+      </div>
+      <button class="primary" id="addBtn">+ Add Request</button>
+    </header>
+
+    <div id="notice" role="status" aria-live="polite"></div>
+
+    <section class="stats">
+      <div class="stat"><span class="muted">Total Requests</span><strong id="totalCount">0</strong></div>
+      <div class="stat"><span class="muted">Pending</span><strong id="pendingCount">0</strong></div>
+      <div class="stat"><span class="muted">In Progress</span><strong id="progressCount">0</strong></div>
+      <div class="stat"><span class="muted">Completed Cost</span><strong id="completedCost">₹0</strong></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search problem, room, property...">
+        <select id="statusFilter" aria-label="Filter status">
+          <option value="">All statuses</option>
+          <option>Pending</option>
+          <option>In Progress</option>
+          <option>Completed</option>
+          <option>Cancelled</option>
+        </select>
+        <select id="priorityFilter" aria-label="Filter priority">
+          <option value="">All priorities</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+          <option>Urgent</option>
+        </select>
+        <button class="secondary" id="exportBtn">Export CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Issue</th>
+              <th>Room / Property</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Reported</th>
+              <th>Cost</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requestsBody">
+            <tr><td colspan="8" class="empty">Connecting to Firebase...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="recordCount" class="muted"></p>
+    </section>
+  </main>
+
+  <div class="modal" id="requestModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h2 id="modalTitle">Add Maintenance Request</h2>
+      <p class="muted">Record the issue and track it until completion.</p>
+      <form id="requestForm">
+        <div class="grid">
+          <div class="field">
+            <label for="title">Issue title *</label>
+            <input id="title" maxlength="120" required placeholder="e.g. Bathroom tap leaking">
+          </div>
+          <div class="field">
+            <label for="category">Category *</label>
+            <select id="category" required>
+              <option>Plumbing</option>
+              <option>Electrical</option>
+              <option>Furniture</option>
+              <option>Cleaning</option>
+              <option>Appliance</option>
+              <option>Painting</option>
+              <option>Internet</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="propertyId">Property</label>
+            <select id="propertyId">
+              <option value="">No property selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="roomId">Room</label>
+            <select id="roomId">
+              <option value="">No room selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="priority">Priority *</label>
+            <select id="priority" required>
+              <option>Low</option>
+              <option selected>Medium</option>
+              <option>High</option>
+              <option>Urgent</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="status">Status *</label>
+            <select id="status" required>
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="reportedDate">Reported date *</label>
+            <input id="reportedDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="completedDate">Completed date</label>
+            <input id="completedDate" type="date">
+          </div>
+          <div class="field">
+            <label for="estimatedCost">Estimated cost (₹)</label>
+            <input id="estimatedCost" type="number" min="0" max="100000000" step="0.01" value="0">
+          </div>
+          <div class="field">
+            <label for="actualCost">Actual cost (₹)</label>
+            <input id="actualCost" type="number" min="0" max="100000000" step="0.01" value="0">
+          </div>
+          <div class="field">
+            <label for="vendor">Repair person / vendor</label>
+            <input id="vendor" maxlength="120" placeholder="Name or company">
+          </div>
+          <div class="field">
+            <label for="paymentStatus">Expense payment</label>
+            <select id="paymentStatus">
+              <option>Not Paid</option>
+              <option>Paid</option>
+              <option>Not Applicable</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="description">Problem details *</label>
+            <textarea id="description" rows="3" maxlength="2000" required placeholder="Describe the issue..."></textarea>
+          </div>
+          <div class="field full">
+            <label for="notes">Additional notes</label>
+            <textarea id="notes" rows="2" maxlength="1000" placeholder="Optional notes, parts replaced, etc."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+          <button type="submit" class="primary" id="saveBtn">Save Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, updateDoc,
+      deleteDoc, doc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+
+    let currentUser = null;
+    let requests = [];
+    let properties = [];
+    let rooms = [];
+    let editingId = null;
+    let saving = false;
+
+    const money = value => new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: "INR", maximumFractionDigits: 2
+    }).format(Number(value || 0));
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      })[c]);
+    }
+
+    function notify(message, type = "success") {
+      $("notice").className = type;
+      $("notice").textContent = message;
+    }
+
+    function col(name) {
+      return collection(db, "users", currentUser.uid, name);
+    }
+
+    function propertyLabel(id) {
+      const p = properties.find(item => item.id === id);
+      return p ? (p.name || p.propertyName || "Unnamed property") : (id ? "Property unavailable" : "—");
+    }
+
+    function roomLabel(id) {
+      const r = rooms.find(item => item.id === id);
+      return r ? (r.name || "Unnamed room") : (id ? "Room unavailable" : "—");
+    }
+
+    function slug(value) {
+      return String(value || "").toLowerCase().replace(/[^a-z]/g, "");
+    }
+
+    async function loadRelated() {
+      const [propertySnap, roomSnap] = await Promise.all([
+        getDocs(col("properties")),
+        getDocs(col("rooms"))
+      ]);
+      properties = propertySnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      rooms = roomSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      $("propertyId").innerHTML = '<option value="">No property selected</option>' +
+        properties.map(p => `<option value="${esc(p.id)}">${esc(p.name || p.propertyName || "Unnamed property")}</option>`).join("");
+
+      refreshRoomOptions();
+    }
+
+    function refreshRoomOptions(selectedRoom = "") {
+      const propertyId = $("propertyId").value;
+      const relevantRooms = rooms.filter(r => !propertyId || !r.propertyId || r.propertyId === propertyId);
+      $("roomId").innerHTML = '<option value="">No room selected</option>' +
+        relevantRooms.map(r => `<option value="${esc(r.id)}">${esc(r.name || "Unnamed room")}</option>`).join("");
+      if (selectedRoom && relevantRooms.some(r => r.id === selectedRoom)) {
+        $("roomId").value = selectedRoom;
+      }
+    }
+
+    async function loadRequests() {
+      $("requestsBody").innerHTML = '<tr><td colspan="8" class="empty">Loading requests...</td></tr>';
+      const snap = await getDocs(col("maintenanceRecords"));
+      requests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    }
+
+    function render() {
+      const q = $("search").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const priority = $("priorityFilter").value;
+
+      const filtered = requests.filter(r => {
+        const text = [
+          r.title, r.description, r.category, r.vendor,
+          propertyLabel(r.propertyId), roomLabel(r.roomId)
+        ].join(" ").toLowerCase();
+        return (!q || text.includes(q)) &&
+          (!status || r.status === status) &&
+          (!priority || r.priority === priority);
+      });
+
+      $("totalCount").textContent = requests.length;
+      $("pendingCount").textContent = requests.filter(r => r.status === "Pending").length;
+      $("progressCount").textContent = requests.filter(r => r.status === "In Progress").length;
+      $("completedCost").textContent = money(requests
+        .filter(r => r.status === "Completed")
+        .reduce((sum, r) => sum + Number(r.actualCost || 0), 0));
+      $("recordCount").textContent = `Showing ${filtered.length} of ${requests.length} requests`;
+
+      if (!filtered.length) {
+        $("requestsBody").innerHTML = `<tr><td colspan="8" class="empty">${requests.length ? "No requests match your filters." : "No maintenance requests yet. Click Add Request to start."}</td></tr>`;
+        return;
+      }
+
+      $("requestsBody").innerHTML = filtered.map(r => `
+        <tr>
+          <td><strong>${esc(r.title)}</strong><br><span class="muted">${esc(r.description || "").slice(0,90)}</span></td>
+          <td>${esc(roomLabel(r.roomId))}<br><span class="muted">${esc(propertyLabel(r.propertyId))}</span></td>
+          <td>${esc(r.category || "Other")}</td>
+          <td><span class="pill ${slug(r.priority)}">${esc(r.priority || "Medium")}</span></td>
+          <td>${esc(r.reportedDate || "—")}</td>
+          <td>${money(r.actualCost)}</td>
+          <td><span class="pill ${slug(r.status)}">${esc(r.status || "Pending")}</span></td>
+          <td><div class="actions">
+            <button class="secondary" data-action="edit" data-id="${esc(r.id)}">Edit</button>
+            <button class="danger" data-action="delete" data-id="${esc(r.id)}">Delete</button>
+          </div></td>
+        </tr>
+      `).join("");
+    }
+
+    function openModal(record = null) {
+      editingId = record?.id || null;
+      $("modalTitle").textContent = record ? "Edit Maintenance Request" : "Add Maintenance Request";
+      $("saveBtn").textContent = record ? "Update Request" : "Save Request";
+
+      $("requestForm").reset();
+      $("title").value = record?.title || "";
+      $("category").value = record?.category || "Plumbing";
+      $("propertyId").value = record?.propertyId || "";
+      refreshRoomOptions(record?.roomId || "");
+      $("priority").value = record?.priority || "Medium";
+      $("status").value = record?.status || "Pending";
+      $("reportedDate").value = record?.reportedDate || new Date().toLocaleDateString("en-CA");
+      $("completedDate").value = record?.completedDate || "";
+      $("estimatedCost").value = record?.estimatedCost ?? 0;
+      $("actualCost").value = record?.actualCost ?? 0;
+      $("vendor").value = record?.vendor || "";
+      $("paymentStatus").value = record?.paymentStatus || "Not Paid";
+      $("description").value = record?.description || "";
+      $("notes").value = record?.notes || "";
+
+      modal.classList.add("open");
+      $("title").focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      editingId = null;
+      $("requestForm").reset();
+    }
+
+    $("addBtn").addEventListener("click", () => openModal());
+    $("cancelBtn").addEventListener("click", closeModal);
+    $("propertyId").addEventListener("change", () => refreshRoomOptions());
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    ["search", "statusFilter", "priorityFilter"].forEach(id => {
+      $(id).addEventListener(id === "search" ? "input" : "change", render);
+    });
+
+    $("requestsBody").addEventListener("click", async e => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const record = requests.find(r => r.id === btn.dataset.id);
+      if (!record) return;
+
+      if (btn.dataset.action === "edit") {
+        openModal(record);
+        return;
+      }
+
+      if (btn.dataset.action === "delete") {
+        if (!confirm(`Delete maintenance request "${record.title}"? This cannot be undone.`)) return;
+        btn.disabled = true;
+        try {
+          await deleteDoc(doc(db, "users", currentUser.uid, "maintenanceRecords", record.id));
+          requests = requests.filter(r => r.id !== record.id);
+          render();
+          notify("Maintenance request deleted.");
+        } catch (error) {
+          console.error(error);
+          notify("Delete failed. Check Firestore rules and connection.", "error");
+          btn.disabled = false;
+        }
+      }
+    });
+
+    $("requestForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (saving) return;
+
+      const title = $("title").value.trim();
+      const description = $("description").value.trim();
+      const estimatedCost = Number($("estimatedCost").value || 0);
+      const actualCost = Number($("actualCost").value || 0);
+      const reportedDate = $("reportedDate").value;
+      const completedDate = $("completedDate").value;
+      const status = $("status").value;
+
+      if (!title || !description || !reportedDate) {
+        notify("Title, problem details aur reported date zaroori hain.", "error");
+        return;
+      }
+      if (![estimatedCost, actualCost].every(n => Number.isFinite(n) && n >= 0 && n <= 100000000)) {
+        notify("Valid non-negative cost enter karein.", "error");
+        return;
+      }
+      if (completedDate && completedDate < reportedDate) {
+        notify("Completed date, reported date se pehle nahi ho sakti.", "error");
+        return;
+      }
+      if (status === "Completed" && !completedDate) {
+        $("completedDate").value = new Date().toLocaleDateString("en-CA");
+      }
+
+      const propertyId = $("propertyId").value;
+      const roomId = $("roomId").value;
+      const data = {
+        title,
+        category: $("category").value,
+        propertyId: propertyId || "",
+        roomId: roomId || "",
+        priority: $("priority").value,
+        status,
+        reportedDate,
+        completedDate: $("completedDate").value || "",
+        estimatedCost,
+        actualCost,
+        vendor: $("vendor").value.trim(),
+        paymentStatus: $("paymentStatus").value,
+        description,
+        notes: $("notes").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      saving = true;
+      $("saveBtn").disabled = true;
+
+      try {
+        if (editingId) {
+          await updateDoc(doc(db, "users", currentUser.uid, "maintenanceRecords", editingId), data);
+          notify("Maintenance request updated successfully.");
+        } else {
+          data.createdAt = serverTimestamp();
+          await addDoc(col("maintenanceRecords"), data);
+          notify("Maintenance request saved successfully.");
+        }
+        closeModal();
+        await loadRequests();
+      } catch (error) {
+        console.error(error);
+        notify("Save failed. Check Firestore rules and internet connection.", "error");
+      } finally {
+        saving = false;
+        $("saveBtn").disabled = false;
+      }
+    });
+
+    $("exportBtn").addEventListener("click", () => {
+      const q = $("search").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const priority = $("priorityFilter").value;
+      const rows = requests.filter(r => {
+        const text = [r.title, r.description, r.category, r.vendor,
+          propertyLabel(r.propertyId), roomLabel(r.roomId)].join(" ").toLowerCase();
+        return (!q || text.includes(q)) &&
+          (!status || r.status === status) &&
+          (!priority || r.priority === priority);
+      });
+
+      const columns = [
+        ["Title", "title"], ["Description", "description"],
+        ["Property", "property"], ["Room", "room"], ["Category", "category"],
+        ["Priority", "priority"], ["Status", "status"], ["Reported Date", "reportedDate"],
+        ["Completed Date", "completedDate"], ["Estimated Cost", "estimatedCost"],
+        ["Actual Cost", "actualCost"], ["Vendor", "vendor"], ["Payment Status", "paymentStatus"],
+        ["Notes", "notes"]
+      ];
+      const csvCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        columns.map(c => csvCell(c[0])).join(","),
+        ...rows.map(r => columns.map(([_, key]) => {
+          const value = key === "property" ? propertyLabel(r.propertyId)
+            : key === "room" ? roomLabel(r.roomId) : r[key];
+          return csvCell(value);
+        }).join(","))
+      ].join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "roomflow-maintenance.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+      try {
+        await loadRelated();
+        await loadRequests();
+      } catch (error) {
+        console.error(error);
+        $("requestsBody").innerHTML = '<tr><td colspan="8" class="empty">Could not load data.</td></tr>';
+        notify("Firebase/Firestore connection ya security rules check karein.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
+```
