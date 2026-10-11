@@ -1,0 +1,578 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rent Agreements | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .wrap{max-width:1200px;margin:auto;padding:24px}
+    .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+    .muted{opacity:.7;font-size:13px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}
+    .stat,.panel{border:1px solid var(--border-color,#ddd);border-radius:14px;padding:18px;background:var(--card-bg,#fff)}
+    .stat strong{display:block;font-size:25px;margin-top:8px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    input,select,textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit}
+    .toolbar input{flex:1;min-width:200px}
+    .toolbar select{width:auto;min-width:145px}
+    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;font:inherit}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .primary{background:#2563eb;color:#fff}
+    .secondary{background:#e5e7eb;color:#111827}
+    .danger{background:#fee2e2;color:#991b1b}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;min-width:950px}
+    th,td{padding:13px 10px;border-bottom:1px solid var(--border-color,#ddd);text-align:left;vertical-align:top}
+    th{font-size:12px;opacity:.7}
+    .pill{display:inline-block;border-radius:20px;padding:5px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+    .draft{background:#e5e7eb;color:#374151}
+    .active{background:#dcfce7;color:#166534}
+    .expiringsoon{background:#fef3c7;color:#92400e}
+    .expired{background:#fee2e2;color:#991b1b}
+    .terminated{background:#e5e7eb;color:#374151}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .actions button{padding:7px 9px;font-size:12px}
+    .empty{text-align:center;padding:32px;opacity:.7}
+    .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:999}
+    .modal.open{display:flex}
+    .modal-card{width:min(720px,100%);max-height:90vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-color,inherit);border-radius:16px;padding:22px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+    .full{grid-column:1/-1}
+    .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+    #notice{margin-bottom:14px}
+    .error{color:#b91c1c}
+    .success{color:#15803d}
+    .link{color:#2563eb;overflow-wrap:anywhere}
+    @media(max-width:800px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:14px}}
+    @media(max-width:520px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.head button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div>
+        <p class="muted">ROOMFLOW / DOCUMENTS</p>
+        <h1>Rent Agreements</h1>
+        <p class="muted">Track agreement dates, rent, deposits and renewals.</p>
+      </div>
+      <button class="primary" id="addBtn">+ Add Agreement</button>
+    </header>
+
+    <div id="notice" role="status" aria-live="polite"></div>
+
+    <section class="stats">
+      <div class="stat"><span class="muted">Total Agreements</span><strong id="totalCount">0</strong></div>
+      <div class="stat"><span class="muted">Active</span><strong id="activeCount">0</strong></div>
+      <div class="stat"><span class="muted">Expiring Soon</span><strong id="expiringCount">0</strong></div>
+      <div class="stat"><span class="muted">Expired</span><strong id="expiredCount">0</strong></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search tenant, landlord, property...">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option>Draft</option>
+          <option>Active</option>
+          <option>Expiring Soon</option>
+          <option>Expired</option>
+          <option>Terminated</option>
+        </select>
+        <button class="secondary" id="exportBtn">Export CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Agreement</th>
+              <th>Tenant</th>
+              <th>Property / Room</th>
+              <th>Monthly Rent</th>
+              <th>Deposit</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="agreementBody">
+            <tr><td colspan="9" class="empty">Connecting to Firebase...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="recordCount" class="muted"></p>
+    </section>
+  </main>
+
+  <div class="modal" id="agreementModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h2 id="modalTitle">Add Agreement</h2>
+      <p class="muted">Fill in the agreement details. Fields marked * are required.</p>
+      <form id="agreementForm">
+        <div class="grid">
+          <div class="field">
+            <label for="agreementName">Agreement title *</label>
+            <input id="agreementName" maxlength="120" required placeholder="e.g. Room 101 Rental Agreement">
+          </div>
+          <div class="field">
+            <label for="propertyId">Property</label>
+            <select id="propertyId">
+              <option value="">No property selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="roomId">Room</label>
+            <select id="roomId">
+              <option value="">No room selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="status">Agreement status *</label>
+            <select id="status" required>
+              <option>Draft</option>
+              <option>Active</option>
+              <option>Terminated</option>
+            </select>
+            <small class="muted">Expiry status is calculated from the end date.</small>
+          </div>
+          <div class="field">
+            <label for="tenantName">Tenant name *</label>
+            <input id="tenantName" maxlength="120" required>
+          </div>
+          <div class="field">
+            <label for="tenantContact">Tenant contact</label>
+            <input id="tenantContact" maxlength="100" placeholder="Phone or email">
+          </div>
+          <div class="field">
+            <label for="landlordName">Landlord name *</label>
+            <input id="landlordName" maxlength="120" required>
+          </div>
+          <div class="field">
+            <label for="landlordContact">Landlord contact</label>
+            <input id="landlordContact" maxlength="100" placeholder="Phone or email">
+          </div>
+          <div class="field">
+            <label for="monthlyRent">Monthly rent (₹) *</label>
+            <input id="monthlyRent" type="number" min="0" max="100000000" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="deposit">Security deposit (₹)</label>
+            <input id="deposit" type="number" min="0" max="100000000" step="0.01" value="0">
+          </div>
+          <div class="field">
+            <label for="startDate">Start date *</label>
+            <input id="startDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="endDate">End date *</label>
+            <input id="endDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="noticePeriod">Notice period</label>
+            <input id="noticePeriod" maxlength="60" placeholder="e.g. 30 days">
+          </div>
+          <div class="field">
+            <label for="documentUrl">Agreement document URL</label>
+            <input id="documentUrl" type="url" maxlength="1000" placeholder="https://...">
+          </div>
+          <div class="field full">
+            <label for="notes">Notes / renewal details</label>
+            <textarea id="notes" rows="3" maxlength="2000" placeholder="Optional agreement notes"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+          <button type="submit" class="primary" id="saveBtn">Save Agreement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, updateDoc,
+      deleteDoc, doc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+
+    let currentUser = null;
+    let agreements = [];
+    let properties = [];
+    let rooms = [];
+    let editingId = null;
+    let saving = false;
+
+    const money = value => new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: "INR", maximumFractionDigits: 2
+    }).format(Number(value || 0));
+
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      })[c]);
+    }
+
+    function notify(message, type = "success") {
+      $("notice").className = type;
+      $("notice").textContent = message;
+    }
+
+    function col(name) {
+      return collection(db, "users", currentUser.uid, name);
+    }
+
+    function localDate(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function daysUntil(dateString) {
+      if (!dateString) return null;
+      const end = new Date(`${dateString}T00:00:00`);
+      const today = new Date(`${localDate()}T00:00:00`);
+      return Math.round((end - today) / 86400000);
+    }
+
+    function effectiveStatus(record) {
+      if (record.status === "Draft" || record.status === "Terminated") {
+        return record.status;
+      }
+      const remaining = daysUntil(record.endDate);
+      if (remaining === null) return "Draft";
+      if (remaining < 0) return "Expired";
+      if (remaining <= 30) return "Expiring Soon";
+      return "Active";
+    }
+
+    function statusClass(status) {
+      return status.toLowerCase().replace(/\s+/g, "");
+    }
+
+    function propertyLabel(id) {
+      const p = properties.find(item => item.id === id);
+      return p ? (p.name || p.propertyName || "Unnamed property") : (id ? "Property unavailable" : "—");
+    }
+
+    function roomLabel(id) {
+      const r = rooms.find(item => item.id === id);
+      return r ? (r.name || "Unnamed room") : (id ? "Room unavailable" : "—");
+    }
+
+    async function loadRelated() {
+      const [pSnap, rSnap] = await Promise.all([
+        getDocs(col("properties")),
+        getDocs(col("rooms"))
+      ]);
+      properties = pSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      rooms = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      $("propertyId").innerHTML = '<option value="">No property selected</option>' +
+        properties.map(p => `<option value="${esc(p.id)}">${esc(p.name || p.propertyName || "Unnamed property")}</option>`).join("");
+
+      refreshRoomOptions();
+    }
+
+    function refreshRoomOptions(selectedRoom = "") {
+      const propertyId = $("propertyId").value;
+      const filteredRooms = rooms.filter(r => !propertyId || !r.propertyId || r.propertyId === propertyId);
+      $("roomId").innerHTML = '<option value="">No room selected</option>' +
+        filteredRooms.map(r => `<option value="${esc(r.id)}">${esc(r.name || "Unnamed room")}</option>`).join("");
+      if (selectedRoom && filteredRooms.some(r => r.id === selectedRoom)) {
+        $("roomId").value = selectedRoom;
+      }
+    }
+
+    async function loadAgreements() {
+      $("agreementBody").innerHTML = '<tr><td colspan="9" class="empty">Loading agreements...</td></tr>';
+      const snap = await getDocs(col("agreements"));
+      agreements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    }
+
+    function render() {
+      const q = $("search").value.trim().toLowerCase();
+      const statusFilter = $("statusFilter").value;
+
+      const filtered = agreements.filter(a => {
+        const searchText = [
+          a.title, a.tenantName, a.tenantContact,
+          a.landlordName, a.landlordContact,
+          propertyLabel(a.propertyId), roomLabel(a.roomId)
+        ].join(" ").toLowerCase();
+        return (!q || searchText.includes(q)) &&
+          (!statusFilter || effectiveStatus(a) === statusFilter);
+      });
+
+      $("totalCount").textContent = agreements.length;
+      $("activeCount").textContent = agreements.filter(a => effectiveStatus(a) === "Active").length;
+      $("expiringCount").textContent = agreements.filter(a => effectiveStatus(a) === "Expiring Soon").length;
+      $("expiredCount").textContent = agreements.filter(a => effectiveStatus(a) === "Expired").length;
+      $("recordCount").textContent = `Showing ${filtered.length} of ${agreements.length} agreements`;
+
+      if (!filtered.length) {
+        $("agreementBody").innerHTML = `<tr><td colspan="9" class="empty">${agreements.length ? "No agreements match your filters." : "No agreements added yet. Click Add Agreement to start."}</td></tr>`;
+        return;
+      }
+
+      $("agreementBody").innerHTML = filtered.map(a => {
+        const status = effectiveStatus(a);
+        const docLink = safeUrl(a.documentUrl);
+        return `
+          <tr>
+            <td><strong>${esc(a.title || "Untitled agreement")}</strong><br>
+              ${docLink ? `<a class="link" href="${esc(docLink)}" target="_blank" rel="noopener noreferrer">Open document</a>` : '<span class="muted">No document link</span>'}
+            </td>
+            <td>${esc(a.tenantName || "—")}<br><span class="muted">${esc(a.tenantContact || "")}</span></td>
+            <td>${esc(propertyLabel(a.propertyId))}<br><span class="muted">${esc(roomLabel(a.roomId))}</span></td>
+            <td>${money(a.monthlyRent)}</td>
+            <td>${money(a.deposit)}</td>
+            <td>${esc(a.startDate || "—")}</td>
+            <td>${esc(a.endDate || "—")}</td>
+            <td><span class="pill ${statusClass(status)}">${esc(status)}</span></td>
+            <td><div class="actions">
+              <button class="secondary" data-action="edit" data-id="${esc(a.id)}">Edit</button>
+              <button class="danger" data-action="delete" data-id="${esc(a.id)}">Delete</button>
+            </div></td>
+          </tr>`;
+      }).join("");
+    }
+
+    function safeUrl(value) {
+      if (!value) return "";
+      try {
+        const url = new URL(value);
+        return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+      } catch {
+        return "";
+      }
+    }
+
+    function openModal(record = null) {
+      editingId = record?.id || null;
+      $("agreementForm").reset();
+      $("modalTitle").textContent = record ? "Edit Agreement" : "Add Agreement";
+      $("saveBtn").textContent = record ? "Update Agreement" : "Save Agreement";
+
+      $("agreementName").value = record?.title || "";
+      $("propertyId").value = record?.propertyId || "";
+      refreshRoomOptions(record?.roomId || "");
+      $("status").value = record?.status || "Draft";
+      $("tenantName").value = record?.tenantName || "";
+      $("tenantContact").value = record?.tenantContact || "";
+      $("landlordName").value = record?.landlordName || "";
+      $("landlordContact").value = record?.landlordContact || "";
+      $("monthlyRent").value = record?.monthlyRent ?? "";
+      $("deposit").value = record?.deposit ?? 0;
+      $("startDate").value = record?.startDate || localDate();
+      $("endDate").value = record?.endDate || "";
+      $("noticePeriod").value = record?.noticePeriod || "";
+      $("documentUrl").value = record?.documentUrl || "";
+      $("notes").value = record?.notes || "";
+
+      $("agreementModal").classList.add("open");
+      $("agreementName").focus();
+    }
+
+    function closeModal() {
+      $("agreementModal").classList.remove("open");
+      editingId = null;
+      $("agreementForm").reset();
+    }
+
+    $("addBtn").addEventListener("click", () => openModal());
+    $("cancelBtn").addEventListener("click", closeModal);
+    $("propertyId").addEventListener("change", () => refreshRoomOptions());
+    $("agreementModal").addEventListener("click", e => {
+      if (e.target === $("agreementModal")) closeModal();
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+    });
+    $("search").addEventListener("input", render);
+    $("statusFilter").addEventListener("change", render);
+
+    $("agreementBody").addEventListener("click", async e => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const record = agreements.find(a => a.id === btn.dataset.id);
+      if (!record) return;
+
+      if (btn.dataset.action === "edit") {
+        openModal(record);
+        return;
+      }
+
+      if (btn.dataset.action === "delete") {
+        if (!confirm(`Delete agreement "${record.title || "Untitled agreement"}"? This cannot be undone.`)) return;
+        btn.disabled = true;
+        try {
+          await deleteDoc(doc(db, "users", currentUser.uid, "agreements", record.id));
+          agreements = agreements.filter(a => a.id !== record.id);
+          render();
+          notify("Agreement deleted successfully.");
+        } catch (error) {
+          console.error(error);
+          notify("Delete failed. Check Firestore rules and connection.", "error");
+          btn.disabled = false;
+        }
+      }
+    });
+
+    $("agreementForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (saving) return;
+
+      const title = $("agreementName").value.trim();
+      const tenantName = $("tenantName").value.trim();
+      const landlordName = $("landlordName").value.trim();
+      const startDate = $("startDate").value;
+      const endDate = $("endDate").value;
+      const monthlyRent = Number($("monthlyRent").value);
+      const deposit = Number($("deposit").value || 0);
+      const documentUrl = $("documentUrl").value.trim();
+
+      if (!title || !tenantName || !landlordName || !startDate || !endDate) {
+        notify("Please fill in all required fields.", "error");
+        return;
+      }
+      if (endDate < startDate) {
+        notify("End date cannot be earlier than start date.", "error");
+        return;
+      }
+      if (![monthlyRent, deposit].every(n => Number.isFinite(n) && n >= 0 && n <= 100000000)) {
+        notify("Enter valid rent and deposit amounts.", "error");
+        return;
+      }
+      if (documentUrl && !safeUrl(documentUrl)) {
+        notify("Enter a valid HTTP or HTTPS document link.", "error");
+        return;
+      }
+
+      const propertyId = $("propertyId").value;
+      const roomId = $("roomId").value;
+
+      const data = {
+        title,
+        propertyId: propertyId || "",
+        roomId: roomId || "",
+        status: $("status").value,
+        tenantName,
+        tenantContact: $("tenantContact").value.trim(),
+        landlordName,
+        landlordContact: $("landlordContact").value.trim(),
+        monthlyRent,
+        deposit,
+        startDate,
+        endDate,
+        noticePeriod: $("noticePeriod").value.trim(),
+        documentUrl,
+        notes: $("notes").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      saving = true;
+      $("saveBtn").disabled = true;
+
+      try {
+        if (editingId) {
+          await updateDoc(doc(db, "users", currentUser.uid, "agreements", editingId), data);
+          notify("Agreement updated successfully.");
+        } else {
+          data.createdAt = serverTimestamp();
+          await addDoc(col("agreements"), data);
+          notify("Agreement saved successfully.");
+        }
+        closeModal();
+        await loadAgreements();
+      } catch (error) {
+        console.error(error);
+        notify("Save failed. Check Firestore rules and connection.", "error");
+      } finally {
+        saving = false;
+        $("saveBtn").disabled = false;
+      }
+    });
+
+    $("exportBtn").addEventListener("click", () => {
+      const q = $("search").value.trim().toLowerCase();
+      const statusFilter = $("statusFilter").value;
+      const rows = agreements.filter(a => {
+        const text = [a.title, a.tenantName, a.tenantContact,
+          a.landlordName, a.landlordContact, propertyLabel(a.propertyId),
+          roomLabel(a.roomId)].join(" ").toLowerCase();
+        return (!q || text.includes(q)) &&
+          (!statusFilter || effectiveStatus(a) === statusFilter);
+      });
+
+      const columns = [
+        ["Title", "title"], ["Tenant", "tenantName"], ["Tenant Contact", "tenantContact"],
+        ["Landlord", "landlordName"], ["Landlord Contact", "landlordContact"],
+        ["Property", "property"], ["Room", "room"], ["Monthly Rent", "monthlyRent"],
+        ["Deposit", "deposit"], ["Start Date", "startDate"], ["End Date", "endDate"],
+        ["Status", "status"], ["Notice Period", "noticePeriod"],
+        ["Document URL", "documentUrl"], ["Notes", "notes"]
+      ];
+      const cell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        columns.map(c => cell(c[0])).join(","),
+        ...rows.map(a => columns.map(([_, key]) => {
+          let value;
+          if (key === "property") value = propertyLabel(a.propertyId);
+          else if (key === "room") value = roomLabel(a.roomId);
+          else if (key === "status") value = effectiveStatus(a);
+          else value = a[key];
+          return cell(value);
+        }).join(","))
+      ].join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "roomflow-agreements.csv";
+      anchor.click();
+      URL.revokeObjectURL(url);
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+      try {
+        await loadRelated();
+        await loadAgreements();
+      } catch (error) {
+        console.error(error);
+        $("agreementBody").innerHTML = '<tr><td colspan="9" class="empty">Could not load data.</td></tr>';
+        notify("Firebase connection or Firestore security rules need checking.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
+```
