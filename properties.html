@@ -33,4 +33,864 @@
     }
 
     .btn {
-     
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 9px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      color: inherit;
+      background: var(--card-bg, #fff);
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card,
+    .property-card,
+    .property-form {
+      padding: 20px;
+      border: 1px solid var(--border-color, #e5e7eb);
+      border-radius: 14px;
+      background: var(--card-bg, #fff);
+    }
+
+    .summary-card span {
+      display: block;
+      font-size: 13px;
+      opacity: .7;
+      margin-bottom: 10px;
+    }
+
+    .summary-card strong {
+      font-size: 24px;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px;
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 9px;
+      background: var(--input-bg, transparent);
+      color: inherit;
+    }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .property-card h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+
+    .property-address {
+      font-size: 14px;
+      opacity: .7;
+      margin: 0 0 18px;
+      overflow-wrap: anywhere;
+    }
+
+    .property-details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .detail-item {
+      padding: 12px;
+      border-radius: 9px;
+      background: var(--muted-bg, #f8fafc);
+      overflow-wrap: anywhere;
+    }
+
+    .detail-item span {
+      display: block;
+      font-size: 12px;
+      opacity: .7;
+      margin-bottom: 6px;
+    }
+
+    .detail-item strong {
+      font-size: 15px;
+    }
+
+    .property-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-color, #e5e7eb);
+    }
+
+    .property-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .property-actions .btn {
+      padding: 8px 11px;
+      font-size: 13px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-inactive {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-section h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .form-field label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color, #d1d5db);
+      border-radius: 9px;
+      background: var(--input-bg, transparent);
+      color: inherit;
+      font: inherit;
+    }
+
+    .form-field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .message {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 9px;
+      margin-bottom: 18px;
+    }
+
+    .message.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .message.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      border: 1px dashed var(--border-color, #ddd);
+      border-radius: 14px;
+      opacity: .75;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 750px) {
+      .properties-page {
+        padding: 16px;
+      }
+
+      .property-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full-width {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="properties-page">
+
+    <header class="page-header">
+      <div>
+        <h1>My Properties</h1>
+        <p>Manage your rented room and landlord details.</p>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="addPropertyBtn">
+        + Add Property
+      </button>
+    </header>
+
+    <div id="pageMessage" class="message" role="status"></div>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Total Properties</span>
+        <strong id="propertyCount">0</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Active Properties</span>
+        <strong id="activeCount">0</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Combined Monthly Rent</span>
+        <strong id="monthlyRentTotal">₹0</strong>
+      </article>
+    </section>
+
+    <section id="propertyFormSection" class="property-form form-section hidden">
+      <h2 id="formTitle">Add Property</h2>
+
+      <form id="propertyForm">
+        <div class="form-grid">
+
+          <div class="form-field">
+            <label for="propertyName">Property / Room Name *</label>
+            <input id="propertyName" maxlength="100" required
+              placeholder="e.g. My Room">
+          </div>
+
+          <div class="form-field">
+            <label for="propertyType">Property Type *</label>
+            <select id="propertyType" required>
+              <option value="Room">Room</option>
+              <option value="Flat">Flat / Apartment</option>
+              <option value="PG">PG</option>
+              <option value="House">House</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="propertyAddress">Full Address *</label>
+            <textarea id="propertyAddress" maxlength="500" required
+              placeholder="Room number, building, area, city"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label for="monthlyRent">Monthly Rent (₹) *</label>
+            <input id="monthlyRent" type="number" min="0" max="100000000"
+              step="0.01" required placeholder="e.g. 8000">
+          </div>
+
+          <div class="form-field">
+            <label for="securityDeposit">Security Deposit (₹)</label>
+            <input id="securityDeposit" type="number" min="0"
+              max="100000000" step="0.01" value="0">
+          </div>
+
+          <div class="form-field">
+            <label for="dueDay">Rent Due Day *</label>
+            <select id="dueDay" required>
+              <option value="1">1st of every month</option>
+              <option value="5">5th of every month</option>
+              <option value="7">7th of every month</option>
+              <option value="10">10th of every month</option>
+              <option value="15">15th of every month</option>
+              <option value="20">20th of every month</option>
+              <option value="25">25th of every month</option>
+              <option value="28">28th of every month</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="startDate">Move-in Date</label>
+            <input id="startDate" type="date">
+          </div>
+
+          <div class="form-field">
+            <label for="landlordName">Landlord Name</label>
+            <input id="landlordName" maxlength="100"
+              placeholder="Landlord's full name">
+          </div>
+
+          <div class="form-field">
+            <label for="landlordPhone">Landlord Phone</label>
+            <input id="landlordPhone" type="tel" maxlength="20"
+              placeholder="Phone number">
+          </div>
+
+          <div class="form-field">
+            <label for="propertyStatus">Property Status *</label>
+            <select id="propertyStatus" required>
+              <option value="active">Active / Currently Rented</option>
+              <option value="inactive">Inactive / Vacated</option>
+            </select>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="propertyNotes">Notes</label>
+            <textarea id="propertyNotes" maxlength="2000"
+              placeholder="Agreement details, meter location, other notes..."></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">
+            Save Property
+          </button>
+          <button type="button" class="btn" id="cancelBtn">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="toolbar">
+      <input type="search" id="searchInput"
+        placeholder="Search by name, address or landlord..."
+        aria-label="Search properties">
+
+      <select id="statusFilter" aria-label="Filter properties">
+        <option value="all">All properties</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </section>
+
+    <section id="propertyList" class="property-grid">
+      <div class="empty-state">Loading properties...</div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    import { initializeApp, getApps, getApp }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = getApps().length
+      ? getApp()
+      : initializeApp(firebaseConfig);
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const $ = id => document.getElementById(id);
+
+    let currentUser = null;
+    let properties = [];
+    let editingId = null;
+
+    const money = value =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+      }).format(Number(value) || 0);
+
+    function showMessage(text, type = "success") {
+      const box = $("pageMessage");
+      box.textContent = text;
+      box.className = "message " + type;
+    }
+
+    function clearMessage() {
+      $("pageMessage").textContent = "";
+      $("pageMessage").className = "message";
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function showForm(property = null) {
+      editingId = property ? property.id : null;
+
+      $("propertyForm").reset();
+      $("formTitle").textContent = property
+        ? "Edit Property"
+        : "Add Property";
+
+      $("saveBtn").textContent = property
+        ? "Update Property"
+        : "Save Property";
+
+      $("propertyName").value = property?.name || "";
+      $("propertyType").value = property?.type || "Room";
+      $("propertyAddress").value = property?.address || "";
+      $("monthlyRent").value = property?.monthlyRent ?? "";
+      $("securityDeposit").value = property?.securityDeposit ?? 0;
+      $("dueDay").value = String(property?.dueDay ?? 1);
+      $("startDate").value = property?.startDate || "";
+      $("landlordName").value = property?.landlordName || "";
+      $("landlordPhone").value = property?.landlordPhone || "";
+      $("propertyStatus").value = property?.status || "active";
+      $("propertyNotes").value = property?.notes || "";
+
+      $("propertyFormSection").classList.remove("hidden");
+      $("propertyFormSection").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    function hideForm() {
+      $("propertyFormSection").classList.add("hidden");
+      $("propertyForm").reset();
+      editingId = null;
+    }
+
+    function getFormData() {
+      return {
+        name: $("propertyName").value.trim(),
+        type: $("propertyType").value,
+        address: $("propertyAddress").value.trim(),
+        monthlyRent: Number($("monthlyRent").value),
+        securityDeposit: Number($("securityDeposit").value || 0),
+        dueDay: Number($("dueDay").value),
+        startDate: $("startDate").value,
+        landlordName: $("landlordName").value.trim(),
+        landlordPhone: $("landlordPhone").value.trim(),
+        status: $("propertyStatus").value,
+        notes: $("propertyNotes").value.trim()
+      };
+    }
+
+    function validateProperty(data) {
+      if (!data.name || !data.address) {
+        return "Please enter the property name and address.";
+      }
+
+      if (
+        !Number.isFinite(data.monthlyRent) ||
+        data.monthlyRent < 0 ||
+        !Number.isFinite(data.securityDeposit) ||
+        data.securityDeposit < 0
+      ) {
+        return "Rent and deposit must be valid non-negative amounts.";
+      }
+
+      if (
+        !Number.isInteger(data.dueDay) ||
+        data.dueDay < 1 ||
+        data.dueDay > 28
+      ) {
+        return "Please choose a valid rent due day.";
+      }
+
+      if (!["active", "inactive"].includes(data.status)) {
+        return "Please choose a valid property status.";
+      }
+
+      return "";
+    }
+
+    async function loadProperties() {
+      if (!currentUser) return;
+
+      $("propertyList").innerHTML =
+        '<div class="empty-state">Loading properties...</div>';
+
+      try {
+        const snapshot = await getDocs(
+          collection(db, "users", currentUser.uid, "properties")
+        );
+
+        properties = snapshot.docs.map(item => ({
+          id: item.id,
+          ...item.data()
+        }));
+
+        updateSummary();
+        renderProperties();
+      } catch (error) {
+        console.error(error);
+
+        $("propertyList").innerHTML =
+          '<div class="empty-state">Could not load properties. Check Firestore permissions.</div>';
+
+        showMessage(
+          "Properties could not be loaded. Please check your Firestore security rules.",
+          "error"
+        );
+      }
+    }
+
+    function updateSummary() {
+      const active = properties.filter(
+        property => property.status === "active"
+      );
+
+      $("propertyCount").textContent = properties.length;
+      $("activeCount").textContent = active.length;
+
+      $("monthlyRentTotal").textContent = money(
+        active.reduce(
+          (total, property) =>
+            total + (Number(property.monthlyRent) || 0),
+          0
+        )
+      );
+    }
+
+    function renderProperties() {
+      const search = $("searchInput").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+
+      const filtered = properties.filter(property => {
+        const searchable = [
+          property.name,
+          property.address,
+          property.landlordName,
+          property.type
+        ].join(" ").toLowerCase();
+
+        return searchable.includes(search) &&
+          (status === "all" || property.status === status);
+      });
+
+      if (!filtered.length) {
+        $("propertyList").innerHTML = `
+          <div class="empty-state">
+            <h3>No properties found</h3>
+            <p>Add your rented room to start managing its details.</p>
+          </div>
+        `;
+        return;
+      }
+
+      $("propertyList").innerHTML = filtered.map(property => {
+        const active = property.status === "active";
+
+        return `
+          <article class="property-card">
+            <h2>${escapeHTML(property.name || "Unnamed Property")}</h2>
+            <p class="property-address">
+              ${escapeHTML(property.address || "No address added")}
+            </p>
+
+            <div class="property-details">
+              <div class="detail-item">
+                <span>Monthly Rent</span>
+                <strong>${escapeHTML(money(property.monthlyRent))}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Security Deposit</span>
+                <strong>${escapeHTML(money(property.securityDeposit))}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Rent Due Day</span>
+                <strong>${escapeHTML(property.dueDay ?? "—")} of each month</strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Property Type</span>
+                <strong>${escapeHTML(property.type || "Room")}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Landlord</span>
+                <strong>${escapeHTML(property.landlordName || "Not added")}</strong>
+              </div>
+
+              <div class="detail-item">
+                <span>Landlord Phone</span>
+                <strong>${escapeHTML(property.landlordPhone || "Not added")}</strong>
+              </div>
+            </div>
+
+            ${property.startDate ? `
+              <p class="property-address">
+                Move-in date: ${escapeHTML(property.startDate)}
+              </p>
+            ` : ""}
+
+            ${property.notes ? `
+              <p class="property-address">
+                Notes: ${escapeHTML(property.notes)}
+              </p>
+            ` : ""}
+
+            <div class="property-footer">
+              <span class="status-badge ${active ? "" : "status-inactive"}">
+                ${active ? "ACTIVE" : "INACTIVE"}
+              </span>
+
+              <div class="property-actions">
+                <button type="button" class="btn"
+                  data-action="edit" data-id="${escapeHTML(property.id)}">
+                  Edit
+                </button>
+
+                <button type="button" class="btn"
+                  data-action="toggle" data-id="${escapeHTML(property.id)}">
+                  ${active ? "Mark Vacated" : "Activate"}
+                </button>
+
+                <button type="button" class="btn"
+                  data-action="delete" data-id="${escapeHTML(property.id)}">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    $("propertyForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      clearMessage();
+
+      const data = getFormData();
+      const error = validateProperty(data);
+
+      if (error) {
+        showMessage(error, "error");
+        return;
+      }
+
+      const saveButton = $("saveBtn");
+      saveButton.disabled = true;
+      saveButton.textContent = editingId ? "Updating..." : "Saving...";
+
+      try {
+        const userProperties = collection(
+          db, "users", currentUser.uid, "properties"
+        );
+
+        if (editingId) {
+          await updateDoc(
+            doc(db, "users", currentUser.uid, "properties", editingId),
+            {
+              ...data,
+              updatedAt: serverTimestamp()
+            }
+          );
+
+          showMessage("Property updated successfully.");
+        } else {
+          await addDoc(userProperties, {
+            ...data,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+
+          showMessage("Property saved successfully.");
+        }
+
+        hideForm();
+        await loadProperties();
+      } catch (error) {
+        console.error(error);
+        showMessage(
+          "Could not save property. Check your Firestore rules and try again.",
+          "error"
+        );
+      } finally {
+        saveButton.disabled = false;
+        $("saveBtn").textContent = editingId
+          ? "Update Property"
+          : "Save Property";
+      }
+    });
+
+    $("propertyList").addEventListener("click", async event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button || !currentUser) return;
+
+      const id = button.dataset.id;
+      const action = button.dataset.action;
+      const property = properties.find(item => item.id === id);
+
+      if (!property) return;
+
+      if (action === "edit") {
+        showForm(property);
+        return;
+      }
+
+      if (action === "toggle") {
+        const newStatus = property.status === "active"
+          ? "inactive"
+          : "active";
+
+        const confirmation = newStatus === "inactive"
+          ? "Mark this property as vacated?"
+          : "Activate this property again?";
+
+        if (!confirm(confirmation)) return;
+
+        button.disabled = true;
+
+        try {
+          await updateDoc(
+            doc(db, "users", currentUser.uid, "properties", id),
+            {
+              status: newStatus,
+              updatedAt: serverTimestamp()
+            }
+          );
+
+          showMessage("Property status updated.");
+          await loadProperties();
+        } catch (error) {
+          console.error(error);
+          showMessage("Could not update property status.", "error");
+        } finally {
+          button.disabled = false;
+        }
+
+        return;
+      }
+
+      if (action === "delete") {
+        const confirmation = confirm(
+          "Delete this property permanently? This does not delete separate rent or electricity records."
+        );
+
+        if (!confirmation) return;
+
+        button.disabled = true;
+
+        try {
+          await deleteDoc(
+            doc(db, "users", currentUser.uid, "properties", id)
+          );
+
+          showMessage("Property deleted.");
+          await loadProperties();
+        } catch (error) {
+          console.error(error);
+          showMessage("Could not delete property.", "error");
+        } finally {
+          button.disabled = false;
+        }
+      }
+    });
+
+    $("addPropertyBtn").addEventListener("click", () => {
+      clearMessage();
+      showForm();
+    });
+
+    $("cancelBtn").addEventListener("click", hideForm);
+
+    $("searchInput").addEventListener("input", renderProperties);
+    $("statusFilter").addEventListener("change", renderProperties);
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+      await loadProperties();
+    });
+  </script>
+</body>
+</html>
+```
