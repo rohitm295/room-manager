@@ -85,7 +85,7 @@
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCXFw-Dr_K_ul3NfUYtq2c85E2mJa8RKUI",
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2cT85E2mJa8RKUI",
       authDomain: "roomflow-6c920.firebaseapp.com",
       projectId: "roomflow-6c920",
       storageBucket: "roomflow-6c920.firebasestorage.app",
@@ -125,8 +125,9 @@
           return "Network error. Check your internet connection.";
         case "auth/operation-not-allowed":
           return "Email/password login is not enabled in Firebase.";
+        case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
         case "auth/invalid-api-key":
-          return "Firebase API key is invalid. Please check the configuration.";
+          return "Firebase API key is not accepted. Check the Firebase Web App configuration and API key restrictions.";
         default:
           return "Login failed. Please try again. (" +
             (error.code || "unknown-error") + ")";
