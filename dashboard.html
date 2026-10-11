@@ -1,158 +1,269 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4f46e5">
   <title>Dashboard | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
 
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
-    header{background:#fff;border-bottom:1px solid #e5eaf1;padding:17px 5%;
-      display:flex;justify-content:space-between;align-items:center;gap:15px}
-    .logo{font-size:24px;font-weight:800;color:#2563eb}
-    button,.btn{border:0;border-radius:9px;padding:11px 16px;
-      cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
-    .logout{background:#fee2e2;color:#b91c1c}
-    main{max-width:1100px;margin:35px auto;padding:0 20px}
-    .welcome{margin-bottom:25px}
-    .welcome h1{font-size:29px;margin-bottom:9px}
-    .muted{color:#64748b;font-size:14px;line-height:1.6}
-    .role{display:inline-block;background:#dbeafe;color:#1d4ed8;
-      padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-    .card{background:#fff;border:1px solid #e8edf4;border-radius:15px;
-      padding:23px;box-shadow:0 5px 18px #17203306}
-    .card .emoji{font-size:26px;margin-bottom:15px}
-    .card h3{font-size:16px;margin-bottom:9px}
-    .card p{font-size:14px;color:#64748b;line-height:1.6}
-    .section{margin:30px 0 15px;font-size:20px}
-    .notice{margin-top:24px;background:#eff6ff;border-radius:12px;
-      padding:17px;color:#1e40af;font-size:14px;line-height:1.6}
-    .error{color:#b91c1c;background:#fef2f2;padding:14px;border-radius:10px;margin:15px 0}
-    footer{text-align:center;color:#64748b;padding:30px 15px;font-size:12px}
-    .hidden{display:none}
-    @media(max-width:700px){
-      .grid{grid-template-columns:1fr}
-      main{margin-top:25px}
-      .welcome h1{font-size:24px}
-      header{padding:15px 18px}
+    .welcome-panel {
+      padding: 26px;
+      margin-bottom: 25px;
+      border-radius: 16px;
+      background: linear-gradient(125deg, #4338ca, #6366f1);
+      color: white;
+    }
+
+    .welcome-panel h2 {
+      margin-bottom: 8px;
+      font-size: 27px;
+    }
+
+    .welcome-panel p {
+      margin-bottom: 0;
+      color: #e0e7ff;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .quick-actions .btn {
+      background: white;
+      color: #4338ca;
+    }
+
+    .quick-actions .btn-outline {
+      background: transparent;
+      border-color: rgba(255,255,255,.6);
+      color: white;
+    }
+
+    .profile-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .profile-row h3 {
+      margin: 0 0 4px;
+    }
+
+    .profile-row p {
+      margin: 0;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+
+    .role-label {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .notice {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #1e40af;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="logo">RoomFlow</div>
-    <button id="logoutBtn" class="logout">Log out</button>
-  </header>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="brand-mark">R</span>
+        RoomFlow
+      </a>
 
-  <main>
-    <div id="loading">Loading your dashboard...</div>
-    <div id="errorBox" class="error hidden" role="alert"></div>
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <a href="dashboard.html" class="active">▦ Dashboard</a>
+        <a href="#rentOverview">₹ Rent Overview</a>
+        <a href="#electricity">⚡ Electricity</a>
+        <a href="#payments">▤ Payments</a>
+        <a href="#profile">♙ My Profile</a>
+      </nav>
 
-    <div id="dashboard" class="hidden">
-      <section class="welcome">
-        <h1 id="welcomeText">Welcome!</h1>
-        <p class="muted">Your room and property management space.</p>
-        <span id="roleBadge" class="role"></span>
-      </section>
-
-      <section id="tenantView" class="hidden">
-        <h2 class="section">Your rental details</h2>
-        <div class="grid">
-          <article class="card">
-            <div class="emoji">🏠</div>
-            <h3>My Room</h3>
-            <p>View your linked property and room details once your landlord connects your account.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">💳</div>
-            <h3>Rent & Payments</h3>
-            <p>Your monthly rent, due dates and payment records will appear here when available.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">⚡</div>
-            <h3>Electricity Bills</h3>
-            <p>Check your meter readings and electricity bills shared with your account.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">📄</div>
-            <h3>Rental Agreement</h3>
-            <p>View your rental agreement and expiry details when your landlord shares them.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">🛠️</div>
-            <h3>Maintenance</h3>
-            <p>Maintenance request functionality will be connected in the next development stage.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">👤</div>
-            <h3>My Account</h3>
-            <p id="tenantEmail"></p>
-          </article>
-        </div>
-      </section>
-
-      <section id="landlordView" class="hidden">
-        <h2 class="section">Property management</h2>
-        <div class="grid">
-          <article class="card">
-            <div class="emoji">🏢</div>
-            <h3>My Properties</h3>
-            <p>Property and room management will be available here.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">👥</div>
-            <h3>My Tenants</h3>
-            <p>Add tenants and connect their accounts after the tenant management module is built.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">💰</div>
-            <h3>Rent Collection</h3>
-            <p>Track rent due dates and record cash, UPI or bank payments when billing is connected.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">⚡</div>
-            <h3>Electricity</h3>
-            <p>Meter readings and electricity billing will be connected in a later module.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">📊</div>
-            <h3>Reports</h3>
-            <p>View collection, pending dues and property expenses when reporting is implemented.</p>
-          </article>
-          <article class="card">
-            <div class="emoji">👤</div>
-            <h3>My Account</h3>
-            <p id="landlordEmail"></p>
-          </article>
-        </div>
-      </section>
-
-      <div class="notice">
-        <strong>RoomFlow is getting ready!</strong><br>
-        This dashboard is the starting interface. Property records, bills and payments
-        are not yet implemented by these cards. Your private account profile is loaded
-        from Firebase.
+      <div class="sidebar-bottom">
+        <button type="button" id="logoutButton" class="btn btn-outline btn-block">
+          Log out
+        </button>
+        <p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:16px">
+          RoomFlow · Jatav Industries
+        </p>
       </div>
-    </div>
-  </main>
+    </aside>
 
-  <footer>RoomFlow — Powered by Jatav Industries</footer>
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <span class="muted" style="font-size:13px">
+            Your rental management overview
+          </span>
+        </div>
+        <span class="badge badge-info" id="accountStatus">Loading account…</span>
+      </header>
+
+      <div class="app-content">
+        <div id="pageMessage" class="form-message" role="status" hidden></div>
+
+        <section class="welcome-panel">
+          <h2>Welcome, <span id="welcomeName">there</span>!</h2>
+          <p id="welcomeText">
+            Your RoomFlow account is ready. Here is your account overview.
+          </p>
+
+          <div class="quick-actions">
+            <a href="#rentOverview" class="btn">View rent overview</a>
+            <a href="#profile" class="btn btn-outline">My profile</a>
+          </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Account summary">
+          <article class="stat-card">
+            <div class="stat-icon">₹</div>
+            <div class="stat-label">Monthly Rent</div>
+            <p class="stat-value" id="monthlyRent">—</p>
+            <div class="stat-note">Configured rent amount</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Electricity</div>
+            <p class="stat-value" id="electricityAmount">—</p>
+            <div class="stat-note">Electricity charges</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon">▤</div>
+            <div class="stat-label">Pending Amount</div>
+            <p class="stat-value" id="pendingAmount">—</p>
+            <div class="stat-note">Unpaid charges</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon">⌂</div>
+            <div class="stat-label" id="roleCardLabel">Account Type</div>
+            <p class="stat-value" id="accountRole">—</p>
+            <div class="stat-note">Your RoomFlow role</div>
+          </article>
+        </section>
+
+        <section class="panel" id="rentOverview">
+          <div class="panel-header">
+            <h2>Rent Overview</h2>
+            <span class="badge badge-neutral">Getting started</span>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">🏠</div>
+            <h3>Your rent records will appear here</h3>
+            <p>
+              Rent totals and payment records will be displayed when the
+              rent-management features and database are connected.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" id="electricity">
+          <div class="panel-header">
+            <h2>Electricity Overview</h2>
+            <span class="badge badge-neutral">Not connected yet</span>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">⚡</div>
+            <h3>Meter readings and bills</h3>
+            <p>
+              Previous reading, current reading, units consumed and bill
+              amounts will be shown here after electricity records are added.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" id="payments">
+          <div class="panel-header">
+            <h2>Recent Payments</h2>
+          </div>
+          <div class="empty-state">
+            <div class="empty-icon">💳</div>
+            <h3>No payment records displayed</h3>
+            <p>
+              This section will show rent and electricity payments after
+              the payment-history feature is implemented.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel" id="profile">
+          <div class="panel-header">
+            <h2>My Profile</h2>
+          </div>
+
+          <div class="profile-row">
+            <div class="avatar" id="profileAvatar">R</div>
+            <div>
+              <h3 id="profileName">Loading profile…</h3>
+              <p id="profileEmail">—</p>
+              <span class="role-label" id="profileRole">—</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <p><strong>Account created:</strong> <span id="createdAt">—</span></p>
+          <p><strong>Email verification:</strong> <span id="emailVerification">—</span></p>
+        </section>
+
+        <footer class="site-footer" style="border-radius:12px">
+          <p style="margin:0;font-size:13px;color:var(--text-muted)">
+            © <span data-current-year></span> RoomFlow — Powered by Jatav Industries
+          </p>
+        </footer>
+      </div>
+    </main>
+  </div>
 
   <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { initializeApp, getApp, getApps }
+      from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
     import {
-      getAuth, onAuthStateChanged, signOut
+      getAuth,
+      onAuthStateChanged,
+      signOut
     } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     import {
-      getFirestore, doc, getDoc
+      getFirestore,
+      doc,
+      getDoc
     } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -165,75 +276,155 @@
       measurementId: "G-1YGPS03PKC"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const loading = document.getElementById("loading");
-    const dashboard = document.getElementById("dashboard");
-    const errorBox = document.getElementById("errorBox");
+    const pageMessage = document.getElementById("pageMessage");
+    const logoutButton = document.getElementById("logoutButton");
 
-    function showError(text) {
-      loading.classList.add("hidden");
-      dashboard.classList.add("hidden");
-      errorBox.textContent = text;
-      errorBox.classList.remove("hidden");
+    function showMessage(text, type = "info") {
+      pageMessage.textContent = text;
+      pageMessage.className = `form-message ${type}`;
+      pageMessage.hidden = false;
     }
 
-    onAuthStateChanged(auth, async (user) => {
+    function formatMoney(value) {
+      const amount = Number(value);
+      if (!Number.isFinite(amount)) return "—";
+
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+
+      let date;
+
+      if (typeof value.toDate === "function") {
+        date = value.toDate();
+      } else {
+        date = new Date(value);
+      }
+
+      if (Number.isNaN(date.getTime())) return "—";
+
+      return new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).format(date);
+    }
+
+    function safeRole(value) {
+      return value === "landlord" || value === "tenant"
+        ? value
+        : "user";
+    }
+
+    function displayProfile(user, profile) {
+      const name =
+        profile.fullName ||
+        user.displayName ||
+        "RoomFlow User";
+
+      const role = safeRole(profile.role);
+
+      document.getElementById("welcomeName").textContent = name;
+      document.getElementById("profileName").textContent = name;
+      document.getElementById("profileEmail").textContent = user.email || "No email";
+      document.getElementById("profileRole").textContent = role;
+      document.getElementById("accountRole").textContent =
+        role.charAt(0).toUpperCase() + role.slice(1);
+      document.getElementById("roleCardLabel").textContent = "Account Type";
+      document.getElementById("profileAvatar").textContent =
+        name.trim().charAt(0).toUpperCase() || "R";
+      document.getElementById("accountStatus").textContent = "Signed in";
+      document.getElementById("emailVerification").textContent =
+        user.emailVerified ? "Verified" : "Not verified";
+      document.getElementById("createdAt").textContent =
+        formatDate(user.metadata.creationTime);
+
+      // Only show amounts if the profile contains actual configured values.
+      document.getElementById("monthlyRent").textContent =
+        profile.monthlyRent != null
+          ? formatMoney(profile.monthlyRent)
+          : "Not set";
+
+      document.getElementById("electricityAmount").textContent =
+        profile.electricityAmount != null
+          ? formatMoney(profile.electricityAmount)
+          : "Not set";
+
+      document.getElementById("pendingAmount").textContent =
+        profile.pendingAmount != null
+          ? formatMoney(profile.pendingAmount)
+          : "Not set";
+
+      document.getElementById("welcomeText").textContent =
+        role === "landlord"
+          ? "Manage your rental properties and tenant records from one place."
+          : role === "tenant"
+            ? "Keep track of your rental information and payment records."
+            : "Your account overview is ready.";
+    }
+
+    onAuthStateChanged(auth, async user => {
       if (!user) {
-        location.replace("login.html");
+        window.location.replace("login.html");
         return;
       }
 
       try {
         const profileRef = doc(db, "users", user.uid);
-        const profileSnap = await getDoc(profileRef);
+        const profileSnapshot = await getDoc(profileRef);
 
-        if (!profileSnap.exists()) {
-          showError(
-            "Your account profile was not found. Please contact support."
+        if (!profileSnapshot.exists()) {
+          showMessage(
+            "Your account profile could not be found. Please contact support.",
+            "error"
           );
+          document.getElementById("accountStatus").textContent =
+            "Profile missing";
           return;
         }
 
-        const profile = profileSnap.data();
+        displayProfile(user, profileSnapshot.data());
 
-        document.getElementById("welcomeText").textContent =
-          "Welcome, " + (profile.fullName || user.displayName || "User");
-
-        document.getElementById("roleBadge").textContent =
-          profile.role === "landlord" ? "LANDLORD ACCOUNT" :
-          profile.role === "tenant" ? "TENANT ACCOUNT" : "ACCOUNT";
-
-        if (profile.role === "tenant") {
-          document.getElementById("tenantView").classList.remove("hidden");
-          document.getElementById("tenantEmail").textContent = user.email || "";
-        } else if (profile.role === "landlord") {
-          document.getElementById("landlordView").classList.remove("hidden");
-          document.getElementById("landlordEmail").textContent = user.email || "";
-        } else {
-          showError("Your account role is invalid. Please contact support.");
-          return;
-        }
-
-        loading.classList.add("hidden");
-        dashboard.classList.remove("hidden");
       } catch (error) {
-        console.error(error);
-        showError(
-          "Dashboard could not load. Check your internet connection and Firestore security rules."
+        console.error("RoomFlow profile loading failed:", error);
+
+        showMessage(
+          "We couldn't load your profile. Check your internet connection and Firestore permissions.",
+          "error"
         );
+
+        document.getElementById("accountStatus").textContent =
+          "Profile unavailable";
       }
     });
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
+      logoutButton.textContent = "Logging out…";
+
       try {
         await signOut(auth);
-        location.replace("login.html");
+        window.location.replace("login.html");
       } catch (error) {
-        showError("Logout failed. Please try again.");
+        console.error("RoomFlow logout failed:", error);
+        showMessage("Unable to log out. Please try again.", "error");
+        logoutButton.disabled = false;
+        logoutButton.textContent = "Log out";
       }
+    });
+
+    document.querySelectorAll("[data-current-year]").forEach(element => {
+      element.textContent = new Date().getFullYear();
     });
   </script>
 </body>
