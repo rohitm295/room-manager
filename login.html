@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,19 +8,14 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{
-      font-family:Arial,sans-serif;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+      font-family:Arial,sans-serif;min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);
       color:#172033
     }
     .card{
-      width:100%;max-width:430px;background:white;
-      padding:34px;border-radius:20px;
-      box-shadow:0 15px 50px #1e293b14
+      width:100%;max-width:430px;background:white;padding:34px;
+      border-radius:20px;box-shadow:0 15px 50px #1e293b14
     }
     .logo{font-size:27px;font-weight:800;color:#2563eb;text-align:center}
     .tag{text-align:center;color:#64748b;margin:8px 0 28px;font-size:14px}
@@ -33,7 +27,7 @@
       border-radius:10px;font-size:15px;outline:none
     }
     input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb18}
-    .row{display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+    .row{display:flex;justify-content:flex-end;align-items:center;margin:16px 0}
     .row a,.bottom a{color:#2563eb;text-decoration:none;font-size:13px;font-weight:600}
     button{
       width:100%;padding:14px;border:0;border-radius:10px;
@@ -41,7 +35,8 @@
       cursor:pointer;margin-top:10px
     }
     button:hover{background:#1d4ed8}
-    .message{font-size:14px;margin-top:16px;line-height:1.5}
+    button:disabled{opacity:.65;cursor:wait}
+    .message{font-size:14px;margin-top:16px;line-height:1.5;overflow-wrap:anywhere}
     .bottom{text-align:center;margin-top:24px;font-size:14px;color:#64748b}
     .back{display:block;text-align:center;margin-top:22px;color:#64748b;text-decoration:none;font-size:13px}
     @media(max-width:420px){.card{padding:25px 20px}}
@@ -58,19 +53,18 @@
     <form id="loginForm">
       <label for="email">Email address</label>
       <input id="email" type="email" placeholder="you@example.com"
-             autocomplete="email" required>
+             autocomplete="username" required>
 
       <label for="password">Password</label>
       <input id="password" type="password" placeholder="Enter your password"
              autocomplete="current-password" required>
 
       <div class="row">
-        <span></span>
         <a href="#" id="forgotLink">Forgot password?</a>
       </div>
 
       <button type="submit" id="loginButton">Log in</button>
-      <p id="message" class="message" role="status"></p>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
     </form>
 
     <p class="bottom">
@@ -79,24 +73,127 @@
     <a class="back" href="home.html">← Back to Home</a>
   </main>
 
-  <!-- Firebase connection will be added in the next step. -->
   <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ul3NfUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     const form = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
     const message = document.getElementById("message");
     const button = document.getElementById("loginButton");
+    const forgotLink = document.getElementById("forgotLink");
 
-    form.addEventListener("submit", function(event) {
+    function showMessage(text, success = false) {
+      message.style.color = success ? "#15803d" : "#b91c1c";
+      message.textContent = text;
+    }
+
+    function readableError(error) {
+      switch (error.code) {
+        case "auth/invalid-email":
+          return "Please enter a valid email address.";
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          return "Email or password is incorrect.";
+        case "auth/user-disabled":
+          return "This account has been disabled.";
+        case "auth/too-many-requests":
+          return "Too many attempts. Please wait and try again later.";
+        case "auth/network-request-failed":
+          return "Network error. Check your internet connection.";
+        case "auth/operation-not-allowed":
+          return "Email/password login is not enabled in Firebase.";
+        case "auth/invalid-api-key":
+          return "Firebase API key is invalid. Please check the configuration.";
+        default:
+          return "Login failed. Please try again. (" +
+            (error.code || "unknown-error") + ")";
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      message.style.color = "#b45309";
-      message.textContent =
-        "Login is not connected yet. Firebase Authentication setup is the next step.";
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      button.disabled = true;
+      button.textContent = "Logging in...";
+      showMessage("");
+
+      try {
+        const result = await signInWithEmailAndPassword(
+          auth, email, password
+        );
+
+        if (!result.user.emailVerified) {
+          await signOut(auth);
+          showMessage(
+            "Please verify your email first. Open the verification link sent to your inbox, then log in again."
+          );
+          return;
+        }
+
+        showMessage("Login successful! Opening your dashboard...", true);
+        window.location.replace("dashboard.html");
+
+      } catch (error) {
+        console.error("RoomFlow login error:", error);
+        showMessage(readableError(error));
+      } finally {
+        button.disabled = false;
+        button.textContent = "Log in";
+      }
     });
 
-    document.getElementById("forgotLink").addEventListener("click", function(event) {
+    forgotLink.addEventListener("click", async (event) => {
       event.preventDefault();
-      message.style.color = "#b45309";
-      message.textContent =
-        "Password reset will work after Firebase Authentication is connected.";
+
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        showMessage("Please enter your email address above first.");
+        emailInput.focus();
+        return;
+      }
+
+      forgotLink.style.pointerEvents = "none";
+      showMessage("Sending password reset email...");
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage(
+          "If this email belongs to an account, a password reset email has been requested. Check your inbox and spam folder.",
+          true
+        );
+      } catch (error) {
+        console.error("RoomFlow password reset error:", error);
+        showMessage(readableError(error));
+      } finally {
+        forgotLink.style.pointerEvents = "auto";
+      }
     });
   </script>
 </body>
