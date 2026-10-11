@@ -1,1 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
+  <title>Settings | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .settings-wrap{max-width:950px;margin:30px auto;padding:20px}
+    .settings-header{margin-bottom:24px}
+    .settings-header h1{margin:0 0 8px}
+    .settings-card{background:var(--card-bg,#fff);border:1px solid var(--border-color,#e5e7eb);border-radius:16px;padding:24px;margin-bottom:20px}
+    .settings-card h2{font-size:19px;margin:0 0 8px}
+    .settings-card p{color:var(--muted-color,#64748b);font-size:14px}
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .field label{font-size:14px;font-weight:600}
+    .field input,.field select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:var(--input-bg,#fff);color:var(--text-color,#111827)}
+    .settings-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    .settings-btn{border:0;border-radius:9px;padding:12px 18px;font-weight:600;cursor:pointer}
+    .primary-btn{background:#2563eb;color:#fff}
+    .secondary-btn{background:#e2e8f0;color:#1e293b}
+    .danger-btn{background:#fee2e2;color:#991b1b}
+    .status-msg{margin-top:14px;font-size:14px}
+    .profile-line{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #e5e7eb;overflow-wrap:anywhere}
+    .profile-line:last-child{border-bottom:0}
+    .profile-line span:first-child{color:#64748b}
+    .profile-line span:last-child{font-weight:600;text-align:right}
+    .settings-nav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    .settings-nav a{color:#2563eb;text-decoration:none;font-weight:600}
+    @media(max-width:600px){.settings-wrap{padding:14px;margin:12px auto}.settings-grid{grid-template-columns:1fr}.settings-card{padding:18px}.settings-actions button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="settings-wrap">
+    <header class="settings-header">
+      <div class="settings-nav">
+        <a href="home.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+      <h1>Account Settings</h1>
+      <p>Manage your RoomFlow profile and preferences.</p>
+    </header>
 
+    <section class="settings-card">
+      <h2>Profile Information</h2>
+      <p>Your account information from RoomFlow.</p>
+      <div class="profile-line"><span>Full Name</span><span id="profileName">Loading...</span></div>
+      <div class="profile-line"><span>Email</span><span id="profileEmail">Loading...</span></div>
+      <div class="profile-line"><span>Account Role</span><span id="profileRole">—</span></div>
+      <div class="profile-line"><span>Email Verification</span><span id="verificationStatus">Checking...</span></div>
+      <div class="settings-actions">
+        <button class="settings-btn secondary-btn" id="verifyBtn" type="button">Resend Verification Email</button>
+      </div>
+      <div class="status-msg" id="profileMessage" role="status"></div>
+    </section>
+
+    <section class="settings-card">
+      <h2>Preferences</h2>
+      <p>Choose how RoomFlow should look on this device.</p>
+      <div class="settings-grid">
+        <div class="field">
+          <label for="themeSelect">Appearance</label>
+          <select id="themeSelect">
+            <option value="light">Light Mode</option>
+            <option value="dark">Dark Mode</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="currencySelect">Currency Display</label>
+          <select id="currencySelect">
+            <option value="INR">Indian Rupee (₹)</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="settings-btn primary-btn" id="savePreferences" type="button">Save Preferences</button>
+      </div>
+      <div class="status-msg" id="preferencesMessage" role="status"></div>
+    </section>
+
+    <section class="settings-card">
+      <h2>Security</h2>
+      <p>Keep your account secure.</p>
+      <div class="settings-actions">
+        <button class="settings-btn secondary-btn" id="resetPasswordBtn" type="button">Send Password Reset Email</button>
+        <button class="settings-btn danger-btn" id="logoutBtn" type="button">Log Out</button>
+      </div>
+      <div class="status-msg" id="securityMessage" role="status"></div>
+    </section>
+
+    <footer style="text-align:center;color:#64748b;font-size:13px;padding:16px">
+      RoomFlow · Powered by Jatav Industries
+    </footer>
+  </main>
+
+  <script type="module">
+    import { initializeApp, getApps, getApp }
+      from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged, sendEmailVerification,
+      sendPasswordResetEmail,
