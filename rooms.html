@@ -1,0 +1,438 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Manager | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-wrap{max-width:1200px;margin:auto;padding:24px}
+    .page-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+    .page-head h1{margin:0 0 6px}
+    .muted{opacity:.7;font-size:14px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
+    .stat,.panel{border:1px solid var(--border-color,#ddd);border-radius:14px;padding:18px;background:var(--card-bg,#fff)}
+    .stat strong{display:block;font-size:25px;margin-top:8px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    input,select,textarea{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit}
+    .toolbar input{flex:1;min-width:200px}
+    .toolbar select{width:auto;min-width:150px}
+    button,.btn{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font:inherit}
+    .primary{background:#2563eb;color:white}
+    .secondary{background:#e5e7eb;color:#111827}
+    .danger{background:#fee2e2;color:#991b1b}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;min-width:780px}
+    th,td{padding:13px 10px;border-bottom:1px solid var(--border-color,#ddd);text-align:left;vertical-align:middle}
+    th{font-size:13px;opacity:.7}
+    .status{display:inline-block;border-radius:30px;padding:5px 9px;font-size:12px;font-weight:600}
+    .available{background:#dcfce7;color:#166534}
+    .occupied{background:#dbeafe;color:#1d4ed8}
+    .maintenance{background:#fef3c7;color:#92400e}
+    .inactive{background:#e5e7eb;color:#374151}
+    .actions{display:flex;gap:6px}
+    .actions button{padding:7px 9px;font-size:13px}
+    .empty{text-align:center;padding:35px 12px;opacity:.7}
+    .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:16px;z-index:999}
+    .modal.open{display:flex}
+    .modal-card{width:min(650px,100%);max-height:90vh;overflow:auto;background:var(--card-bg,#fff);color:var(--text-color,inherit);border-radius:16px;padding:22px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .field label{display:block;font-size:13px;margin-bottom:6px;font-weight:600}
+    .field.full{grid-column:1/-1}
+    .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+    #notice{margin-bottom:15px}
+    .error{color:#b91c1c}
+    .success{color:#15803d}
+    @media(max-width:800px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.page-wrap{padding:14px}}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.page-head button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="page-wrap">
+    <header class="page-head">
+      <div>
+        <p class="muted">ROOMFLOW / MANAGEMENT</p>
+        <h1>Room Manager</h1>
+        <p class="muted">Manage rooms, rent amounts and occupancy.</p>
+      </div>
+      <button class="primary" id="addBtn">+ Add Room</button>
+    </header>
+
+    <div id="notice" role="status" aria-live="polite"></div>
+
+    <section class="stats">
+      <div class="stat"><span class="muted">Total Rooms</span><strong id="totalRooms">0</strong></div>
+      <div class="stat"><span class="muted">Available</span><strong id="availableRooms">0</strong></div>
+      <div class="stat"><span class="muted">Occupied</span><strong id="occupiedRooms">0</strong></div>
+      <div class="stat"><span class="muted">Monthly Rent Total</span><strong id="rentTotal">₹0</strong></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search room, property or tenant...">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="Available">Available</option>
+          <option value="Occupied">Occupied</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <select id="typeFilter" aria-label="Filter by room type">
+          <option value="">All room types</option>
+          <option value="Single">Single</option>
+          <option value="Shared">Shared</option>
+          <option value="Studio">Studio</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Room</th>
+              <th>Property</th>
+              <th>Type</th>
+              <th>Monthly Rent</th>
+              <th>Occupant</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="roomsBody">
+            <tr><td colspan="7" class="empty">Connecting to Firebase...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" id="recordCount"></p>
+    </section>
+  </main>
+
+  <div class="modal" id="roomModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h2 id="modalTitle">Add Room</h2>
+      <p class="muted">Enter the room details below.</p>
+      <form id="roomForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="roomName">Room name / number *</label>
+            <input id="roomName" maxlength="80" required placeholder="e.g. Room 101">
+          </div>
+          <div class="field">
+            <label for="propertyId">Property</label>
+            <select id="propertyId">
+              <option value="">No property selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="roomType">Room type *</label>
+            <select id="roomType" required>
+              <option value="Single">Single</option>
+              <option value="Shared">Shared</option>
+              <option value="Studio">Studio</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="roomRent">Monthly rent (₹) *</label>
+            <input id="roomRent" type="number" min="0" max="100000000" step="0.01" required placeholder="5000">
+          </div>
+          <div class="field">
+            <label for="roomStatus">Status *</label>
+            <select id="roomStatus" required>
+              <option value="Available">Available</option>
+              <option value="Occupied">Occupied</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="occupantName">Occupant / tenant name</label>
+            <input id="occupantName" maxlength="100" placeholder="Tenant name (optional)">
+          </div>
+          <div class="field">
+            <label for="roomFloor">Floor</label>
+            <input id="roomFloor" maxlength="40" placeholder="e.g. First floor">
+          </div>
+          <div class="field">
+            <label for="roomSize">Room size</label>
+            <input id="roomSize" maxlength="40" placeholder="e.g. 12 x 10 ft">
+          </div>
+          <div class="field full">
+            <label for="roomNotes">Notes</label>
+            <textarea id="roomNotes" rows="3" maxlength="1000" placeholder="Optional details"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+          <button type="submit" class="primary" id="saveBtn">Save Room</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc,
+      doc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-Dr_K_ulN3fUYtq2c85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const $ = id => document.getElementById(id);
+    const body = $("roomsBody");
+    const modal = $("roomModal");
+    let currentUser = null;
+    let rooms = [];
+    let properties = [];
+    let editingId = null;
+    let saving = false;
+
+    const money = amount => new Intl.NumberFormat("en-IN", {
+      style: "currency", currency: "INR", maximumFractionDigits: 2
+    }).format(Number(amount || 0));
+
+    function showNotice(message, type = "success") {
+      $("notice").className = type;
+      $("notice").textContent = message;
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function userCollection(name) {
+      return collection(db, "users", currentUser.uid, name);
+    }
+
+    function propertyName(id) {
+      return properties.find(p => p.id === id)?.name || (id ? "Property unavailable" : "—");
+    }
+
+    function statusClass(status) {
+      return ({
+        Available: "available",
+        Occupied: "occupied",
+        Maintenance: "maintenance",
+        Inactive: "inactive"
+      })[status] || "inactive";
+    }
+
+    async function loadProperties() {
+      const snap = await getDocs(userCollection("properties"));
+      properties = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const select = $("propertyId");
+      select.innerHTML = '<option value="">No property selected</option>' +
+        properties.map(p => `<option value="${escapeHTML(p.id)}">${escapeHTML(p.name || p.propertyName || "Unnamed property")}</option>`).join("");
+    }
+
+    async function loadRooms() {
+      body.innerHTML = '<tr><td colspan="7" class="empty">Loading rooms...</td></tr>';
+      try {
+        const snap = await getDocs(userCollection("rooms"));
+        rooms = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render();
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<tr><td colspan="7" class="empty">Could not load rooms.</td></tr>';
+        showNotice("Rooms load nahi hue. Firestore rules aur internet connection check karein.", "error");
+      }
+    }
+
+    function render() {
+      const search = $("searchInput").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const type = $("typeFilter").value;
+
+      const filtered = rooms.filter(room => {
+        const haystack = [
+          room.name, room.propertyName, propertyName(room.propertyId),
+          room.occupantName, room.type, room.floor
+        ].join(" ").toLowerCase();
+
+        return (!search || haystack.includes(search)) &&
+          (!status || room.status === status) &&
+          (!type || room.type === type);
+      });
+
+      $("totalRooms").textContent = rooms.filter(r => r.status !== "Inactive").length;
+      $("availableRooms").textContent = rooms.filter(r => r.status === "Available").length;
+      $("occupiedRooms").textContent = rooms.filter(r => r.status === "Occupied").length;
+      $("rentTotal").textContent = money(rooms.filter(r => r.status === "Occupied").reduce((sum, r) => sum + Number(r.rent || 0), 0));
+      $("recordCount").textContent = `Showing ${filtered.length} of ${rooms.length} rooms`;
+
+      if (!filtered.length) {
+        body.innerHTML = `<tr><td colspan="7" class="empty">${rooms.length ? "No rooms match your filters." : "No rooms added yet. Click “Add Room” to get started."}</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = filtered.map(room => `
+        <tr>
+          <td><strong>${escapeHTML(room.name || "Unnamed room")}</strong><br><span class="muted">${escapeHTML(room.floor || "")}</span></td>
+          <td>${escapeHTML(propertyName(room.propertyId))}</td>
+          <td>${escapeHTML(room.type || "Other")}</td>
+          <td>${money(room.rent)}</td>
+          <td>${escapeHTML(room.occupantName || "—")}</td>
+          <td><span class="status ${statusClass(room.status)}">${escapeHTML(room.status || "Inactive")}</span></td>
+          <td><div class="actions">
+            <button class="secondary" data-action="edit" data-id="${escapeHTML(room.id)}">Edit</button>
+            <button class="danger" data-action="delete" data-id="${escapeHTML(room.id)}">Delete</button>
+          </div></td>
+        </tr>
+      `).join("");
+    }
+
+    function openModal(room = null) {
+      editingId = room?.id || null;
+      $("modalTitle").textContent = room ? "Edit Room" : "Add Room";
+      $("saveBtn").textContent = room ? "Update Room" : "Save Room";
+      $("roomName").value = room?.name || "";
+      $("propertyId").value = room?.propertyId || "";
+      $("roomType").value = room?.type || "Single";
+      $("roomRent").value = room?.rent ?? "";
+      $("roomStatus").value = room?.status || "Available";
+      $("occupantName").value = room?.occupantName || "";
+      $("roomFloor").value = room?.floor || "";
+      $("roomSize").value = room?.size || "";
+      $("roomNotes").value = room?.notes || "";
+      modal.classList.add("open");
+      $("roomName").focus();
+    }
+
+    function closeModal() {
+      modal.classList.remove("open");
+      editingId = null;
+      $("roomForm").reset();
+    }
+
+    $("addBtn").addEventListener("click", () => openModal());
+    $("cancelBtn").addEventListener("click", closeModal);
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    $("searchInput").addEventListener("input", render);
+    $("statusFilter").addEventListener("change", render);
+    $("typeFilter").addEventListener("change", render);
+
+    body.addEventListener("click", async e => {
+      const button = e.target.closest("button[data-action]");
+      if (!button) return;
+      const room = rooms.find(r => r.id === button.dataset.id);
+      if (!room) return;
+
+      if (button.dataset.action === "edit") {
+        openModal(room);
+        return;
+      }
+
+      if (button.dataset.action === "delete") {
+        if (!confirm(`Delete "${room.name || "this room"}"? This cannot be undone.`)) return;
+        button.disabled = true;
+        try {
+          await deleteDoc(doc(db, "users", currentUser.uid, "rooms", room.id));
+          rooms = rooms.filter(r => r.id !== room.id);
+          render();
+          showNotice("Room deleted successfully.");
+        } catch (error) {
+          console.error(error);
+          showNotice("Room delete nahi hua. Firestore rules check karein.", "error");
+          button.disabled = false;
+        }
+      }
+    });
+
+    $("roomForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (saving) return;
+
+      const name = $("roomName").value.trim();
+      const rent = Number($("roomRent").value);
+      const propertyId = $("propertyId").value;
+
+      if (!name) {
+        showNotice("Room name/number enter karein.", "error");
+        return;
+      }
+      if (!Number.isFinite(rent) || rent < 0 || rent > 100000000) {
+        showNotice("Valid monthly rent enter karein.", "error");
+        return;
+      }
+
+      const selectedProperty = properties.find(p => p.id === propertyId);
+      const data = {
+        name,
+        propertyId: propertyId || "",
+        propertyName: selectedProperty?.name || selectedProperty?.propertyName || "",
+        type: $("roomType").value,
+        rent,
+        status: $("roomStatus").value,
+        occupantName: $("occupantName").value.trim(),
+        floor: $("roomFloor").value.trim(),
+        size: $("roomSize").value.trim(),
+        notes: $("roomNotes").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+
+      saving = true;
+      $("saveBtn").disabled = true;
+
+      try {
+        if (editingId) {
+          await updateDoc(doc(db, "users", currentUser.uid, "rooms", editingId), data);
+          showNotice("Room updated successfully.");
+        } else {
+          data.createdAt = serverTimestamp();
+          await addDoc(userCollection("rooms"), data);
+          showNotice("Room added successfully.");
+        }
+        closeModal();
+        await loadRooms();
+      } catch (error) {
+        console.error(error);
+        showNotice("Save nahi hua. Firestore rules aur connection check karein.", "error");
+      } finally {
+        saving = false;
+        $("saveBtn").disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      try {
+        await loadProperties();
+        await loadRooms();
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<tr><td colspan="7" class="empty">Could not connect to Firebase.</td></tr>';
+        showNotice("Firebase connection ya Firestore rules check karein.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
+```
