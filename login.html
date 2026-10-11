@@ -1,1 +1,103 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | RoomFlow</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Arial,sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+      color:#172033
+    }
+    .card{
+      width:100%;max-width:430px;background:white;
+      padding:34px;border-radius:20px;
+      box-shadow:0 15px 50px #1e293b14
+    }
+    .logo{font-size:27px;font-weight:800;color:#2563eb;text-align:center}
+    .tag{text-align:center;color:#64748b;margin:8px 0 28px;font-size:14px}
+    h1{font-size:25px;margin-bottom:8px}
+    .sub{color:#64748b;font-size:14px;margin-bottom:24px}
+    label{display:block;font-size:14px;font-weight:600;margin:17px 0 8px}
+    input{
+      width:100%;padding:13px;border:1px solid #dbe2ea;
+      border-radius:10px;font-size:15px;outline:none
+    }
+    input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb18}
+    .row{display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+    .row a,.bottom a{color:#2563eb;text-decoration:none;font-size:13px;font-weight:600}
+    button{
+      width:100%;padding:14px;border:0;border-radius:10px;
+      background:#2563eb;color:white;font-weight:700;font-size:16px;
+      cursor:pointer;margin-top:10px
+    }
+    button:hover{background:#1d4ed8}
+    .message{font-size:14px;margin-top:16px;line-height:1.5}
+    .bottom{text-align:center;margin-top:24px;font-size:14px;color:#64748b}
+    .back{display:block;text-align:center;margin-top:22px;color:#64748b;text-decoration:none;font-size:13px}
+    @media(max-width:420px){.card{padding:25px 20px}}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">RoomFlow</div>
+    <p class="tag">Powered by Jatav Industries</p>
+
+    <h1>Welcome back 👋</h1>
+    <p class="sub">Log in to manage your rent and property.</p>
+
+    <form id="loginForm">
+      <label for="email">Email address</label>
+      <input id="email" type="email" placeholder="you@example.com"
+             autocomplete="email" required>
+
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter your password"
+             autocomplete="current-password" required>
+
+      <div class="row">
+        <span></span>
+        <a href="#" id="forgotLink">Forgot password?</a>
+      </div>
+
+      <button type="submit" id="loginButton">Log in</button>
+      <p id="message" class="message" role="status"></p>
+    </form>
+
+    <p class="bottom">
+      Don't have an account? <a href="signup.html">Create account</a>
+    </p>
+    <a class="back" href="home.html">← Back to Home</a>
+  </main>
+
+  <!-- Firebase connection will be added in the next step. -->
+  <script type="module">
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+    const button = document.getElementById("loginButton");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      message.style.color = "#b45309";
+      message.textContent =
+        "Login is not connected yet. Firebase Authentication setup is the next step.";
+    });
+
+    document.getElementById("forgotLink").addEventListener("click", function(event) {
+      event.preventDefault();
+      message.style.color = "#b45309";
+      message.textContent =
+        "Password reset will work after Firebase Authentication is connected.";
+    });
+  </script>
+</body>
+</html>
