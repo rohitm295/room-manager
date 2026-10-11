@@ -1,1 +1,358 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | RoomFlow</title>
+  <meta name="theme-color" content="#2563eb">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      color: #172033;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 15px 50px #1e293b14;
+    }
+
+    .logo {
+      text-align: center;
+      color: #2563eb;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .brand {
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      margin: 7px 0 25px;
+    }
+
+    h1 { font-size: 26px; margin-bottom: 8px; }
+    .intro { color: #64748b; font-size: 14px; line-height: 1.5; margin-bottom: 22px; }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 16px 0 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px #2563eb18;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0 20px;
+    }
+
+    .role {
+      border: 1px solid #dbe2ea;
+      border-radius: 12px;
+      padding: 15px 10px;
+      cursor: pointer;
+      text-align: center;
+      background: #fff;
+    }
+
+    .role:has(input:checked) {
+      border: 2px solid #2563eb;
+      background: #eff6ff;
+      padding: 14px 9px;
+    }
+
+    .role input { width: auto; margin-right: 5px; }
+    .role strong { display: block; margin-top: 8px; font-size: 14px; }
+    .role small { display: block; margin-top: 6px; color: #64748b; line-height: 1.4; }
+
+    .terms {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin: 19px 0;
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .terms input { width: auto; margin-top: 3px; }
+    .terms label { margin: 0; font-weight: normal; }
+
+    a { color: #2563eb; text-decoration: none; }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1d4ed8; }
+    button:disabled { opacity: .65; cursor: wait; }
+
+    .message {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .bottom {
+      text-align: center;
+      margin-top: 23px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 25px 19px; }
+      h1 { font-size: 23px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <div class="logo">RoomFlow</div>
+    <p class="brand">Powered by Jatav Industries</p>
+
+    <h1>Create your account ✨</h1>
+    <p class="intro">
+      Manage rent, payments and property details from one place.
+    </p>
+
+    <form id="signupForm">
+      <label>Choose your account type</label>
+
+      <div class="roles">
+        <label class="role">
+          <input type="radio" name="role" value="tenant" required>
+          <strong>🏠 Tenant</strong>
+          <small>View your rent, bills and payments</small>
+        </label>
+
+        <label class="role">
+          <input type="radio" name="role" value="landlord" required>
+          <strong>🏢 Landlord</strong>
+          <small>Manage properties and tenants</small>
+        </label>
+      </div>
+
+      <label for="fullName">Full name</label>
+      <input id="fullName" type="text" placeholder="Enter your full name"
+             autocomplete="name" maxlength="100" required>
+
+      <label for="email">Email address</label>
+      <input id="email" type="email" placeholder="you@example.com"
+             autocomplete="email" required>
+
+      <label for="password">Create password</label>
+      <input id="password" type="password"
+             placeholder="At least 6 characters"
+             autocomplete="new-password" minlength="6" required>
+
+      <label for="confirmPassword">Confirm password</label>
+      <input id="confirmPassword" type="password"
+             placeholder="Enter password again"
+             autocomplete="new-password" minlength="6" required>
+
+      <div class="terms">
+        <input id="terms" type="checkbox" required>
+        <label for="terms">
+          I agree to the RoomFlow terms of use and privacy policy.
+        </label>
+      </div>
+
+      <button id="signupButton" type="submit">Create Account</button>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="bottom">
+      Already have an account? <a href="login.html">Log in</a>
+    </p>
+
+    <a class="back" href="home.html">← Back to Home</a>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      sendEmailVerification
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("signupForm");
+    const message = document.getElementById("message");
+    const button = document.getElementById("signupButton");
+
+    function showMessage(text, success = false) {
+      message.textContent = text;
+      message.style.color = success ? "#15803d" : "#b91c1c";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const fullName = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword =
+        document.getElementById("confirmPassword").value;
+      const role = form.querySelector('input[name="role"]:checked')?.value;
+
+      if (!role) {
+        showMessage("Please select Tenant or Landlord.");
+        return;
+      }
+
+      if (fullName.length < 2) {
+        showMessage("Please enter your full name.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("Passwords do not match.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("Password must contain at least 6 characters.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Creating account...";
+      showMessage("");
+
+      let credential = null;
+
+      try {
+        credential = await createUserWithEmailAndPassword(
+          auth, email, password
+        );
+
+        await updateProfile(credential.user, {
+          displayName: fullName
+        });
+
+        await setDoc(doc(db, "users", credential.user.uid), {
+          uid: credential.user.uid,
+          fullName,
+          email,
+          role,
+          createdAt: serverTimestamp(),
+          emailVerified: false
+        });
+
+        await sendEmailVerification(credential.user);
+
+        showMessage(
+          "Account created! Check your email for the verification link. " +
+          "Please verify your email before using RoomFlow.",
+          true
+        );
+
+        form.reset();
+      } catch (error) {
+        const messages = {
+          "auth/email-already-in-use":
+            "This email is already registered. Please log in.",
+          "auth/invalid-email":
+            "Please enter a valid email address.",
+          "auth/weak-password":
+            "Please choose a stronger password.",
+          "auth/network-request-failed":
+            "Network error. Check your internet connection.",
+          "permission-denied":
+            "Database permission denied. Firestore security rules need checking."
+        };
+
+        if (credential?.user) {
+          showMessage(
+            "Your authentication account may have been created, " +
+            "but profile setup failed. Please don't register repeatedly. " +
+            "Check Firestore rules or contact support."
+          );
+        } else {
+          showMessage(
+            messages[error.code] ||
+            "Could not create your account. Error: " + error.code
+          );
+        }
+      } finally {
+        button.disabled = false;
+        button.textContent = "Create Account";
+      }
+    });
+  </script>
+</body>
+</html>
+
