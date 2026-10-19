@@ -199,3 +199,27 @@
   </script>
 </body>
 </html>
+import { getFirestore, doc, getDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const db = getFirestore(app);
+
+async function openRoleDashboard(user) {
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    alert("Your account profile is not set up yet.");
+    return;
+  }
+
+  const role = userSnap.data().role;
+
+  if (role === "landlord") {
+    window.location.href = "dashboard.html";
+  } else if (role === "tenant") {
+    window.location.href = "tenant-dashboard.html";
+  } else {
+    alert("Your account role is not configured.");
+  }
+}
