@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,15 +46,193 @@
     .success{color:#15803d}
     @media(max-width:800px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.page-wrap{padding:14px}}
     @media(max-width:520px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.page-head button{width:100%}}
+    /* Match the RoomFlow dashboard */
+body {
+  margin: 0;
+  background: #f6f8fc;
+  color: #0f172a;
+}
+
+.app-main {
+  min-width: 0;
+}
+
+.page-wrap {
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 30px;
+}
+
+.page-head {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.page-head h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.page-head .muted {
+  color: #64748b;
+  opacity: 1;
+}
+
+.page-head > div > p:first-child {
+  color: #6366f1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.primary {
+  background: #4f46e5;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: #4338ca;
+}
+
+.stats {
+  gap: 18px;
+}
+
+.stat {
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
+}
+
+.stat .muted {
+  color: #64748b;
+  opacity: 1;
+}
+
+.stat strong {
+  font-size: 28px;
+  margin-top: 14px;
+  color: #0f172a;
+}
+
+.panel {
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
+}
+
+input,
+select,
+textarea {
+  border-color: #dbe2ea;
+  border-radius: 10px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+th {
+  color: #64748b;
+  opacity: 1;
+}
+
+th,
+td {
+  border-bottom-color: #e2e8f0;
+}
+
+#recordCount {
+  margin-top: 18px;
+}
+
+@media (max-width: 800px) {
+  .page-wrap {
+    padding: 16px;
+  }
+
+  .page-head,
+  .panel {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .stats {
+    gap: 10px;
+  }
+
+  .stat {
+    padding: 16px;
+  }
+
+  .stat strong {
+    font-size: 23px;
+  }
+
+  .toolbar input,
+  .toolbar select {
+    width: 100%;
+    min-width: 0;
+    flex: auto;
+  }
+}
   </style>
 </head>
 <body>
-  <main class="page-wrap">
-    <header class="page-head">
-      <div>
-        <p class="muted">ROOMFLOW / MANAGEMENT</p>
-        <h1>Room Manager</h1>
-        <p class="muted">Manage rooms, rent amounts and occupancy.</p>
+  <div class="app-layout">
+  <aside class="sidebar">
+    <a href="dashboard.html" class="brand">
+      <span class="brand-mark">R</span>
+      RoomFlow
+    </a>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html" class="active" aria-current="page">
+        ▣ Rooms
+      </a>
+      <a href="tenants.html">♙ Tenants</a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="dashboard.html" class="btn btn-outline btn-block">
+        ← Dashboard
+      </a>
+      <p style="color:#94a3b8;font-size:11px;
+                text-align:center;margin-top:16px">
+        RoomFlow · Jatav Industries
+      </p>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="page-wrap">
       </div>
       <button class="primary" id="addBtn">+ Add Room</button>
     </header>
@@ -432,7 +610,6 @@
         showNotice("Firebase connection ya Firestore rules check karein.", "error");
       }
     });
-  </script>
-</body>
-</html>
-```
+      </div>
+  </main>
+</div>
