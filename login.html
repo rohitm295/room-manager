@@ -1,47 +1,156 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | RoomFlow</title>
+
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:Arial,sans-serif;min-height:100vh;
-      display:flex;align-items:center;justify-content:center;
-      padding:20px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);
-      color:#172033
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    .card{
-      width:100%;max-width:430px;background:white;padding:34px;
-      border-radius:20px;box-shadow:0 15px 50px #1e293b14
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      color: #172033;
     }
-    .logo{font-size:27px;font-weight:800;color:#2563eb;text-align:center}
-    .tag{text-align:center;color:#64748b;margin:8px 0 28px;font-size:14px}
-    h1{font-size:25px;margin-bottom:8px}
-    .sub{color:#64748b;font-size:14px;margin-bottom:24px}
-    label{display:block;font-size:14px;font-weight:600;margin:17px 0 8px}
-    input{
-      width:100%;padding:13px;border:1px solid #dbe2ea;
-      border-radius:10px;font-size:15px;outline:none
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      padding: 34px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px #1e293b14;
     }
-    input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb18}
-    .row{display:flex;justify-content:flex-end;align-items:center;margin:16px 0}
-    .row a,.bottom a{color:#2563eb;text-decoration:none;font-size:13px;font-weight:600}
-    button{
-      width:100%;padding:14px;border:0;border-radius:10px;
-      background:#2563eb;color:white;font-weight:700;font-size:16px;
-      cursor:pointer;margin-top:10px
+
+    .logo {
+      font-size: 27px;
+      font-weight: 800;
+      color: #2563eb;
+      text-align: center;
     }
-    button:hover{background:#1d4ed8}
-    button:disabled{opacity:.65;cursor:wait}
-    .message{font-size:14px;margin-top:16px;line-height:1.5;overflow-wrap:anywhere}
-    .bottom{text-align:center;margin-top:24px;font-size:14px;color:#64748b}
-    .back{display:block;text-align:center;margin-top:22px;color:#64748b;text-decoration:none;font-size:13px}
-    @media(max-width:420px){.card{padding:25px 20px}}
+
+    .tag {
+      text-align: center;
+      color: #64748b;
+      margin: 8px 0 28px;
+      font-size: 14px;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin: 17px 0 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px #2563eb18;
+    }
+
+    .row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    .row a,
+    .bottom a {
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .message {
+      font-size: 14px;
+      margin-top: 16px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .message:empty {
+      display: none;
+    }
+
+    .bottom {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 22px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    @media (max-width: 420px) {
+      .card {
+        padding: 25px 20px;
+      }
+    }
   </style>
 </head>
+
 <body>
   <main class="card">
     <div class="logo">RoomFlow</div>
@@ -52,24 +161,44 @@
 
     <form id="loginForm">
       <label for="email">Email address</label>
-      <input id="email" type="email" placeholder="you@example.com"
-             autocomplete="username" required>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        placeholder="you@example.com"
+        autocomplete="username"
+        required
+      >
 
       <label for="password">Password</label>
-      <input id="password" type="password" placeholder="Enter your password"
-             autocomplete="current-password" required>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
 
       <div class="row">
         <a href="#" id="forgotLink">Forgot password?</a>
       </div>
 
       <button type="submit" id="loginButton">Log in</button>
-      <p id="message" class="message" role="status" aria-live="polite"></p>
+
+      <p
+        id="message"
+        class="message"
+        role="status"
+        aria-live="polite"
+      ></p>
     </form>
 
     <p class="bottom">
-      Don't have an account? <a href="signup.html">Create account</a>
+      Don't have an account?
+      <a href="signup.html">Create account</a>
     </p>
+
     <a class="back" href="home.html">← Back to Home</a>
   </main>
 
@@ -78,13 +207,14 @@
       "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
     import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    
+      getAuth,
+      setPersistence,
+      browserLocalPersistence,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail
+    } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
       authDomain: "roomflow-6c920.firebaseapp.com",
@@ -105,6 +235,8 @@
     const button = document.getElementById("loginButton");
     const forgotLink = document.getElementById("forgotLink");
 
+    let busy = false;
+
     function showMessage(text, success = false) {
       message.style.color = success ? "#15803d" : "#b91c1c";
       message.textContent = text;
@@ -114,23 +246,36 @@
       switch (error.code) {
         case "auth/invalid-email":
           return "Please enter a valid email address.";
+
+        case "auth/missing-password":
+          return "Please enter your password.";
+
         case "auth/invalid-credential":
         case "auth/wrong-password":
         case "auth/user-not-found":
           return "Email or password is incorrect.";
+
         case "auth/user-disabled":
           return "This account has been disabled.";
+
         case "auth/too-many-requests":
           return "Too many attempts. Please wait and try again later.";
+
         case "auth/network-request-failed":
           return "Network error. Check your internet connection.";
+
         case "auth/operation-not-allowed":
           return "Email/password login is not enabled in Firebase.";
+
         case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
         case "auth/invalid-api-key":
-          return "Firebase API key is not accepted. Check the Firebase Web App configuration and API key restrictions.";
+          return "Firebase API key is not accepted. Check your Firebase configuration.";
+
+        case "auth/web-storage-unsupported":
+          return "Browser storage is unavailable. Allow site storage and try again.";
+
         default:
-          return "Login failed. Please try again. (" +
+          return "Request failed. Please try again. (" +
             (error.code || "unknown-error") + ")";
       }
     }
@@ -138,9 +283,13 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
+      if (busy) return;
+      if (!form.reportValidity()) return;
+
       const email = emailInput.value.trim();
       const password = passwordInput.value;
 
+      busy = true;
       button.disabled = true;
       button.textContent = "Logging in...";
       showMessage("");
@@ -148,27 +297,32 @@
       try {
         await setPersistence(auth, browserLocalPersistence);
 
-await signInWithEmailAndPassword(
-  auth, email, password
-);
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
         );
 
-       
+        showMessage(
+          "Login successful! Opening your dashboard...",
+          true
+        );
 
-        showMessage("Login successful! Opening your dashboard...", true);
         window.location.replace("dashboard.html");
-
       } catch (error) {
         console.error("RoomFlow login error:", error);
         showMessage(readableError(error));
       } finally {
+        busy = false;
         button.disabled = false;
         button.textContent = "Log in";
-      
+      }
     });
 
     forgotLink.addEventListener("click", async (event) => {
       event.preventDefault();
+
+      if (busy) return;
 
       const email = emailInput.value.trim();
 
@@ -178,11 +332,17 @@ await signInWithEmailAndPassword(
         return;
       }
 
-      forgotLink.style.pointerEvents = "none";
+      if (!emailInput.reportValidity()) return;
+
+      busy = true;
+      button.disabled = true;
+      forgotLink.setAttribute("aria-disabled", "true");
+
       showMessage("Sending password reset email...");
 
       try {
         await sendPasswordResetEmail(auth, email);
+
         showMessage(
           "If this email belongs to an account, a password reset email has been requested. Check your inbox and spam folder.",
           true
@@ -191,9 +351,11 @@ await signInWithEmailAndPassword(
         console.error("RoomFlow password reset error:", error);
         showMessage(readableError(error));
       } finally {
-        forgotLink.style.pointerEvents = "auto";
-      
-    })
+        busy = false;
+        button.disabled = false;
+        forgotLink.removeAttribute("aria-disabled");
+      }
+    });
   </script>
 </body>
 </html>
