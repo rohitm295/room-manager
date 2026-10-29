@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile | RoomFlow</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .profile-card {
+      max-width: 680px;
+      padding: 28px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+    }
+    .profile-card dl { margin-top: 24px; }
+    .profile-card dt {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 22px;
+    }
+    .profile-card dd {
+      margin: 6px 0 0;
+      color: #0f172a;
+      font-size: 17px;
+      overflow-wrap: anywhere;
+    }
+    #message { color: #b91c1c; margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="brand-mark">R</span> RoomFlow
+      </a>
+
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <a href="dashboard.html">▦ Dashboard</a>
+        <a href="rent.html">₹ Rent Manager</a>
+        <a href="electricity.html">⚡ Electricity</a>
+        <a href="payments.html">▤ Payments</a>
+        <a href="profile.html" class="active"
+           aria-current="page">♙ My Profile</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button id="logoutButton" type="button"
+                class="btn btn-outline btn-block">Log out</button>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <h1>My Profile</h1>
+          <p class="muted">Your RoomFlow account details</p>
+        </div>
+        <a href="dashboard.html" class="btn btn-outline">
+          Back to Dashboard
+        </a>
+      </header>
+
+      <div class="app-content">
+        <p id="message" role="status" aria-live="polite"></p>
+
+        <section class="profile-card">
+          <h2>Account details</h2>
+          <dl>
+            <dt>Full name</dt>
+            <dd id="fullName">Loading…</dd>
+
+            <dt>Email address</dt>
+            <dd id="email">—</dd>
+
+            <dt>Account type</dt>
+            <dd id="role">—</dd>
+
+            <dt>Email verification</dt>
+            <dd id="verification">—</dd>
+
+            <dt>Account created</dt>
+            <dd id="created">—</dd>
+          </dl>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const message = document.getElementById("message");
+    const show = (id, value) => {
+      document.getElementById(id).textContent = value;
+    };
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        location.replace("login.html");
+        return;
+      }
+
+      show("email", user.email || "No email");
+      show("verification", user.emailVerified ? "Verified" : "Not verified");
+
+      const created = new Date(user.metadata.creationTime);
+      show("created", Number.isNaN(created.getTime())
+        ? "—"
+        : created.toLocaleDateString("en-IN"));
+
+      try {
+        const snapshot = await getDoc(doc(db, "users", user.uid));
+
+        if (!snapshot.exists()) {
+          show("fullName", user.displayName || "RoomFlow User");
+          message.textContent =
+            "Your account profile is missing. Please contact support.";
+          return;
+        }
+
+        const profile = snapshot.data();
+        show("fullName",
+          profile.fullName || user.displayName || "RoomFlow User");
+
+        const role = profile.role;
+        show("role", role === "landlord" || role === "tenant"
+          ? role.charAt(0).toUpperCase() + role.slice(1)
+          : "Role not configured");
+      } catch (error) {
+        console.error(error);
+        show("fullName", "Profile unavailable");
+        message.textContent =
+          "Could not load your profile. Check your connection and permissions.";
+      }
+    });
+
+    document.getElementById("logoutButton").onclick = async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+
+      try {
+        await signOut(auth);
+        location.replace("login.html");
+      } catch (error) {
+        console.error(error);
+        message.textContent = "Logout failed. Please try again.";
+        button.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
