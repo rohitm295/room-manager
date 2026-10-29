@@ -146,8 +146,11 @@
       showMessage("");
 
       try {
-        const result = await signInWithEmailAndPassword(
-          auth, email, password
+        await setPersistence(auth, browserLocalPersistence);
+
+await signInWithEmailAndPassword(
+  auth, email, password
+);
         );
 
        
