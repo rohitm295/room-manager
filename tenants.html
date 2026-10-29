@@ -944,5 +944,543 @@
     shell.append(sidebar, main);
   })();
 </script>
+  <style>
+  /* Dashboard sidebar */
+  .rf-tenant-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .rf-tenant-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    height: 100vh;
+    padding: 26px 18px;
+    box-sizing: border-box;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .rf-tenant-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 6px 32px;
+    color: white;
+    font-size: 25px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .rf-tenant-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+    color: white;
+  }
+
+  .rf-tenant-nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rf-tenant-nav a {
+    padding: 15px;
+    border-radius: 11px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .rf-tenant-nav a:hover,
+  .rf-tenant-nav a.active {
+    background: #252c4b;
+    color: white;
+  }
+
+  .rf-tenant-bottom {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .rf-tenant-back {
+    display: block;
+    padding: 13px;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .rf-tenant-bottom p {
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .rf-tenant-shell > .tenant-wrap {
+    width: calc(100% - 268px);
+    min-width: 0;
+    max-width: none;
+    margin: 0 0 0 268px;
+    padding: 0;
+    flex: 1;
+  }
+
+  .rf-tenant-shell .tenant-header {
+    margin: 0;
+    padding: 24px 30px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .rf-tenant-shell .tenant-header .tenant-actions {
+    margin-top: 0;
+  }
+
+  .rf-tenant-shell .tenant-stats {
+    margin: 26px 30px;
+    gap: 18px;
+  }
+
+  /* Only the tenant list remains on the main page */
+  .rf-tenant-shell .tenant-layout {
+    display: block;
+    margin: 0 30px 30px;
+  }
+
+  .rf-tenant-shell .tenant-panel {
+    min-width: 0;
+    padding: 24px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+  }
+
+  .rf-add-tenant {
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .rf-add-tenant:hover {
+    background: #4338ca;
+  }
+
+  /* Tenant form popup */
+  #rfTenantDialog {
+    box-sizing: border-box;
+    width: min(720px, calc(100% - 32px));
+    max-height: 90vh;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 18px;
+    background: white;
+    color: #0f172a;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px #0f172a40;
+  }
+
+  #rfTenantDialog::backdrop {
+    background: #0f172a99;
+  }
+
+  #rfTenantDialog .rf-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  #rfTenantDialog .rf-dialog-head strong {
+    font-size: 18px;
+  }
+
+  #rfTenantDialog .rf-dialog-close {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  #rfTenantDialog > .tenant-panel {
+    padding: 24px;
+    border: 0;
+    background: white;
+  }
+
+  #rfTenantDialog .tenant-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  #rfTenantDialog .rf-field {
+    min-width: 0;
+  }
+
+  #rfTenantDialog .tenant-form label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #rfTenantDialog input:not([type="hidden"]),
+  #rfTenantDialog select,
+  #rfTenantDialog textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: white;
+    color: #0f172a;
+    font: inherit;
+  }
+
+  #rfTenantDialog input:focus,
+  #rfTenantDialog select:focus,
+  #rfTenantDialog textarea:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+
+  #rfTenantDialog .rf-full,
+  #rfTenantDialog .tenant-actions,
+  #rfTenantDialog .tenant-note {
+    grid-column: 1 / -1;
+  }
+
+  #rfTenantDialog .tenant-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  #rfTenantDialog .tenant-btn {
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #rfTenantDialog .tenant-btn.secondary {
+    background: #eef2ff;
+    color: #3730a3;
+  }
+
+  #rfTenantDialog .tenant-btn:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+
+  #rfTenantDialog .tenant-note {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  #rfTenantDialog .rf-dialog-message:empty {
+    display: none;
+  }
+
+  #rfTenantDialog .rf-dialog-message {
+    margin: 16px 24px 0;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+
+  @media (max-width: 1100px) {
+    .rf-tenant-shell .tenant-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 800px) {
+    .rf-tenant-shell {
+      display: block;
+    }
+
+    .rf-tenant-sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 18px;
+    }
+
+    .rf-tenant-brand {
+      margin-bottom: 16px;
+    }
+
+    .rf-tenant-nav {
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .rf-tenant-nav a {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rf-tenant-bottom {
+      display: none;
+    }
+
+    .rf-tenant-shell > .tenant-wrap {
+      width: 100%;
+      margin: 0;
+    }
+
+    .rf-tenant-shell .tenant-header {
+      padding: 20px;
+    }
+
+    .rf-tenant-shell .tenant-stats {
+      margin: 20px 16px;
+    }
+
+    .rf-tenant-shell .tenant-layout {
+      margin: 0 16px 24px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    #rfTenantDialog .tenant-form {
+      grid-template-columns: 1fr;
+    }
+
+    .rf-tenant-shell .tenant-header > .tenant-actions {
+      width: 100%;
+    }
+
+    .rf-add-tenant {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    if (document.getElementById("rfTenantDialog")) return;
+
+    const main = document.querySelector("main.tenant-wrap");
+    const form = document.getElementById("tenantForm");
+    const header = document.querySelector(".tenant-header");
+
+    if (!main || !form || !header) return;
+
+    /* Create sidebar only when it is not already installed. */
+    if (!document.getElementById("rfTenantShell")) {
+      const shell = document.createElement("div");
+      shell.id = "rfTenantShell";
+      shell.className = "rf-tenant-shell";
+
+      const sidebar = document.createElement("aside");
+      sidebar.className = "rf-tenant-sidebar";
+
+      sidebar.innerHTML = `
+        <a href="dashboard.html" class="rf-tenant-brand">
+          <span class="rf-tenant-mark">R</span>
+          RoomFlow
+        </a>
+
+        <nav class="rf-tenant-nav" aria-label="Main navigation">
+          <a href="dashboard.html">▦ Dashboard</a>
+          <a href="properties.html">⌂ Properties</a>
+          <a href="rooms.html">▣ Rooms</a>
+          <a href="tenants.html" class="active" aria-current="page">
+            ♙ Tenants
+          </a>
+          <a href="rent.html">₹ Rent Manager</a>
+          <a href="electricity.html">⚡ Electricity</a>
+          <a href="payments.html">▤ Payments</a>
+          <a href="profile.html">♙ My Profile</a>
+        </nav>
+
+        <div class="rf-tenant-bottom">
+          <a href="dashboard.html" class="rf-tenant-back">
+            ← Dashboard
+          </a>
+          <p>RoomFlow · Jatav Industries</p>
+        </div>
+      `;
+
+      main.parentNode.insertBefore(shell, main);
+      shell.append(sidebar, main);
+    }
+
+    const panel = form.closest(".tenant-panel");
+    if (!panel) return;
+
+    /* Wrap existing labels and fields without replacing their IDs. */
+    Array.from(form.querySelectorAll("label")).forEach(label => {
+      const input = label.nextElementSibling;
+
+      if (!input || !["INPUT", "SELECT", "TEXTAREA"].includes(input.tagName)) {
+        return;
+      }
+
+      const field = document.createElement("div");
+      field.className = "rf-field";
+
+      if (input.tagName === "TEXTAREA") {
+        field.classList.add("rf-full");
+      }
+
+      label.before(field);
+      field.append(label, input);
+    });
+
+    const dialog = document.createElement("dialog");
+    dialog.id = "rfTenantDialog";
+    dialog.setAttribute("aria-labelledby", "formTitle");
+
+    const dialogHead = document.createElement("div");
+    dialogHead.className = "rf-dialog-head";
+    dialogHead.innerHTML = `
+      <strong>Tenant details</strong>
+      <button type="button" class="rf-dialog-close"
+              aria-label="Close tenant form">×</button>
+    `;
+
+    const dialogMessage = document.createElement("p");
+    dialogMessage.className = "rf-dialog-message";
+    dialogMessage.setAttribute("role", "status");
+
+    dialog.append(dialogHead, dialogMessage, panel);
+    document.body.append(dialog);
+
+    let actions = header.querySelector(".tenant-actions");
+
+    if (!actions) {
+      actions = document.createElement("div");
+      actions.className = "tenant-actions";
+      header.append(actions);
+    }
+
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "rf-add-tenant";
+    addButton.textContent = "+ Add Tenant";
+    actions.prepend(addButton);
+
+    const cancelButton = document.getElementById("cancelBtn");
+    const saveButton = document.getElementById("saveBtn");
+
+    function resetExistingForm() {
+      /* Existing Cancel Edit handler resets all form fields. */
+      if (cancelButton) cancelButton.click();
+      else form.reset();
+    }
+
+    function openForm() {
+      dialogMessage.textContent = "";
+
+      if (!dialog.open) dialog.showModal();
+
+      document.getElementById("tenantName")?.focus();
+    }
+
+    function closeForm() {
+      if (saveButton?.disabled) return;
+      dialog.close();
+    }
+
+    addButton.addEventListener("click", () => {
+      resetExistingForm();
+      openForm();
+    });
+
+    dialogHead.querySelector("button").addEventListener("click", closeForm);
+
+    dialog.addEventListener("cancel", event => {
+      if (saveButton?.disabled) event.preventDefault();
+    });
+
+    dialog.addEventListener("close", () => {
+      resetExistingForm();
+    });
+
+    dialog.addEventListener("click", event => {
+      const bounds = dialog.getBoundingClientRect();
+
+      if (
+        event.target === dialog &&
+        (
+          event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom
+        )
+      ) {
+        closeForm();
+      }
+    });
+
+    /* Existing Edit handler fills the form first; then open it. */
+    document.addEventListener("click", event => {
+      if (event.target.closest("#tenantsBody [data-edit]")) {
+        openForm();
+      }
+    });
+
+    /* Show save errors inside the popup; close after successful save. */
+    const message = document.getElementById("tenantMessage");
+
+    if (message) {
+      new MutationObserver(() => {
+        if (!dialog.open) return;
+
+        const text = message.textContent || "";
+
+        if (message.classList.contains("error")) {
+          dialogMessage.textContent = text;
+        } else if (
+          message.classList.contains("success") &&
+          /tenant (added|updated) successfully/i.test(text)
+        ) {
+          dialog.close();
+        }
+      }).observe(message, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+    }
+  })();
+</script>
 </body>
 </html>
