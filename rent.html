@@ -1,106 +1,421 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#4f46e5">
   <title>Rent Manager | RoomFlow</title>
-  <link rel="stylesheet" href="assets/style.css">
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#f5f7fb;color:#172033;font-family:Arial,sans-serif}
-    .page{max-width:1200px;margin:auto;padding:24px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px}
-    .brand{font-size:23px;font-weight:800;color:#2563eb}
-    .nav{display:flex;gap:14px;flex-wrap:wrap}
-    .nav a{color:#2563eb;text-decoration:none;font-weight:600}
-    h1{font-size:28px;margin:0 0 8px}
-    .muted{color:#64748b;font-size:14px;line-height:1.5}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0}
-    .card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px #0f172a08}
-    .stat-label{font-size:14px;color:#64748b}
-    .stat-value{font-size:27px;font-weight:800;margin-top:10px}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .field{display:flex;flex-direction:column;gap:7px}
-    .field label{font-size:14px;font-weight:700}
-    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:#fff;color:#172033}
-    .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-    button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .primary{background:#2563eb;color:white}
-    .secondary{background:#e2e8f0;color:#1e293b}
-    .danger{background:#fee2e2;color:#991b1b}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;min-width:760px}
-    th,td{text-align:left;padding:13px 11px;border-bottom:1px solid #e2e8f0;font-size:14px;white-space:nowrap}
-    th{background:#f8fafc;color:#475569}
-    .pill{display:inline-block;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700}
-    .paid{background:#dcfce7;color:#166534}
-    .pending{background:#fef3c7;color:#92400e}
-    .overdue{background:#fee2e2;color:#991b1b}
-    .small-btn{padding:7px 10px;margin:2px;font-size:12px}
-    .message{font-size:14px;margin-top:12px;line-height:1.5}
-    .hidden{display:none!important}
-    .empty{text-align:center;padding:28px;color:#64748b}
-    .section-title{margin:0 0 7px;font-size:20px}
-    @media(max-width:700px){.page{padding:14px}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}h1{font-size:24px}.stat-value{font-size:24px}}
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f6f8fc;
+      color: #0f172a;
+      font-family: Arial, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 268px;
+      height: 100vh;
+      padding: 26px 18px;
+      background: #111827;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 6px 32px;
+      color: white;
+      font-size: 25px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand span {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+    }
+
+    .sidebar nav { display: grid; gap: 8px; }
+
+    .sidebar nav a {
+      padding: 15px;
+      border-radius: 11px;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: #252c4b;
+      color: white;
+    }
+
+    .brand-note {
+      margin-top: auto;
+      padding-top: 24px;
+      color: #94a3b8;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .page {
+      margin-left: 268px;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 24px 30px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    h1 { font-size: 25px; margin: 0 0 8px; }
+    .topbar p { margin: 0; }
+    .content { padding: 30px; }
+    .muted { color: #64748b; font-size: 14px; line-height: 1.5; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      padding: 24px;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 3px 12px #0f172a08;
+    }
+
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 21px;
+    }
+
+    .stat-label { color: #64748b; font-size: 14px; }
+    .stat-value {
+      margin-top: 12px;
+      font-size: 27px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 14px; font-weight: 600; }
+    .full { grid-column: 1 / -1; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      background: white;
+      color: #0f172a;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .primary { background: #4f46e5; color: white; }
+    .primary:hover { background: #4338ca; }
+    .secondary { background: #eef2ff; color: #3730a3; }
+    .danger { background: #fee2e2; color: #991b1b; }
+    .small-btn { padding: 7px 10px; margin: 2px; font-size: 12px; }
+
+    .table-wrap { overflow-x: auto; margin-top: 18px; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+
+    th, td {
+      padding: 14px 11px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    th { background: #f8fafc; color: #64748b; }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .paid { background: #dcfce7; color: #166534; }
+    .pending { background: #fef3c7; color: #92400e; }
+    .overdue { background: #fee2e2; color: #991b1b; }
+    .message { font-size: 14px; margin-top: 12px; line-height: 1.5; }
+    .message:empty { display: none; }
+    .hidden { display: none !important; }
+    .empty { text-align: center; padding: 30px; color: #64748b; }
+    .section-title { margin: 0 0 8px; font-size: 20px; }
+    .footer { padding-top: 24px; text-align: center; }
+
+    #rentDialog {
+      width: min(720px, calc(100% - 32px));
+      max-height: 90vh;
+      margin: auto;
+      padding: 24px;
+      border: none;
+      border-radius: 18px;
+      background: white;
+      color: #0f172a;
+      overflow-y: auto;
+    }
+
+    #rentDialog::backdrop { background: #0f172a99; }
+
+    .dialog-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .dialog-heading p { margin: 0; }
+    .close-btn { padding: 6px 12px; font-size: 24px; }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding: 18px;
+      }
+
+      .brand { margin-bottom: 16px; }
+      .sidebar nav { display: flex; overflow-x: auto; }
+      .sidebar nav a { flex-shrink: 0; white-space: nowrap; }
+      .brand-note { display: none; }
+      .page { margin-left: 0; }
+      .topbar { padding: 20px; }
+      .content { padding: 18px; }
+    }
+
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      #addRentBtn { width: 100%; }
+      .card, #rentDialog { padding: 18px; }
+      .stat-value { font-size: 24px; }
+    }
   </style>
 </head>
+
 <body>
-<main class="page">
-  <header class="topbar">
-    <div class="brand">RoomFlow</div>
-    <nav class="nav" aria-label="Main navigation">
-      <a href="home.html">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="settings.html">Settings</a>
+  <aside class="sidebar">
+    <a href="dashboard.html" class="brand">
+      <span>R</span>RoomFlow
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html">▣ Rooms</a>
+      <a href="tenants.html">♙ Tenants</a>
+      <a href="rent.html" class="active" aria-current="page">
+        ₹ Rent Manager
+      </a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
+      <a href="settings.html">⚙ Settings</a>
     </nav>
-  </header>
 
-  <section>
-    <h1>Rent Manager</h1>
-    <p class="muted">Track monthly rent, due dates and payment history.</p>
-  </section>
+    <p class="brand-note">RoomFlow · Jatav Industries</p>
+  </aside>
 
-  <section class="grid" aria-label="Rent summary">
-    <div class="card">
-      <div class="stat-label">Total Rent Recorded</div>
-      <div class="stat-value" id="totalRent">₹0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Total Pending</div>
-      <div class="stat-value" id="pendingRent">₹0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Paid This Month</div>
-      <div class="stat-value" id="paidRent">₹0</div>
-    </div>
-  </section>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>Rent Manager</h1>
+        <p class="muted">Track monthly rent, due dates and payment history.</p>
+      </div>
+      <button class="primary" id="addRentBtn" type="button" disabled>
+        + Add Rent
+      </button>
+    </header>
 
-  <section class="card">
-    <h2 class="section-title" id="formHeading">Add Rent Record</h2>
-    <p class="muted">Enter your rent details below.</p>
+    <div class="content">
+      <section class="grid" aria-label="Rent summary">
+        <div class="card">
+          <div class="stat-icon">₹</div>
+          <div class="stat-label">Total Rent Recorded</div>
+          <div class="stat-value" id="totalRent">—</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-icon">◷</div>
+          <div class="stat-label">Total Pending</div>
+          <div class="stat-value" id="pendingRent">—</div>
+        </div>
+
+        <div class="card">
+          <div class="stat-icon">✓</div>
+          <div class="stat-label">Paid Rent for This Rent Month</div>
+          <div class="stat-value" id="paidRent">—</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Rent History</h2>
+        <p class="muted">Search and filter your rent records.</p>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="searchInput">Search month or notes</label>
+            <input id="searchInput" type="search" placeholder="Search...">
+          </div>
+
+          <div class="field">
+            <label for="filterStatus">Filter by status</label>
+            <select id="filterStatus">
+              <option value="All">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Overdue">Overdue</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" id="exportBtn" type="button">
+            Export CSV
+          </button>
+          <button class="secondary" id="refreshBtn" type="button" disabled>
+            Refresh
+          </button>
+        </div>
+
+        <div class="message" id="historyMessage"
+             role="status" aria-live="polite"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Paid Date</th>
+                <th>Status</th>
+                <th>Method</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rentRows"></tbody>
+          </table>
+
+          <div class="empty hidden" id="emptyState">
+            No rent records found.
+          </div>
+        </div>
+      </section>
+
+      <p class="muted footer">
+        RoomFlow — Powered by Jatav Industries
+      </p>
+    </div>
+  </main>
+
+  <dialog id="rentDialog" aria-labelledby="formHeading">
+    <div class="dialog-heading">
+      <div>
+        <h2 class="section-title" id="formHeading">Add Rent Record</h2>
+        <p class="muted">Enter your rent details below.</p>
+      </div>
+      <button class="secondary close-btn" id="closeRentBtn"
+              type="button" aria-label="Close rent form">×</button>
+    </div>
 
     <form id="rentForm">
       <input type="hidden" id="recordId">
+
       <div class="form-grid">
         <div class="field">
-          <label for="rentMonth">Rent Month</label>
+          <label for="rentMonth">Rent Month *</label>
           <input id="rentMonth" type="month" required>
         </div>
+
         <div class="field">
-          <label for="rentAmount">Rent Amount (₹)</label>
-          <input id="rentAmount" type="number" min="0.01" max="100000000" step="0.01" placeholder="e.g. 8000" required>
+          <label for="rentAmount">Rent Amount (₹) *</label>
+          <input id="rentAmount" type="number" min="0.01"
+                 max="100000000" step="0.01"
+                 placeholder="e.g. 8000" required>
         </div>
+
         <div class="field">
-          <label for="dueDate">Due Date</label>
+          <label for="dueDate">Due Date *</label>
           <input id="dueDate" type="date" required>
         </div>
+
         <div class="field">
           <label for="paidDate">Payment Date (if paid)</label>
           <input id="paidDate" type="date">
         </div>
+
         <div class="field">
           <label for="rentStatus">Payment Status</label>
           <select id="rentStatus" required>
@@ -108,6 +423,7 @@
             <option value="Paid">Paid</option>
           </select>
         </div>
+
         <div class="field">
           <label for="paymentMethod">Payment Method</label>
           <select id="paymentMethod">
@@ -119,1088 +435,515 @@
             <option>Other</option>
           </select>
         </div>
-        <div class="field" style="grid-column:1/-1">
-          <label for="rentNotes">Notes (optional)</label>
-          <textarea id="rentNotes" rows="2" maxlength="500" placeholder="e.g. Paid to landlord"></textarea>
+
+        <div class="field full">
+          <label for="rentNotes">Notes</label>
+          <textarea id="rentNotes" rows="3" maxlength="500"
+                    placeholder="Optional notes"></textarea>
         </div>
       </div>
+
+      <div class="message" id="formMessage"
+           role="status" aria-live="polite"></div>
+
       <div class="actions">
-        <button class="primary" id="submitBtn" type="submit">Save Rent Record</button>
-        <button class="secondary hidden" id="cancelEdit" type="button">Cancel Edit</button>
+        <button class="primary" id="submitBtn" type="submit">
+          Save Rent Record
+        </button>
+        <button class="secondary" id="cancelEdit" type="button">
+          Cancel
+        </button>
       </div>
-      <div class="message" id="formMessage" role="status"></div>
     </form>
-  </section>
+  </dialog>
 
-  <section class="card">
-    <h2 class="section-title">Rent History</h2>
-    <p class="muted">Search and filter your rent records.</p>
-    <div class="form-grid">
-      <div class="field">
-        <label for="searchInput">Search month or notes</label>
-        <input id="searchInput" type="search" placeholder="Search...">
-      </div>
-      <div class="field">
-        <label for="filterStatus">Filter by status</label>
-        <select id="filterStatus">
-          <option value="All">All Statuses</option>
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Overdue">Overdue</option>
-        </select>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="secondary" id="exportBtn" type="button">Export CSV</button>
-    </div>
-    <div class="message" id="historyMessage" role="status"></div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Amount</th>
-            <th>Due Date</th>
-            <th>Paid Date</th>
-            <th>Status</th>
-            <th>Method</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="rentRows"></tbody>
-      </table>
-      <div class="empty hidden" id="emptyState">No rent records found.</div>
-    </div>
-  </section>
+  <script type="module">
+    import { initializeApp, getApps, getApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
-  <p class="muted" style="text-align:center">RoomFlow · Powered by Jatav Industries</p>
-</main>
+    import { getAuth, onAuthStateChanged } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-<script type="module">
-  import { initializeApp, getApps, getApp }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import {
-    getFirestore, collection, doc, getDocs, addDoc, updateDoc,
-    deleteDoc, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import {
+      getFirestore, collection, doc, getDocs,
+      addDoc, updateDoc, deleteDoc, query,
+      orderBy, serverTimestamp
+    } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
-    authDomain: "roomflow-6c920.firebaseapp.com",
-    projectId: "roomflow-6c920",
-    storageBucket: "roomflow-6c920.firebasestorage.app",
-    messagingSenderId: "827966111309",
-    appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-    measurementId: "G-1YGPS03PKC"
-  };
-
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  const $ = id => document.getElementById(id);
-  let currentUser = null;
-  let records = [];
-  let busy = false;
-
-  const money = value => new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR", maximumFractionDigits: 2
-  }).format(Number(value) || 0);
-
-  const today = () => {
-    const d = new Date();
-    const offset = d.getTimezoneOffset();
-    return new Date(d.getTime() - offset * 60000).toISOString().slice(0, 10);
-  };
-
-  const currentMonth = () => today().slice(0, 7);
-
-  function showMessage(id, text, error = false) {
-    $(id).textContent = text;
-    $(id).style.color = error ? "#b91c1c" : "#047857";
-  }
-
-  function actualStatus(record) {
-    if (record.status === "Paid") return "Paid";
-    if (record.dueDate && record.dueDate < today()) return "Overdue";
-    return "Pending";
-  }
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;",
-      '"': "&quot;", "'": "&#39;"
-    }[ch]));
-  }
-
-  function setDefaultForm() {
-    $("rentMonth").value = currentMonth();
-    $("rentAmount").value = "";
-    $("dueDate").value = currentMonth() + "-05";
-    $("paidDate").value = "";
-    $("rentStatus").value = "Pending";
-    $("paymentMethod").value = "";
-    $("rentNotes").value = "";
-    $("recordId").value = "";
-    $("formHeading").textContent = "Add Rent Record";
-    $("submitBtn").textContent = "Save Rent Record";
-    $("cancelEdit").classList.add("hidden");
-  }
-
-  function render() {
-    const search = $("searchInput").value.trim().toLowerCase();
-    const filter = $("filterStatus").value;
-
-    const visible = records.filter(r => {
-      const status = actualStatus(r);
-      const text = `${r.month} ${r.notes || ""} ${r.paymentMethod || ""}`.toLowerCase();
-      return text.includes(search) && (filter === "All" || status === filter);
+    const app = getApps().length ? getApp() : initializeApp({
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
+      measurementId: "G-1YGPS03PKC"
     });
 
-    $("rentRows").innerHTML = visible.map(r => {
-      const status = actualStatus(r);
-      const cls = status.toLowerCase();
-      return `<tr>
-        <td>${escapeHTML(r.month)}</td>
-        <td>${money(r.amount)}</td>
-        <td>${escapeHTML(r.dueDate || "—")}</td>
-        <td>${escapeHTML(r.paidDate || "—")}</td>
-        <td><span class="pill ${cls}">${status}</span></td>
-        <td>${escapeHTML(r.paymentMethod || "—")}</td>
-        <td>
-          <button class="small-btn secondary" data-action="edit" data-id="${escapeHTML(r.id)}">Edit</button>
-          <button class="small-btn danger" data-action="delete" data-id="${escapeHTML(r.id)}">Delete</button>
-        </td>
-      </tr>`;
-    }).join("");
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+    const dialog = $("rentDialog");
 
-    $("emptyState").classList.toggle("hidden", visible.length !== 0);
-    $("totalRent").textContent = money(records.reduce((sum, r) => sum + Number(r.amount || 0), 0));
-    $("pendingRent").textContent = money(records.reduce((sum, r) =>
-      sum + (actualStatus(r) !== "Paid" ? Number(r.amount || 0) : 0), 0));
-    $("paidRent").textContent = money(records.reduce((sum, r) =>
-      sum + (r.month === currentMonth() && actualStatus(r) === "Paid" ? Number(r.amount || 0) : 0), 0));
-  }
+    let currentUser = null;
+    let records = [];
+    let busy = false;
+    let loading = false;
+    let loaded = false;
 
-  async function loadRecords() {
-    if (!currentUser) return;
-    showMessage("historyMessage", "Loading rent records...");
-    try {
-      const q = query(
-        collection(db, "users", currentUser.uid, "rentRecords"),
-        orderBy("month", "desc")
-      );
-      const snapshot = await getDocs(q);
-      records = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      render();
-      showMessage("historyMessage", records.length
-        ? `${records.length} rent record(s) loaded.`
-        : "No records yet. Add your first rent record above.");
-    } catch (error) {
-      console.error(error);
-      records = [];
-      render();
-      showMessage("historyMessage",
-        "Could not load rent data. Check your Firestore security rules and connection.", true);
-    }
-  }
+    const money = value => new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2
+    }).format(Number(value) || 0);
 
-  $("rentForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    if (!currentUser || busy) return;
-
-    const month = $("rentMonth").value;
-    const amount = Number($("rentAmount").value);
-    const dueDate = $("dueDate").value;
-    const paidDate = $("paidDate").value;
-    const status = $("rentStatus").value;
-
-    if (!month || !dueDate || !Number.isFinite(amount) || amount <= 0) {
-      showMessage("formMessage", "Please enter a valid month, due date and rent amount.", true);
-      return;
-    }
-    if (dueDate.slice(0, 7) !== month) {
-      showMessage("formMessage", "Due date must be within the selected rent month.", true);
-      return;
-    }
-    if (status === "Paid" && !paidDate) {
-      showMessage("formMessage", "Please enter the payment date for a paid record.", true);
-      return;
-    }
-    if (paidDate && paidDate > today()) {
-      showMessage("formMessage", "Payment date cannot be in the future.", true);
-      return;
+    function today() {
+      const date = new Date();
+      return new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 10);
     }
 
-    const id = $("recordId").value;
-    const data = {
-      month,
-      amount,
-      dueDate,
-      paidDate: status === "Paid" ? paidDate : "",
-      status,
-      paymentMethod: $("paymentMethod").value,
-      notes: $("rentNotes").value.trim().slice(0, 500),
-      updatedAt: serverTimestamp()
-    };
+    const currentMonth = () => today().slice(0, 7);
 
-    busy = true;
-    $("submitBtn").disabled = true;
-    try {
-      if (id) {
-        const existing = records.find(r => r.id === id);
-        if (!existing) throw new Error("Record not found.");
-        await updateDoc(doc(db, "users", currentUser.uid, "rentRecords", id), data);
-        showMessage("formMessage", "Rent record updated successfully.");
-      } else {
-        const duplicate = records.some(r => r.month === month);
-        if (duplicate && !confirm("A record already exists for this month. Add another record anyway?")) {
-          return;
-        }
-        await addDoc(collection(db, "users", currentUser.uid, "rentRecords"), {
-          ...data, createdAt: serverTimestamp()
-        });
-        showMessage("formMessage", "Rent record saved successfully.");
-      }
+    function showMessage(id, text, error = false) {
+      $(id).textContent = text;
+      $(id).style.color = error ? "#b91c1c" : "#047857";
+    }
+
+    function actualStatus(record) {
+      if (record.status === "Paid") return "Paid";
+      if (record.dueDate && record.dueDate < today()) return "Overdue";
+      return "Pending";
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function setDefaultForm() {
+      $("rentMonth").value = currentMonth();
+      $("rentAmount").value = "";
+      $("dueDate").value = currentMonth() + "-05";
+      $("paidDate").value = "";
+      $("rentStatus").value = "Pending";
+      $("paymentMethod").value = "";
+      $("rentNotes").value = "";
+      $("recordId").value = "";
+      $("formHeading").textContent = "Add Rent Record";
+      $("submitBtn").textContent = "Save Rent Record";
+      showMessage("formMessage", "");
+    }
+
+    function openDialog() {
+      if (!dialog.open) dialog.showModal();
+      $("rentMonth").focus();
+    }
+
+    function closeDialog() {
+      if (!busy) dialog.close();
+    }
+
+    function updateButtons() {
+      const unavailable = !currentUser || busy || loading;
+      $("addRentBtn").disabled = unavailable || !loaded;
+      $("refreshBtn").disabled = unavailable;
+      $("exportBtn").disabled = unavailable || !loaded;
+      $("submitBtn").disabled = busy;
+      $("cancelEdit").disabled = busy;
+      $("closeRentBtn").disabled = busy;
+    }
+
+    $("addRentBtn").addEventListener("click", () => {
+      if (!currentUser || busy || loading || !loaded) return;
       setDefaultForm();
-      await loadRecords();
-    } catch (error) {
-      console.error(error);
-      showMessage("formMessage", "Could not save the record. Check your internet and Firestore rules.", true);
-    } finally {
-      busy = false;
-      $("submitBtn").disabled = false;
-    }
-  });
+      openDialog();
+    });
 
-  $("rentRows").addEventListener("click", async event => {
-    const button = event.target.closest("button[data-action]");
-    if (!button || !currentUser || busy) return;
+    $("closeRentBtn").addEventListener("click", closeDialog);
+    $("cancelEdit").addEventListener("click", closeDialog);
 
-    const record = records.find(r => r.id === button.dataset.id);
-    if (!record) return;
+    dialog.addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
 
-    if (button.dataset.action === "edit") {
-      $("recordId").value = record.id;
-      $("rentMonth").value = record.month || "";
-      $("rentAmount").value = record.amount ?? "";
-      $("dueDate").value = record.dueDate || "";
-      $("paidDate").value = record.paidDate || "";
-      $("rentStatus").value = record.status === "Paid" ? "Paid" : "Pending";
-      $("paymentMethod").value = record.paymentMethod || "";
-      $("rentNotes").value = record.notes || "";
-      $("formHeading").textContent = "Edit Rent Record";
-      $("submitBtn").textContent = "Update Rent Record";
-      $("cancelEdit").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
+    $("rentMonth").addEventListener("change", () => {
+      const month = $("rentMonth").value;
+      if (month) $("dueDate").value = month + "-05";
+    });
 
-    if (!confirm(`Delete rent record for ${record.month}? This cannot be undone.`)) return;
+    function render() {
+      if (!loaded) return;
 
-    busy = true;
-    button.disabled = true;
-    try {
-      await deleteDoc(doc(db, "users", currentUser.uid, "rentRecords", record.id));
-      showMessage("historyMessage", "Rent record deleted.");
-      await loadRecords();
-    } catch (error) {
-      console.error(error);
-      showMessage("historyMessage", "Could not delete record. Check Firestore rules.", true);
-    } finally {
-      busy = false;
-    }
-  });
+      const search = $("searchInput").value.trim().toLowerCase();
+      const filter = $("filterStatus").value;
 
-  $("cancelEdit").addEventListener("click", () => {
-    setDefaultForm();
-    showMessage("formMessage", "Edit cancelled.");
-  });
+      const visible = records.filter(record => {
+        const text = [
+          record.month, record.notes || "", record.paymentMethod || ""
+        ].join(" ").toLowerCase();
 
-  $("searchInput").addEventListener("input", render);
-  $("filterStatus").addEventListener("change", render);
-
-  $("exportBtn").addEventListener("click", () => {
-    if (!records.length) {
-      showMessage("historyMessage", "There are no records to export.", true);
-      return;
-    }
-
-    const headers = ["Month", "Amount", "Due Date", "Paid Date", "Status", "Payment Method", "Notes"];
-    const csvCell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
-    const lines = [
-      headers.map(csvCell).join(","),
-      ...records.map(r => [
-        r.month, r.amount, r.dueDate, r.paidDate,
-        actualStatus(r), r.paymentMethod, r.notes
-      ].map(csvCell).join(","))
-    ];
-    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `roomflow-rent-${currentMonth()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      window.location.replace("login.html?next=rent.html");
-      return;
-    }
-    currentUser = user;
-    await loadRecords();
-    setDefaultForm();
-  });
-</script>
-  <style>
-  body {
-    margin: 0;
-    background: #f6f8fc;
-    color: #0f172a;
-  }
-
-  .rf-property-shell {
-    display: flex;
-    min-height: 100vh;
-  }
-
-  .rf-property-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 268px;
-    height: 100vh;
-    padding: 26px 18px;
-    box-sizing: border-box;
-    background: #111827;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    z-index: 50;
-  }
-
-  .rf-property-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 6px 32px;
-    color: white;
-    font-size: 25px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .rf-property-mark {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #818cf8, #4f46e5);
-    color: white;
-  }
-
-  .rf-property-nav {
-    display: grid;
-    gap: 8px;
-  }
-
-  .rf-property-nav a {
-    display: block;
-    padding: 15px;
-    border-radius: 11px;
-    color: #cbd5e1;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .rf-property-nav a:hover,
-  .rf-property-nav a.active {
-    background: #252c4b;
-    color: white;
-  }
-
-  .rf-property-bottom {
-    margin-top: auto;
-    padding-top: 24px;
-  }
-
-  .rf-property-back {
-    display: block;
-    padding: 13px;
-    border-radius: 10px;
-    background: #4f46e5;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .rf-property-bottom p {
-    margin-top: 18px;
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-  }
-
-  .rf-property-shell > .properties-page {
-    flex: 1;
-    min-width: 0;
-    max-width: none;
-    width: calc(100% - 268px);
-    margin: 0 0 0 268px;
-    padding: 30px;
-    box-sizing: border-box;
-  }
-
-  .rf-property-shell .page-header {
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: white;
-    margin-bottom: 24px;
-  }
-
-  .rf-property-shell .page-header h1 {
-    font-size: 25px;
-    color: #0f172a;
-  }
-
-  .rf-property-shell .page-header p {
-    color: #64748b;
-    opacity: 1;
-    line-height: 1.6;
-  }
-
-  .rf-property-shell .summary-grid {
-    gap: 18px;
-  }
-
-  .rf-property-shell .summary-card {
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: white;
-    box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
-  }
-
-  .rf-property-shell .summary-card::before {
-    content: "⌂";
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 18px;
-    border-radius: 12px;
-    background: #eef2ff;
-    color: #4f46e5;
-    font-size: 21px;
-  }
-
-  .rf-property-shell .summary-card:nth-child(2)::before {
-    content: "✓";
-  }
-
-  .rf-property-shell .summary-card:nth-child(3)::before {
-    content: "₹";
-  }
-
-  .rf-property-shell .summary-card span {
-    color: #64748b;
-    opacity: 1;
-  }
-
-  .rf-property-shell .summary-card strong {
-    color: #0f172a;
-    font-size: 27px;
-  }
-
-  .rf-property-shell .btn-primary {
-    background: #4f46e5;
-    border-color: #4f46e5;
-    color: white;
-    border-radius: 10px;
-  }
-
-  .rf-property-shell .btn-primary:hover {
-    background: #4338ca;
-    border-color: #4338ca;
-  }
-
-  .rf-property-shell .toolbar {
-    padding: 20px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: white;
-  }
-
-  .rf-property-shell input,
-  .rf-property-shell select,
-  .rf-property-shell textarea {
-    border-color: #dbe2ea;
-    border-radius: 10px;
-    background: white;
-    color: #0f172a;
-  }
-
-  .rf-property-shell input:focus,
-  .rf-property-shell select:focus,
-  .rf-property-shell textarea:focus {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
-  }
-
-  .rf-property-shell .property-card,
-  .rf-property-shell .property-form {
-    padding: 24px;
-    border-color: #e2e8f0;
-    border-radius: 16px;
-    background: white;
-  }
-
-  .rf-property-shell .property-grid > .empty-state {
-    grid-column: 1 / -1;
-    padding: 48px 20px;
-    border: 1px dashed #cbd5e1;
-    border-radius: 16px;
-    background: white;
-    text-align: center;
-    color: #64748b;
-  }
-
-  @media (max-width: 1100px) {
-    .rf-property-shell .property-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 800px) {
-    .rf-property-shell {
-      display: block;
-    }
-
-    .rf-property-sidebar {
-      position: static;
-      width: 100%;
-      height: auto;
-      padding: 18px;
-    }
-
-    .rf-property-brand {
-      margin: 0 0 16px;
-    }
-
-    .rf-property-nav {
-      display: flex;
-      overflow-x: auto;
-    }
-
-    .rf-property-nav a {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .rf-property-bottom {
-      display: none;
-    }
-
-    .rf-property-shell > .properties-page {
-      width: 100%;
-      margin: 0;
-      padding: 18px;
-    }
-
-    .rf-property-shell .summary-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 520px) {
-    .rf-property-shell .page-header,
-    .rf-property-shell .summary-card,
-    .rf-property-shell .property-card,
-    .rf-property-shell .property-form {
-      padding: 18px;
-    }
-
-    .rf-property-shell #addPropertyBtn {
-      width: 100%;
-    }
-
-    .rf-property-shell .toolbar input,
-    .rf-property-shell .toolbar select {
-      width: 100%;
-      min-width: 0;
-      flex: auto;
-    }
-  }
-</style>
-
-<script>
-  (() => {
-    function setupPropertiesLayout() {
-      if (document.getElementById("rfPropertyShell")) return;
-
-      const main = document.querySelector("main.properties-page");
-      if (!main) return;
-
-      const shell = document.createElement("div");
-      shell.id = "rfPropertyShell";
-      shell.className = "rf-property-shell";
-
-      const sidebar = document.createElement("aside");
-      sidebar.className = "rf-property-sidebar";
-
-      sidebar.innerHTML = `
-        <a href="dashboard.html" class="rf-property-brand">
-          <span class="rf-property-mark">R</span>
-          RoomFlow
-        </a>
-
-        <nav class="rf-property-nav" aria-label="Main navigation">
-          <a href="dashboard.html">▦ Dashboard</a>
-          <a href="properties.html" class="active" aria-current="page">
-            ⌂ Properties
-          </a>
-          <a href="rooms.html">▣ Rooms</a>
-          <a href="tenants.html">♙ Tenants</a>
-          <a href="rent.html">₹ Rent Manager</a>
-          <a href="electricity.html">⚡ Electricity</a>
-          <a href="payments.html">▤ Payments</a>
-          <a href="profile.html">♙ My Profile</a>
-        </nav>
-
-        <div class="rf-property-bottom">
-          <a href="dashboard.html" class="rf-property-back">
-            ← Dashboard
-          </a>
-          <p>RoomFlow · Jatav Industries</p>
-        </div>
-      `;
-
-      main.parentNode.insertBefore(shell, main);
-      shell.append(sidebar, main);
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupPropertiesLayout);
-    } else {
-      setupPropertiesLayout();
-    }
-  })();
-</script>
-  <style>
-  body {
-    margin: 0;
-    background: #f6f8fc;
-    color: #0f172a;
-  }
-
-  #rfRentSidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 268px;
-    height: 100vh;
-    padding: 26px 18px;
-    box-sizing: border-box;
-    background: #111827;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    z-index: 50;
-  }
-
-  .rf-rent-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 6px 32px;
-    color: white;
-    font-size: 25px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .rf-rent-mark {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #818cf8, #4f46e5);
-  }
-
-  .rf-rent-nav {
-    display: grid;
-    gap: 8px;
-  }
-
-  .rf-rent-nav a {
-    padding: 15px;
-    border-radius: 11px;
-    color: #cbd5e1;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .rf-rent-nav a:hover,
-  .rf-rent-nav a.active {
-    background: #252c4b;
-    color: white;
-  }
-
-  .rf-rent-bottom {
-    margin-top: auto;
-    padding-top: 24px;
-    color: #94a3b8;
-    text-align: center;
-    font-size: 11px;
-  }
-
-  main.page.rf-rent-page {
-    max-width: none;
-    width: calc(100% - 268px);
-    margin: 0 0 0 268px;
-    padding: 30px;
-    box-sizing: border-box;
-  }
-
-  .rf-rent-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: white;
-  }
-
-  .rf-rent-heading h1 {
-    font-size: 25px;
-  }
-
-  .rf-rent-heading p {
-    margin: 0;
-  }
-
-  .rf-rent-page .card {
-    border-radius: 16px;
-    border-color: #e2e8f0;
-    padding: 24px;
-  }
-
-  .rf-rent-page .grid {
-    gap: 18px;
-  }
-
-  .rf-rent-page .grid .card::before {
-    content: "₹";
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 18px;
-    border-radius: 12px;
-    background: #eef2ff;
-    color: #4f46e5;
-    font-size: 21px;
-  }
-
-  .rf-rent-page .primary,
-  #rfRentDialog .primary {
-    background: #4f46e5;
-    color: white;
-    border-radius: 10px;
-  }
-
-  .rf-rent-page .secondary,
-  #rfRentDialog .secondary {
-    background: #eef2ff;
-    color: #3730a3;
-  }
-
-  .rf-rent-page input,
-  .rf-rent-page select,
-  .rf-rent-page textarea,
-  #rfRentDialog input,
-  #rfRentDialog select,
-  #rfRentDialog textarea {
-    border-color: #dbe2ea;
-    border-radius: 10px;
-  }
-
-  #rfRentDialog {
-    width: min(720px, calc(100% - 32px));
-    max-height: 90vh;
-    margin: auto;
-    padding: 0;
-    border: none;
-    border-radius: 18px;
-    background: white;
-    color: #0f172a;
-    overflow-y: auto;
-    box-sizing: border-box;
-  }
-
-  #rfRentDialog::backdrop {
-    background: #0f172a99;
-  }
-
-  #rfRentDialog .card {
-    margin: 0;
-    padding: 24px;
-    border: none;
-    box-shadow: none;
-  }
-
-  .rf-rent-dialog-bar {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 16px 0;
-  }
-
-  .rf-rent-dialog-bar button {
-    padding: 6px 12px;
-    background: #eef2ff;
-    color: #3730a3;
-    font-size: 23px;
-  }
-
-  #rfRentPageNotice:empty {
-    display: none;
-  }
-
-  #rfRentPageNotice {
-    padding: 14px 16px;
-    margin-bottom: 18px;
-    border-radius: 10px;
-    background: #f0fdf4;
-    color: #15803d;
-  }
-
-  @media (max-width: 1000px) {
-    .rf-rent-page .grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 800px) {
-    #rfRentSidebar {
-      position: static;
-      width: 100%;
-      height: auto;
-      padding: 18px;
-    }
-
-    .rf-rent-brand {
-      margin-bottom: 16px;
-    }
-
-    .rf-rent-nav {
-      display: flex;
-      overflow-x: auto;
-    }
-
-    .rf-rent-nav a {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .rf-rent-bottom {
-      display: none;
-    }
-
-    main.page.rf-rent-page {
-      width: 100%;
-      margin: 0;
-      padding: 18px;
-    }
-  }
-
-  @media (max-width: 520px) {
-    #rfAddRent {
-      width: 100%;
-    }
-
-    #rfRentDialog .form-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .rf-rent-heading,
-    .rf-rent-page .card {
-      padding: 18px;
-    }
-  }
-</style>
-
-<script>
-  (() => {
-    function setupRentLayout() {
-      if (document.getElementById("rfRentSidebar")) return;
-
-      const main = document.querySelector("main.page");
-      const form = document.getElementById("rentForm");
-      const panel = form?.closest("section.card");
-      const title = main?.querySelector("h1");
-      const heading = title?.closest("section");
-
-      if (!main || !form || !panel || !heading) return;
-
-      const sidebar = document.createElement("aside");
-      sidebar.id = "rfRentSidebar";
-
-      sidebar.innerHTML = `
-        <a href="dashboard.html" class="rf-rent-brand">
-          <span class="rf-rent-mark">R</span>
-          RoomFlow
-        </a>
-
-        <nav class="rf-rent-nav" aria-label="Main navigation">
-          <a href="dashboard.html">▦ Dashboard</a>
-          <a href="properties.html">⌂ Properties</a>
-          <a href="rooms.html">▣ Rooms</a>
-          <a href="tenants.html">♙ Tenants</a>
-          <a href="rent.html" class="active" aria-current="page">
-            ₹ Rent Manager
-          </a>
-          <a href="electricity.html">⚡ Electricity</a>
-          <a href="payments.html">▤ Payments</a>
-          <a href="profile.html">♙ My Profile</a>
-          <a href="settings.html">⚙ Settings</a>
-        </nav>
-
-        <div class="rf-rent-bottom">
-          RoomFlow · Jatav Industries
-        </div>
-      `;
-
-      main.before(sidebar);
-      main.classList.add("rf-rent-page");
-
-      /* Replace the old horizontal navigation with the sidebar. */
-      const oldHeader = main.querySelector("header.topbar");
-      if (oldHeader) oldHeader.hidden = true;
-      if (oldHeader) oldHeader.style.display = "none";
-
-      heading.classList.add("rf-rent-heading");
-
-      const headingText = document.createElement("div");
-
-      while (heading.firstChild) {
-        headingText.append(heading.firstChild);
-      }
-
-      const addButton = document.createElement("button");
-      addButton.id = "rfAddRent";
-      addButton.type = "button";
-      addButton.className = "primary";
-      addButton.textContent = "+ Add Rent";
-
-      heading.append(headingText, addButton);
-
-      const notice = document.createElement("p");
-      notice.id = "rfRentPageNotice";
-      notice.setAttribute("role", "status");
-      heading.after(notice);
-
-      /* Move the existing form into a popup, preserving its handlers. */
-      const dialog = document.createElement("dialog");
-      dialog.id = "rfRentDialog";
-      dialog.setAttribute("aria-labelledby", "formHeading");
-
-      const bar = document.createElement("div");
-      bar.className = "rf-rent-dialog-bar";
-
-      const closeButton = document.createElement("button");
-      closeButton.type = "button";
-      closeButton.textContent = "×";
-      closeButton.setAttribute("aria-label", "Close rent form");
-      bar.append(closeButton);
-
-      dialog.append(bar, panel);
-      document.body.append(dialog);
-
-      const submitButton = document.getElementById("submitBtn");
-      const cancelButton = document.getElementById("cancelEdit");
-      const formMessage = document.getElementById("formMessage");
-
-      function openDialog() {
-        if (!dialog.open) dialog.showModal();
-        document.getElementById("rentMonth")?.focus();
-      }
-
-      addButton.addEventListener("click", () => {
-        if (submitButton?.disabled) return;
-
-        /* Existing cancel handler restores default month and due date. */
-        cancelButton?.click();
-
-        if (formMessage) formMessage.textContent = "";
-        notice.textContent = "";
-        openDialog();
+        return text.includes(search) &&
+          (filter === "All" || actualStatus(record) === filter);
       });
 
-      closeButton.addEventListener("click", () => {
-        if (!submitButton?.disabled) dialog.close();
-      });
+      $("rentRows").innerHTML = visible.map(record => {
+        const status = actualStatus(record);
 
-      dialog.addEventListener("cancel", event => {
-        if (submitButton?.disabled) event.preventDefault();
-      });
+        return `
+          <tr>
+            <td>${escapeHTML(record.month)}</td>
+            <td>${money(record.amount)}</td>
+            <td>${escapeHTML(record.dueDate || "—")}</td>
+            <td>${escapeHTML(record.paidDate || "—")}</td>
+            <td>
+              <span class="pill ${status.toLowerCase()}">${status}</span>
+            </td>
+            <td>${escapeHTML(record.paymentMethod || "—")}</td>
+            <td>
+              <button type="button" class="small-btn secondary"
+                data-action="edit" data-id="${escapeHTML(record.id)}">
+                Edit
+              </button>
+              <button type="button" class="small-btn danger"
+                data-action="delete" data-id="${escapeHTML(record.id)}">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
 
-      cancelButton?.addEventListener("click", () => {
-        if (dialog.open && !submitButton?.disabled) {
-          dialog.close();
-        }
-      });
+      $("emptyState").classList.toggle("hidden", visible.length !== 0);
 
-      document.addEventListener("click", event => {
-        const edit = event.target.closest(
-          '#rentRows button[data-action="edit"]'
+      $("totalRent").textContent = money(
+        records.reduce((sum, record) =>
+          sum + Number(record.amount || 0), 0)
+      );
+
+      $("pendingRent").textContent = money(
+        records.reduce((sum, record) =>
+          sum + (actualStatus(record) !== "Paid"
+            ? Number(record.amount || 0) : 0), 0)
+      );
+
+      $("paidRent").textContent = money(
+        records.reduce((sum, record) =>
+          sum + (
+            record.month === currentMonth() &&
+            actualStatus(record) === "Paid"
+              ? Number(record.amount || 0) : 0
+          ), 0)
+      );
+    }
+
+    async function loadRecords() {
+      if (!currentUser || loading) return false;
+
+      loading = true;
+      updateButtons();
+      showMessage("historyMessage", "Loading rent records...");
+
+      try {
+        const snapshot = await getDocs(query(
+          collection(db, "users", currentUser.uid, "rentRecords"),
+          orderBy("month", "desc")
+        ));
+
+        records = snapshot.docs.map(item => ({
+          ...item.data(),
+          id: item.id
+        }));
+
+        loaded = true;
+        render();
+
+        showMessage(
+          "historyMessage",
+          records.length
+            ? `${records.length} rent record(s) loaded.`
+            : "No records yet. Click + Add Rent to get started."
         );
 
-        if (
-          edit &&
-          !submitButton?.disabled &&
-          document.getElementById("recordId")?.value
-        ) {
-          if (formMessage) formMessage.textContent = "";
-          openDialog();
-        }
-      });
+        return true;
+      } catch (error) {
+        console.error(error);
 
-      if (formMessage) {
-        new MutationObserver(() => {
-          if (!dialog.open) return;
+        showMessage(
+          "historyMessage",
+          loaded
+            ? "Refresh failed. Previously loaded records are still shown."
+            : "Could not load rent data. Check your connection and Firestore rules.",
+          true
+        );
 
-          const text = formMessage.textContent || "";
-
-          if (/Rent record (saved|updated) successfully/i.test(text)) {
-            notice.textContent = text;
-            dialog.close();
-          }
-        }).observe(formMessage, {
-          childList: true,
-          subtree: true,
-          characterData: true
-        });
+        return false;
+      } finally {
+        loading = false;
+        updateButtons();
       }
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupRentLayout);
-    } else {
-      setupRentLayout();
-    }
-  })();
-</script>
+    $("rentForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!currentUser || busy || loading || !loaded) return;
+
+      const month = $("rentMonth").value;
+      const amount = Number($("rentAmount").value);
+      const dueDate = $("dueDate").value;
+      const paidDate = $("paidDate").value;
+      const status = $("rentStatus").value;
+      const id = $("recordId").value;
+
+      if (
+        !month || !dueDate ||
+        !Number.isFinite(amount) || amount <= 0 ||
+        amount > 100000000
+      ) {
+        showMessage(
+          "formMessage",
+          "Please enter a valid month, due date and rent amount.",
+          true
+        );
+        return;
+      }
+
+      if (dueDate.slice(0, 7) !== month) {
+        showMessage(
+          "formMessage",
+          "Due date must be within the selected rent month.",
+          true
+        );
+        return;
+      }
+
+      if (status === "Paid" && !paidDate) {
+        showMessage(
+          "formMessage",
+          "Please enter the payment date for a paid record.",
+          true
+        );
+        return;
+      }
+
+      if (paidDate && paidDate > today()) {
+        showMessage(
+          "formMessage",
+          "Payment date cannot be in the future.",
+          true
+        );
+        return;
+      }
+
+      if (
+        !id &&
+        records.some(record => record.month === month) &&
+        !confirm(
+          "A record already exists for this month. Add another record anyway?"
+        )
+      ) return;
+
+      const data = {
+        month,
+        amount,
+        dueDate,
+        paidDate: status === "Paid" ? paidDate : "",
+        status,
+        paymentMethod: $("paymentMethod").value,
+        notes: $("rentNotes").value.trim().slice(0, 500),
+        updatedAt: serverTimestamp()
+      };
+
+      busy = true;
+      updateButtons();
+
+      try {
+        if (id) {
+          if (!records.some(record => record.id === id)) {
+            throw new Error("Record not found.");
+          }
+
+          await updateDoc(
+            doc(db, "users", currentUser.uid, "rentRecords", id),
+            data
+          );
+        } else {
+          await addDoc(
+            collection(db, "users", currentUser.uid, "rentRecords"),
+            { ...data, createdAt: serverTimestamp() }
+          );
+        }
+
+        dialog.close();
+        setDefaultForm();
+
+        const refreshed = await loadRecords();
+
+        if (refreshed) {
+          showMessage(
+            "historyMessage",
+            id ? "Rent record updated successfully." :
+              "Rent record saved successfully."
+          );
+        } else {
+          showMessage(
+            "historyMessage",
+            "Record saved, but the list could not refresh. Click Refresh.",
+            true
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        showMessage(
+          "formMessage",
+          "Could not save the record. Check your connection and Firestore rules.",
+          true
+        );
+      } finally {
+        busy = false;
+        updateButtons();
+      }
+    });
+
+    $("rentRows").addEventListener("click", async event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button || !currentUser || busy || loading) return;
+
+      const record = records.find(item => item.id === button.dataset.id);
+      if (!record) return;
+
+      if (button.dataset.action === "edit") {
+        $("recordId").value = record.id;
+        $("rentMonth").value = record.month || "";
+        $("rentAmount").value = record.amount ?? "";
+        $("dueDate").value = record.dueDate || "";
+        $("paidDate").value = record.paidDate || "";
+        $("rentStatus").value =
+          record.status === "Paid" ? "Paid" : "Pending";
+        $("paymentMethod").value = record.paymentMethod || "";
+        $("rentNotes").value = record.notes || "";
+        $("formHeading").textContent = "Edit Rent Record";
+        $("submitBtn").textContent = "Update Rent Record";
+
+        showMessage("formMessage", "");
+        openDialog();
+        return;
+      }
+
+      if (button.dataset.action !== "delete") return;
+
+      if (!confirm(
+        `Delete rent record for ${record.month}? This cannot be undone.`
+      )) return;
+
+      busy = true;
+      button.disabled = true;
+      updateButtons();
+
+      try {
+        await deleteDoc(
+          doc(db, "users", currentUser.uid, "rentRecords", record.id)
+        );
+
+        const refreshed = await loadRecords();
+
+        showMessage(
+          "historyMessage",
+          refreshed
+            ? "Rent record deleted."
+            : "Record deleted, but the list could not refresh. Click Refresh.",
+          !refreshed
+        );
+      } catch (error) {
+        console.error(error);
+        showMessage(
+          "historyMessage",
+          "Could not delete record. Check your connection and Firestore rules.",
+          true
+        );
+      } finally {
+        busy = false;
+        button.disabled = false;
+        updateButtons();
+      }
+    });
+
+    $("searchInput").addEventListener("input", render);
+    $("filterStatus").addEventListener("change", render);
+
+    $("refreshBtn").addEventListener("click", () => {
+      if (!busy) loadRecords();
+    });
+
+    $("exportBtn").addEventListener("click", () => {
+      if (!loaded || busy || loading) return;
+
+      if (!records.length) {
+        showMessage("historyMessage", "There are no records to export.", true);
+        return;
+      }
+
+      const csvCell = value => {
+        let text = String(value ?? "");
+
+        /* Keep spreadsheet formulas from executing when CSV is opened. */
+        if (/^[\s]*[=+\-@]/.test(text)) text = "'" + text;
+
+        return '"' + text.replace(/"/g, '""') + '"';
+      };
+
+      const rows = [
+        [
+          "Month", "Amount", "Due Date", "Paid Date",
+          "Status", "Payment Method", "Notes"
+        ],
+        ...records.map(record => [
+          record.month,
+          record.amount,
+          record.dueDate,
+          record.paidDate,
+          actualStatus(record),
+          record.paymentMethod,
+          record.notes
+        ])
+      ];
+
+      const csv = "\uFEFF" +
+        rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+
+      const url = URL.createObjectURL(
+        new Blob([csv], { type: "text/csv;charset=utf-8;" })
+      );
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `roomflow-rent-${currentMonth()}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) {
+        currentUser = null;
+        window.location.replace("login.html?next=rent.html");
+        return;
+      }
+
+      currentUser = user;
+      setDefaultForm();
+      await loadRecords();
+    });
+
+    updateButtons();
+  </script>
 </body>
 </html>
-
