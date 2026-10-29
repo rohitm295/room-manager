@@ -559,5 +559,390 @@
       }
     });
   </script>
+  <style>
+  /* RoomFlow dashboard layout */
+  body {
+    margin: 0;
+    background: #f6f8fc;
+    color: #0f172a;
+  }
+
+  .rf-tenant-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .rf-tenant-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    height: 100vh;
+    padding: 26px 18px;
+    box-sizing: border-box;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .rf-tenant-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 6px 32px;
+    color: #fff;
+    font-size: 25px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .rf-tenant-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+    color: white;
+  }
+
+  .rf-tenant-nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rf-tenant-nav a {
+    display: block;
+    padding: 15px;
+    border-radius: 11px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .rf-tenant-nav a:hover,
+  .rf-tenant-nav a.active {
+    background: #252c4b;
+    color: #fff;
+  }
+
+  .rf-tenant-bottom {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .rf-tenant-back {
+    display: block;
+    padding: 13px;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .rf-tenant-bottom p {
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 18px;
+  }
+
+  .rf-tenant-shell > .tenant-wrap {
+    flex: 1;
+    width: calc(100% - 268px);
+    min-width: 0;
+    max-width: none;
+    margin: 0 0 0 268px;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .rf-tenant-shell .tenant-header {
+    margin: 0;
+    padding: 24px 30px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .rf-tenant-shell .tenant-header h1 {
+    color: #0f172a;
+    font-size: 25px;
+    margin: 0 0 8px;
+  }
+
+  .rf-tenant-shell .tenant-header .tenant-actions {
+    margin-top: 0;
+  }
+
+  .rf-tenant-shell .muted {
+    color: #64748b;
+    opacity: 1;
+  }
+
+  .rf-tenant-shell .tenant-stats {
+    margin: 26px 30px 24px;
+    gap: 18px;
+  }
+
+  .rf-tenant-shell .tenant-card {
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
+    min-width: 0;
+  }
+
+  .rf-tenant-shell .tenant-card::before {
+    content: "♙";
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 20px;
+  }
+
+  .rf-tenant-shell .tenant-card:nth-child(2)::before {
+    content: "✓";
+  }
+
+  .rf-tenant-shell .tenant-card:nth-child(3)::before {
+    content: "−";
+  }
+
+  .rf-tenant-shell .tenant-card:nth-child(4)::before {
+    content: "₹";
+  }
+
+  .rf-tenant-shell .stat-number {
+    margin-top: 12px;
+    color: #0f172a;
+    font-size: 27px;
+    overflow-wrap: anywhere;
+  }
+
+  .rf-tenant-shell .tenant-layout {
+    margin: 0 30px 30px;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .rf-tenant-shell .tenant-panel {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+  }
+
+  .rf-tenant-shell .tenant-btn {
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 10px;
+    padding: 11px 15px;
+  }
+
+  .rf-tenant-shell .tenant-btn:hover {
+    background: #4338ca;
+  }
+
+  .rf-tenant-shell .tenant-btn.secondary {
+    background: #eef2ff;
+    color: #3730a3;
+  }
+
+  .rf-tenant-shell .tenant-btn.danger {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .rf-tenant-shell .tenant-btn.small {
+    padding: 7px 10px;
+  }
+
+  .rf-tenant-shell input,
+  .rf-tenant-shell select,
+  .rf-tenant-shell textarea {
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    background: white;
+    color: #0f172a;
+  }
+
+  .rf-tenant-shell input:focus,
+  .rf-tenant-shell select:focus,
+  .rf-tenant-shell textarea:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+
+  .rf-tenant-shell .tenant-table th {
+    background: #f8fafc;
+    color: #64748b;
+  }
+
+  .rf-tenant-shell .tenant-table th,
+  .rf-tenant-shell .tenant-table td {
+    border-bottom-color: #e2e8f0;
+  }
+
+  .rf-tenant-shell #tenantMessage:empty {
+    display: none;
+  }
+
+  .rf-tenant-shell #tenantMessage:not(:empty) {
+    margin: 20px 30px 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  .rf-tenant-shell #tenantMessage.error {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+
+  .rf-tenant-shell #tenantMessage.success {
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  @media (max-width: 1200px) {
+    .rf-tenant-shell .tenant-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rf-tenant-shell .tenant-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .rf-tenant-shell {
+      display: block;
+    }
+
+    .rf-tenant-sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 18px;
+    }
+
+    .rf-tenant-brand {
+      margin: 0 0 16px;
+    }
+
+    .rf-tenant-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .rf-tenant-nav a {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rf-tenant-bottom {
+      display: none;
+    }
+
+    .rf-tenant-shell > .tenant-wrap {
+      width: 100%;
+      margin: 0;
+    }
+
+    .rf-tenant-shell .tenant-header {
+      padding: 20px;
+    }
+
+    .rf-tenant-shell .tenant-stats {
+      margin: 20px 16px;
+    }
+
+    .rf-tenant-shell .tenant-layout {
+      margin: 0 16px 24px;
+    }
+
+    .rf-tenant-shell #tenantMessage:not(:empty) {
+      margin: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .rf-tenant-shell .tenant-card {
+      padding: 16px;
+    }
+
+    .rf-tenant-shell .stat-number {
+      font-size: 22px;
+    }
+
+    .rf-tenant-shell .tenant-panel {
+      padding: 16px;
+    }
+
+    .rf-tenant-shell .tenant-stats {
+      gap: 10px;
+    }
+
+    .rf-tenant-shell .tenant-filters {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const main = document.querySelector("main.tenant-wrap");
+
+    if (!main || document.getElementById("rfTenantShell")) return;
+
+    const shell = document.createElement("div");
+    shell.id = "rfTenantShell";
+    shell.className = "rf-tenant-shell";
+
+    const sidebar = document.createElement("aside");
+    sidebar.className = "rf-tenant-sidebar";
+
+    sidebar.innerHTML = `
+      <a href="dashboard.html" class="rf-tenant-brand">
+        <span class="rf-tenant-mark">R</span>
+        RoomFlow
+      </a>
+
+      <nav class="rf-tenant-nav" aria-label="Main navigation">
+        <a href="dashboard.html">▦ Dashboard</a>
+        <a href="properties.html">⌂ Properties</a>
+        <a href="rooms.html">▣ Rooms</a>
+        <a href="tenants.html" class="active" aria-current="page">
+          ♙ Tenants
+        </a>
+        <a href="rent.html">₹ Rent Manager</a>
+        <a href="electricity.html">⚡ Electricity</a>
+        <a href="payments.html">▤ Payments</a>
+        <a href="profile.html">♙ My Profile</a>
+      </nav>
+
+      <div class="rf-tenant-bottom">
+        <a href="dashboard.html" class="rf-tenant-back">
+          ← Dashboard
+        </a>
+        <p>RoomFlow · Jatav Industries</p>
+      </div>
+    `;
+
+    main.parentNode.insertBefore(shell, main);
+    shell.append(sidebar, main);
+  })();
+</script>
 </body>
 </html>
