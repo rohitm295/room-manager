@@ -1,441 +1,723 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563eb">
-  <title>Payment History | RoomFlow</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <title>Payments | RoomFlow</title>
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#f5f7fb;color:#172033;font-family:Arial,sans-serif}
-    .page{max-width:1200px;margin:auto;padding:24px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:25px}
-    .brand{font-size:23px;font-weight:800;color:#2563eb}
-    .nav{display:flex;gap:14px;flex-wrap:wrap}
-    .nav a{color:#2563eb;text-decoration:none;font-weight:600}
-    h1{font-size:28px;margin:0 0 8px}
-    .muted{color:#64748b;font-size:14px;line-height:1.5}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0}
-    .card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px #0f172a08}
-    .stat-label{font-size:14px;color:#64748b}
-    .stat-value{font-size:27px;font-weight:800;margin-top:10px;overflow-wrap:anywhere}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .field{display:flex;flex-direction:column;gap:7px}
-    .field label{font-size:14px;font-weight:700}
-    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:#fff;color:#172033}
-    button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .primary{background:#2563eb;color:white}
-    .secondary{background:#e2e8f0;color:#1e293b}
-    .danger{background:#fee2e2;color:#991b1b}
-    .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-    .message{font-size:14px;margin-top:12px;line-height:1.5}
-    .hidden{display:none!important}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;min-width:850px}
-    th,td{text-align:left;padding:13px 11px;border-bottom:1px solid #e2e8f0;font-size:14px;white-space:nowrap}
-    th{background:#f8fafc;color:#475569}
-    .pill{display:inline-block;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700}
-    .paid{background:#dcfce7;color:#166534}
-    .empty{text-align:center;padding:28px;color:#64748b}
-    .small-btn{padding:7px 10px;margin:2px;font-size:12px}
-    .section-title{margin:0 0 7px;font-size:20px}
-    @media(max-width:700px){.page{padding:14px}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}h1{font-size:24px}.stat-value{font-size:24px}}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fc;
+      color: #0f172a;
+      font-family: Arial, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .primary { background: #4f46e5; color: white; }
+    .secondary { background: #eef2ff; color: #3730a3; }
+    .danger { background: #fee2e2; color: #991b1b; }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 268px;
+      height: 100vh;
+      padding: 26px 18px;
+      background: #111827;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 6px 30px;
+      color: white;
+      font-size: 25px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .brand span {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+    }
+    nav { display: grid; gap: 8px; }
+    nav a {
+      padding: 15px;
+      border-radius: 11px;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    nav a:hover, nav a.active {
+      background: #252c4b;
+      color: white;
+    }
+    .brand-note {
+      margin-top: auto;
+      padding-top: 24px;
+      color: #94a3b8;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .page { margin-left: 268px; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 24px 30px;
+      border-bottom: 1px solid #e2e8f0;
+      background: white;
+    }
+    h1 { margin: 0 0 8px; font-size: 25px; }
+    h2 { margin: 0 0 16px; font-size: 20px; }
+    .muted {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .content { padding: 30px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .card {
+      min-width: 0;
+      padding: 24px;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      background: white;
+    }
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 21px;
+    }
+    .stat-value {
+      margin-top: 12px;
+      font-size: 27px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+    .toolbar, .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      background: white;
+      color: #0f172a;
+    }
+    .toolbar input, .toolbar select {
+      width: auto;
+      min-width: 160px;
+    }
+    input:focus, select:focus {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+    .table-wrap { overflow-x: auto; margin-top: 18px; }
+    table {
+      width: 100%;
+      min-width: 750px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 14px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th { background: #f8fafc; color: #64748b; }
+    .small-btn { padding: 7px 10px; margin: 2px; font-size: 12px; }
+    .message { margin-top: 16px; font-size: 14px; line-height: 1.5; }
+    .message:empty { display: none; }
+    .empty { padding: 30px; text-align: center; color: #64748b; }
+    .footer { padding-top: 24px; text-align: center; }
+
+    dialog {
+      width: min(620px, calc(100% - 32px));
+      max-height: 90vh;
+      margin: auto;
+      padding: 24px;
+      border: 0;
+      border-radius: 18px;
+      overflow: auto;
+      color: #0f172a;
+    }
+    dialog::backdrop { background: #0f172a99; }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+    .dialog-head h2 { margin-bottom: 8px; }
+    .close { padding: 5px 12px; font-size: 22px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 13px; font-weight: 600; }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding: 18px;
+      }
+      .brand { margin-bottom: 16px; }
+      nav { display: flex; overflow: auto; }
+      nav a { flex-shrink: 0; white-space: nowrap; }
+      .brand-note { display: none; }
+      .page { margin-left: 0; }
+      .content { padding: 18px; }
+      .topbar { padding: 20px; }
+    }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .card, dialog { padding: 18px; }
+      #addBtn { width: 100%; }
+      .toolbar input, .toolbar select { width: 100%; }
+    }
   </style>
 </head>
+
 <body>
-<main class="page">
-  <header class="topbar">
-    <div class="brand">RoomFlow</div>
-    <nav class="nav" aria-label="Main navigation">
-      <a href="home.html">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="rent.html">Rent</a>
-      <a href="electricity.html">Electricity</a>
-      <a href="settings.html">Settings</a>
+  <aside class="sidebar">
+    <a class="brand" href="dashboard.html"><span>R</span>RoomFlow</a>
+
+    <nav aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html">▣ Rooms</a>
+      <a href="tenants.html">♙ Tenants</a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html" class="active" aria-current="page">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
     </nav>
-  </header>
 
-  <section>
-    <h1>Payment History</h1>
-    <p class="muted">Record payments you have actually made for rent and electricity.</p>
-  </section>
+    <p class="brand-note">RoomFlow · Jatav Industries</p>
+  </aside>
 
-  <section class="grid" aria-label="Payment summary">
-    <div class="card">
-      <div class="stat-label">Total Payments Recorded</div>
-      <div class="stat-value" id="totalPayments">₹0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Payments This Month</div>
-      <div class="stat-value" id="monthPayments">₹0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Number of Payments</div>
-      <div class="stat-value" id="paymentCount">0</div>
-    </div>
-  </section>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>Payment History</h1>
+        <p class="muted">Keep a record of completed payments.</p>
+      </div>
+      <button type="button" class="primary" id="addBtn" disabled>
+        + Add Payment
+      </button>
+    </header>
 
-  <section class="card">
-    <h2 class="section-title" id="formHeading">Add Payment Record</h2>
-    <p class="muted">This page records payments separately. It does not automatically mark a rent or electricity bill as paid.</p>
+    <div class="content">
+      <section class="grid" aria-label="Payment summary">
+        <div class="card">
+          <div class="stat-icon">₹</div>
+          <div class="muted">Total Payments — All Records</div>
+          <div class="stat-value" id="totalPayments">—</div>
+        </div>
+        <div class="card">
+          <div class="stat-icon">✓</div>
+          <div class="muted">Payments — Selected Payment Month</div>
+          <div class="stat-value" id="monthPayments">—</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Saved Payments</h2>
+        <p class="muted">
+          These entries do not automatically mark Rent or Electricity bills as Paid.
+        </p>
+
+        <div class="toolbar">
+          <input id="monthFilter" type="month"
+                 aria-label="Filter by payment month">
+          <select id="filterCategory" aria-label="Filter by category">
+            <option value="All">All categories</option>
+            <option>Rent</option>
+            <option>Electricity</option>
+            <option>Other</option>
+          </select>
+          <button type="button" class="secondary" id="refreshBtn" disabled>
+            Refresh
+          </button>
+        </div>
+
+        <p id="historyMessage" class="message" role="status"></p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Payment Date</th>
+                <th>Category</th>
+                <th>Billing Month</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="paymentRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="muted footer">RoomFlow — Powered by Jatav Industries</p>
+    </div>
+  </main>
+
+  <dialog id="paymentDialog" aria-labelledby="formHeading">
+    <div class="dialog-head">
+      <div>
+        <h2 id="formHeading">Add Payment</h2>
+        <p class="muted">Enter a payment that has already been completed.</p>
+      </div>
+      <button type="button" class="secondary close" id="closeBtn"
+              aria-label="Close payment form">×</button>
+    </div>
 
     <form id="paymentForm">
       <input type="hidden" id="recordId">
+
       <div class="form-grid">
         <div class="field">
-          <label for="paymentDate">Payment Date</label>
+          <label for="paymentDate">Payment Date *</label>
           <input id="paymentDate" type="date" required>
         </div>
         <div class="field">
-          <label for="amount">Amount Paid (₹)</label>
-          <input id="amount" type="number" min="0.01" max="1000000000" step="0.01" placeholder="e.g. 8000" required>
+          <label for="amount">Amount (₹) *</label>
+          <input id="amount" type="number" min="0.01"
+                 max="1000000000" step="0.01" required>
         </div>
         <div class="field">
-          <label for="category">Payment Category</label>
+          <label for="category">Category *</label>
           <select id="category" required>
-            <option value="Rent">Rent</option>
-            <option value="Electricity">Electricity</option>
-            <option value="Other">Other</option>
+            <option>Rent</option>
+            <option>Electricity</option>
+            <option>Other</option>
           </select>
         </div>
         <div class="field">
-          <label for="billingMonth">Related Billing Month</label>
+          <label for="billingMonth">Billing Month *</label>
           <input id="billingMonth" type="month" required>
         </div>
         <div class="field">
-          <label for="paymentMethod">Payment Method</label>
+          <label for="paymentMethod">Payment Method *</label>
           <select id="paymentMethod" required>
-            <option value="UPI">UPI</option>
-            <option value="Cash">Cash</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Debit/Credit Card">Debit/Credit Card</option>
-            <option value="Other">Other</option>
+            <option value="">Select method</option>
+            <option>UPI</option>
+            <option>Cash</option>
+            <option>Bank Transfer</option>
+            <option>Debit/Credit Card</option>
+            <option>Other</option>
           </select>
         </div>
-        <div class="field">
-          <label for="reference">Transaction Reference (optional)</label>
-          <input id="reference" type="text" maxlength="100" placeholder="UPI reference or receipt number">
-        </div>
-        <div class="field" style="grid-column:1/-1">
-          <label for="notes">Notes (optional)</label>
-          <textarea id="notes" rows="2" maxlength="500" placeholder="Payment details"></textarea>
-        </div>
       </div>
+
+      <p class="message" id="formMessage" role="status"></p>
+
       <div class="actions">
-        <button class="primary" id="submitBtn" type="submit">Save Payment</button>
-        <button class="secondary hidden" id="cancelEdit" type="button">Cancel Edit</button>
+        <button type="submit" class="primary" id="submitBtn">Save Payment</button>
+        <button type="button" class="secondary" id="cancelBtn">Cancel</button>
       </div>
-      <div class="message" id="formMessage" role="status"></div>
     </form>
-  </section>
+  </dialog>
 
-  <section class="card">
-    <h2 class="section-title">All Payments</h2>
-    <p class="muted">Search and filter your saved payment records.</p>
-    <div class="form-grid">
-      <div class="field">
-        <label for="searchInput">Search</label>
-        <input id="searchInput" type="search" placeholder="Search month, notes, reference...">
-      </div>
-      <div class="field">
-        <label for="filterCategory">Category</label>
-        <select id="filterCategory">
-          <option value="All">All Categories</option>
-          <option value="Rent">Rent</option>
-          <option value="Electricity">Electricity</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="secondary" id="exportBtn" type="button">Export CSV</button>
-    </div>
-    <div class="message" id="historyMessage" role="status"></div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Billing Month</th>
-            <th>Amount</th>
-            <th>Method</th>
-            <th>Reference</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="paymentRows"></tbody>
-      </table>
-      <div class="empty hidden" id="emptyState">No payment records found.</div>
-    </div>
-  </section>
+  <script type="module">
+    import { initializeApp, getApps, getApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDocs,
+      addDoc, updateDoc, deleteDoc, serverTimestamp
+    } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-  <p class="muted" style="text-align:center">RoomFlow · Powered by Jatav Industries</p>
-</main>
-
-<script type="module">
-  import { initializeApp, getApps, getApp }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import {
-    getFirestore, collection, doc, getDocs, addDoc, updateDoc,
-    deleteDoc, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
-    authDomain: "roomflow-6c920.firebaseapp.com",
-    projectId: "roomflow-6c920",
-    storageBucket: "roomflow-6c920.firebasestorage.app",
-    messagingSenderId: "827966111309",
-    appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-    measurementId: "G-1YGPS03PKC"
-  };
-
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const $ = id => document.getElementById(id);
-
-  let currentUser = null;
-  let records = [];
-  let busy = false;
-
-  const today = () => {
-    const d = new Date();
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-      .toISOString().slice(0, 10);
-  };
-  const currentMonth = () => today().slice(0, 7);
-  const money = n => new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR", maximumFractionDigits: 2
-  }).format(Number(n) || 0);
-
-  function message(id, text, error = false) {
-    $(id).textContent = text;
-    $(id).style.color = error ? "#b91c1c" : "#047857";
-  }
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;",
-      '"': "&quot;", "'": "&#39;"
-    }[ch]));
-  }
-
-  function resetForm() {
-    $("paymentForm").reset();
-    $("recordId").value = "";
-    $("paymentDate").value = today();
-    $("billingMonth").value = currentMonth();
-    $("formHeading").textContent = "Add Payment Record";
-    $("submitBtn").textContent = "Save Payment";
-    $("cancelEdit").classList.add("hidden");
-  }
-
-  function render() {
-    const search = $("searchInput").value.trim().toLowerCase();
-    const category = $("filterCategory").value;
-
-    const visible = records.filter(r => {
-      const text = `${r.paymentDate} ${r.billingMonth} ${r.notes || ""} ${r.reference || ""} ${r.paymentMethod || ""}`.toLowerCase();
-      return text.includes(search) &&
-        (category === "All" || r.category === category);
+    const app = getApps().length ? getApp() : initializeApp({
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
     });
 
-    $("paymentRows").innerHTML = visible.map(r => `
-      <tr>
-        <td>${escapeHTML(r.paymentDate)}</td>
-        <td>${escapeHTML(r.category)}</td>
-        <td>${escapeHTML(r.billingMonth)}</td>
-        <td>${money(r.amount)}</td>
-        <td>${escapeHTML(r.paymentMethod)}</td>
-        <td>${escapeHTML(r.reference || "—")}</td>
-        <td>
-          <button class="small-btn secondary" data-action="edit" data-id="${escapeHTML(r.id)}">Edit</button>
-          <button class="small-btn danger" data-action="delete" data-id="${escapeHTML(r.id)}">Delete</button>
-        </td>
-      </tr>
-    `).join("");
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+    const dialog = $("paymentDialog");
 
-    $("emptyState").classList.toggle("hidden", visible.length !== 0);
-    $("totalPayments").textContent = money(
-      records.reduce((sum, r) => sum + Number(r.amount || 0), 0)
-    );
-    $("monthPayments").textContent = money(
-      records.reduce((sum, r) =>
-        sum + (r.paymentDate?.slice(0, 7) === currentMonth()
-          ? Number(r.amount || 0) : 0), 0)
-    );
-    $("paymentCount").textContent = records.length.toLocaleString("en-IN");
-  }
+    let user = null;
+    let records = [];
+    let busy = false;
+    let loading = false;
+    let loaded = false;
 
-  async function loadRecords() {
-    if (!currentUser) return;
-    message("historyMessage", "Loading payment records...");
-    try {
-      const q = query(
-        collection(db, "users", currentUser.uid, "paymentRecords"),
-        orderBy("paymentDate", "desc")
+    function today() {
+      const date = new Date();
+      return new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 10);
+    }
+
+    const monthNow = () => today().slice(0, 7);
+
+    const money = value => new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2
+    }).format(Number(value) || 0);
+
+    const escapeHTML = value => String(value ?? "")
+      .replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
+
+    function message(id, text, error = false) {
+      $(id).textContent = text;
+      $(id).style.color = error ? "#b91c1c" : "#047857";
+    }
+
+    function controls() {
+      const locked = busy || loading || !user;
+      $("addBtn").disabled = locked || !loaded;
+      $("refreshBtn").disabled = locked;
+
+      ["submitBtn", "cancelBtn", "closeBtn"].forEach(id => {
+        $(id).disabled = busy;
+      });
+    }
+
+    function openForm(record = null) {
+      $("paymentForm").reset();
+      $("recordId").value = record?.id || "";
+      $("paymentDate").value = record?.paymentDate || today();
+      $("paymentDate").max = today();
+      $("amount").value = record?.amount ?? "";
+      $("category").value = record?.category || "Rent";
+      $("billingMonth").value = record?.billingMonth || monthNow();
+      $("paymentMethod").value = record?.paymentMethod || "";
+      $("formHeading").textContent = record ? "Edit Payment" : "Add Payment";
+      $("submitBtn").textContent = record ? "Update Payment" : "Save Payment";
+      message("formMessage", "");
+
+      dialog.showModal();
+      $("paymentDate").focus();
+    }
+
+    function render() {
+      if (!loaded) return;
+
+      const month = $("monthFilter").value;
+      const category = $("filterCategory").value;
+
+      const monthly = records.filter(record =>
+        !month || String(record.paymentDate || "").slice(0, 7) === month
       );
-      const snapshot = await getDocs(q);
-      records = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      render();
-      message("historyMessage", records.length
-        ? `${records.length} payment record(s) loaded.`
-        : "No payments recorded yet.");
-    } catch (error) {
-      console.error(error);
-      records = [];
-      render();
-      message("historyMessage",
-        "Could not load records. Check Firestore security rules and internet connection.", true);
+
+      const visible = monthly
+        .filter(record => category === "All" || record.category === category)
+        .sort((a, b) =>
+          String(b.paymentDate || "").localeCompare(String(a.paymentDate || ""))
+        );
+
+      $("totalPayments").textContent = money(
+        records.reduce((sum, record) => sum + Number(record.amount || 0), 0)
+      );
+
+      $("monthPayments").textContent = money(
+        monthly.reduce((sum, record) => sum + Number(record.amount || 0), 0)
+      );
+
+      $("paymentRows").innerHTML = visible.length
+        ? visible.map(record => `
+          <tr>
+            <td>${escapeHTML(record.paymentDate)}</td>
+            <td>${escapeHTML(record.category)}</td>
+            <td>${escapeHTML(record.billingMonth || "—")}</td>
+            <td>${money(record.amount)}</td>
+            <td>${escapeHTML(record.paymentMethod || "—")}</td>
+            <td>
+              <button type="button" class="secondary small-btn"
+                data-action="edit" data-id="${escapeHTML(record.id)}">
+                Edit
+              </button>
+              <button type="button" class="danger small-btn"
+                data-action="delete" data-id="${escapeHTML(record.id)}">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join("")
+        : '<tr><td colspan="6" class="empty">No payments for this selection.</td></tr>';
     }
-  }
 
-  $("paymentForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    if (!currentUser || busy) return;
+    async function loadRecords() {
+      if (!user || loading) return false;
 
-    const paymentDate = $("paymentDate").value;
-    const amount = Number($("amount").value);
-    const category = $("category").value;
-    const billingMonth = $("billingMonth").value;
+      loading = true;
+      controls();
+      message("historyMessage", "Loading payments...");
 
-    if (!paymentDate || !billingMonth || !Number.isFinite(amount) || amount <= 0) {
-      message("formMessage", "Enter a valid date, billing month and amount.", true);
-      return;
+      try {
+        const snapshot = await getDocs(
+          collection(db, "users", user.uid, "paymentRecords")
+        );
+
+        records = snapshot.docs.map(item => ({
+          ...item.data(),
+          id: item.id
+        }));
+
+        loaded = true;
+        render();
+
+        message(
+          "historyMessage",
+          records.length ? "Payments loaded." :
+            "No payments yet. Click + Add Payment."
+        );
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        message(
+          "historyMessage",
+          loaded
+            ? "Refresh failed. Previously loaded payments are still shown."
+            : "Could not load payments. Check connection and Firestore permissions.",
+          true
+        );
+        return false;
+      } finally {
+        loading = false;
+        controls();
+      }
     }
-    if (paymentDate > today()) {
-      message("formMessage", "Payment date cannot be in the future.", true);
-      return;
-    }
 
-    const id = $("recordId").value;
-    const data = {
-      paymentDate,
-      amount,
-      category,
-      billingMonth,
-      paymentMethod: $("paymentMethod").value,
-      reference: $("reference").value.trim().slice(0, 100),
-      notes: $("notes").value.trim().slice(0, 500),
-      updatedAt: serverTimestamp()
+    $("addBtn").onclick = () => {
+      if (!busy && !loading && loaded) openForm();
     };
 
-    busy = true;
-    $("submitBtn").disabled = true;
-    try {
-      if (id) {
-        if (!records.some(r => r.id === id)) throw new Error("Record not found.");
-        await updateDoc(doc(db, "users", currentUser.uid, "paymentRecords", id), data);
-        message("formMessage", "Payment record updated.");
-      } else {
-        await addDoc(collection(db, "users", currentUser.uid, "paymentRecords"), {
-          ...data, createdAt: serverTimestamp()
-        });
-        message("formMessage", "Payment record saved.");
-      }
-      resetForm();
-      await loadRecords();
-    } catch (error) {
-      console.error(error);
-      message("formMessage",
-        "Could not save the payment. Check Firestore rules and connection.", true);
-    } finally {
-      busy = false;
-      $("submitBtn").disabled = false;
-    }
-  });
+    $("refreshBtn").onclick = () => {
+      if (!busy) loadRecords();
+    };
 
-  $("cancelEdit").addEventListener("click", () => {
-    resetForm();
-    message("formMessage", "Edit cancelled.");
-  });
-
-  $("paymentRows").addEventListener("click", async event => {
-    const button = event.target.closest("button[data-action]");
-    if (!button || !currentUser || busy) return;
-
-    const r = records.find(item => item.id === button.dataset.id);
-    if (!r) return;
-
-    if (button.dataset.action === "edit") {
-      $("recordId").value = r.id;
-      $("paymentDate").value = r.paymentDate || "";
-      $("amount").value = r.amount ?? "";
-      $("category").value = r.category || "Rent";
-      $("billingMonth").value = r.billingMonth || "";
-      $("paymentMethod").value = r.paymentMethod || "UPI";
-      $("reference").value = r.reference || "";
-      $("notes").value = r.notes || "";
-      $("formHeading").textContent = "Edit Payment Record";
-      $("submitBtn").textContent = "Update Payment";
-      $("cancelEdit").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (!confirm(`Delete payment record dated ${r.paymentDate}? This cannot be undone.`)) return;
-
-    busy = true;
-    button.disabled = true;
-    try {
-      await deleteDoc(doc(db, "users", currentUser.uid, "paymentRecords", r.id));
-      message("historyMessage", "Payment record deleted.");
-      await loadRecords();
-    } catch (error) {
-      console.error(error);
-      message("historyMessage", "Could not delete record. Check Firestore rules.", true);
-    } finally {
-      busy = false;
-    }
-  });
-
-  $("searchInput").addEventListener("input", render);
-  $("filterCategory").addEventListener("change", render);
-
-  $("exportBtn").addEventListener("click", () => {
-    if (!records.length) {
-      message("historyMessage", "No payment records available to export.", true);
-      return;
-    }
-    const headers = [
-      "Payment Date", "Amount", "Category", "Billing Month",
-      "Payment Method", "Reference", "Notes"
-    ];
-    const cell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
-    const lines = [
-      headers.map(cell).join(","),
-      ...records.map(r => [
-        r.paymentDate, r.amount, r.category, r.billingMonth,
-        r.paymentMethod, r.reference, r.notes
-      ].map(cell).join(","))
-    ];
-    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], {
-      type: "text/csv;charset=utf-8;"
+    ["monthFilter", "filterCategory"].forEach(id => {
+      $(id).onchange = render;
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `roomflow-payments-${currentMonth()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
 
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      window.location.replace("login.html?next=payments.html");
-      return;
-    }
-    currentUser = user;
-    resetForm();
-    await loadRecords();
-  });
-</script>
+    ["closeBtn", "cancelBtn"].forEach(id => {
+      $(id).onclick = () => {
+        if (!busy) dialog.close();
+      };
+    });
+
+    dialog.addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
+
+    $("paymentForm").onsubmit = async event => {
+      event.preventDefault();
+      if (!user || busy || loading || !loaded) return;
+
+      const id = $("recordId").value;
+      const paymentDate = $("paymentDate").value;
+      const amount = Number($("amount").value);
+      const category = $("category").value;
+      const billingMonth = $("billingMonth").value;
+      const paymentMethod = $("paymentMethod").value;
+
+      const categories = ["Rent", "Electricity", "Other"];
+      const methods = ["UPI", "Cash", "Bank Transfer", "Debit/Credit Card", "Other"];
+
+      if (
+        !paymentDate || paymentDate > today() || !billingMonth ||
+        !Number.isFinite(amount) || amount <= 0 || amount > 1000000000 ||
+        !categories.includes(category) || !methods.includes(paymentMethod)
+      ) {
+        message(
+          "formMessage",
+          "Enter valid payment details. Payment date cannot be in the future.",
+          true
+        );
+        return;
+      }
+
+      if (id && !records.some(record => record.id === id)) {
+        message("formMessage", "Record not found. Refresh and try again.", true);
+        return;
+      }
+
+      const duplicate = !id && records.some(record =>
+        record.paymentDate === paymentDate &&
+        Number(record.amount) === amount &&
+        record.category === category &&
+        record.billingMonth === billingMonth &&
+        record.paymentMethod === paymentMethod
+      );
+
+      if (
+        duplicate &&
+        !confirm("A similar payment is already saved. Add another entry?")
+      ) return;
+
+      const data = {
+        paymentDate,
+        amount,
+        category,
+        billingMonth,
+        paymentMethod,
+        updatedAt: serverTimestamp()
+      };
+
+      busy = true;
+      controls();
+
+      try {
+        if (id) {
+          // Existing notes/reference fields are preserved.
+          await updateDoc(
+            doc(db, "users", user.uid, "paymentRecords", id),
+            data
+          );
+        } else {
+          await addDoc(
+            collection(db, "users", user.uid, "paymentRecords"),
+            { ...data, createdAt: serverTimestamp() }
+          );
+        }
+
+        dialog.close();
+        const refreshed = await loadRecords();
+
+        message(
+          "historyMessage",
+          refreshed
+            ? "Payment saved."
+            : "Payment saved, but refresh failed. Click Refresh.",
+          !refreshed
+        );
+      } catch (error) {
+        console.error(error);
+        message(
+          "formMessage",
+          "Could not save payment. Check connection and permissions.",
+          true
+        );
+      } finally {
+        busy = false;
+        controls();
+      }
+    };
+
+    $("paymentRows").onclick = async event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button || !user || busy || loading) return;
+
+      const record = records.find(item => item.id === button.dataset.id);
+      if (!record) return;
+
+      if (button.dataset.action === "edit") {
+        openForm(record);
+        return;
+      }
+
+      if (
+        button.dataset.action !== "delete" ||
+        !confirm(
+          `Delete payment dated ${record.paymentDate}? This cannot be undone.`
+        )
+      ) return;
+
+      busy = true;
+      controls();
+
+      try {
+        await deleteDoc(
+          doc(db, "users", user.uid, "paymentRecords", record.id)
+        );
+
+        const refreshed = await loadRecords();
+
+        message(
+          "historyMessage",
+          refreshed
+            ? "Payment deleted."
+            : "Payment deleted, but refresh failed. Click Refresh.",
+          !refreshed
+        );
+      } catch (error) {
+        console.error(error);
+        message(
+          "historyMessage",
+          "Could not delete payment. Check connection and permissions.",
+          true
+        );
+      } finally {
+        busy = false;
+        controls();
+      }
+    };
+
+    $("monthFilter").value = monthNow();
+    controls();
+
+    onAuthStateChanged(auth, async account => {
+      if (!account) {
+        user = null;
+        location.replace("login.html?next=payments.html");
+        return;
+      }
+
+      user = account;
+      await loadRecords();
+    });
+  </script>
 </body>
 </html>
