@@ -1,4 +1,3 @@
-"AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -891,6 +890,342 @@
       await loadProperties();
     });
   </script>
+  <style>
+  body {
+    margin: 0;
+    background: #f6f8fc;
+    color: #0f172a;
+  }
+
+  .rf-property-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .rf-property-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    height: 100vh;
+    padding: 26px 18px;
+    box-sizing: border-box;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .rf-property-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 6px 32px;
+    color: white;
+    font-size: 25px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .rf-property-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+    color: white;
+  }
+
+  .rf-property-nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rf-property-nav a {
+    display: block;
+    padding: 15px;
+    border-radius: 11px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .rf-property-nav a:hover,
+  .rf-property-nav a.active {
+    background: #252c4b;
+    color: white;
+  }
+
+  .rf-property-bottom {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .rf-property-back {
+    display: block;
+    padding: 13px;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .rf-property-bottom p {
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .rf-property-shell > .properties-page {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    width: calc(100% - 268px);
+    margin: 0 0 0 268px;
+    padding: 30px;
+    box-sizing: border-box;
+  }
+
+  .rf-property-shell .page-header {
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: white;
+    margin-bottom: 24px;
+  }
+
+  .rf-property-shell .page-header h1 {
+    font-size: 25px;
+    color: #0f172a;
+  }
+
+  .rf-property-shell .page-header p {
+    color: #64748b;
+    opacity: 1;
+    line-height: 1.6;
+  }
+
+  .rf-property-shell .summary-grid {
+    gap: 18px;
+  }
+
+  .rf-property-shell .summary-card {
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
+  }
+
+  .rf-property-shell .summary-card::before {
+    content: "⌂";
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 21px;
+  }
+
+  .rf-property-shell .summary-card:nth-child(2)::before {
+    content: "✓";
+  }
+
+  .rf-property-shell .summary-card:nth-child(3)::before {
+    content: "₹";
+  }
+
+  .rf-property-shell .summary-card span {
+    color: #64748b;
+    opacity: 1;
+  }
+
+  .rf-property-shell .summary-card strong {
+    color: #0f172a;
+    font-size: 27px;
+  }
+
+  .rf-property-shell .btn-primary {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: white;
+    border-radius: 10px;
+  }
+
+  .rf-property-shell .btn-primary:hover {
+    background: #4338ca;
+    border-color: #4338ca;
+  }
+
+  .rf-property-shell .toolbar {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: white;
+  }
+
+  .rf-property-shell input,
+  .rf-property-shell select,
+  .rf-property-shell textarea {
+    border-color: #dbe2ea;
+    border-radius: 10px;
+    background: white;
+    color: #0f172a;
+  }
+
+  .rf-property-shell input:focus,
+  .rf-property-shell select:focus,
+  .rf-property-shell textarea:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+
+  .rf-property-shell .property-card,
+  .rf-property-shell .property-form {
+    padding: 24px;
+    border-color: #e2e8f0;
+    border-radius: 16px;
+    background: white;
+  }
+
+  .rf-property-shell .property-grid > .empty-state {
+    grid-column: 1 / -1;
+    padding: 48px 20px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    background: white;
+    text-align: center;
+    color: #64748b;
+  }
+
+  @media (max-width: 1100px) {
+    .rf-property-shell .property-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .rf-property-shell {
+      display: block;
+    }
+
+    .rf-property-sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 18px;
+    }
+
+    .rf-property-brand {
+      margin: 0 0 16px;
+    }
+
+    .rf-property-nav {
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .rf-property-nav a {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rf-property-bottom {
+      display: none;
+    }
+
+    .rf-property-shell > .properties-page {
+      width: 100%;
+      margin: 0;
+      padding: 18px;
+    }
+
+    .rf-property-shell .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .rf-property-shell .page-header,
+    .rf-property-shell .summary-card,
+    .rf-property-shell .property-card,
+    .rf-property-shell .property-form {
+      padding: 18px;
+    }
+
+    .rf-property-shell #addPropertyBtn {
+      width: 100%;
+    }
+
+    .rf-property-shell .toolbar input,
+    .rf-property-shell .toolbar select {
+      width: 100%;
+      min-width: 0;
+      flex: auto;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    function setupPropertiesLayout() {
+      if (document.getElementById("rfPropertyShell")) return;
+
+      const main = document.querySelector("main.properties-page");
+      if (!main) return;
+
+      const shell = document.createElement("div");
+      shell.id = "rfPropertyShell";
+      shell.className = "rf-property-shell";
+
+      const sidebar = document.createElement("aside");
+      sidebar.className = "rf-property-sidebar";
+
+      sidebar.innerHTML = `
+        <a href="dashboard.html" class="rf-property-brand">
+          <span class="rf-property-mark">R</span>
+          RoomFlow
+        </a>
+
+        <nav class="rf-property-nav" aria-label="Main navigation">
+          <a href="dashboard.html">▦ Dashboard</a>
+          <a href="properties.html" class="active" aria-current="page">
+            ⌂ Properties
+          </a>
+          <a href="rooms.html">▣ Rooms</a>
+          <a href="tenants.html">♙ Tenants</a>
+          <a href="rent.html">₹ Rent Manager</a>
+          <a href="electricity.html">⚡ Electricity</a>
+          <a href="payments.html">▤ Payments</a>
+          <a href="profile.html">♙ My Profile</a>
+        </nav>
+
+        <div class="rf-property-bottom">
+          <a href="dashboard.html" class="rf-property-back">
+            ← Dashboard
+          </a>
+          <p>RoomFlow · Jatav Industries</p>
+        </div>
+      `;
+
+      main.parentNode.insertBefore(shell, main);
+      shell.append(sidebar, main);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupPropertiesLayout);
+    } else {
+      setupPropertiesLayout();
+    }
+  })();
+</script>
 </body>
 </html>
 ```
