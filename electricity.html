@@ -1,569 +1,812 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2563eb">
-  <title>Electricity Manager | RoomFlow</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <title>Electricity | RoomFlow</title>
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#f5f7fb;color:#172033;font-family:Arial,sans-serif}
-    .page{max-width:1200px;margin:auto;padding:24px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:25px}
-    .brand{font-size:23px;font-weight:800;color:#2563eb}
-    .nav{display:flex;gap:14px;flex-wrap:wrap}
-    .nav a{color:#2563eb;text-decoration:none;font-weight:600}
-    h1{font-size:28px;margin:0 0 8px}
-    .muted{color:#64748b;font-size:14px;line-height:1.5}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0}
-    .card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px #0f172a08}
-    .stat-label{font-size:14px;color:#64748b}
-    .stat-value{font-size:27px;font-weight:800;margin-top:10px;overflow-wrap:anywhere}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .field{display:flex;flex-direction:column;gap:7px}
-    .field label{font-size:14px;font-weight:700}
-    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:#fff;color:#172033}
-    button{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .primary{background:#2563eb;color:white}
-    .secondary{background:#e2e8f0;color:#1e293b}
-    .danger{background:#fee2e2;color:#991b1b}
-    .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-    .message{font-size:14px;margin-top:12px;line-height:1.5}
-    .hidden{display:none!important}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;min-width:850px}
-    th,td{text-align:left;padding:13px 11px;border-bottom:1px solid #e2e8f0;font-size:14px;white-space:nowrap}
-    th{background:#f8fafc;color:#475569}
-    .pill{display:inline-block;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700}
-    .paid{background:#dcfce7;color:#166534}
-    .pending{background:#fef3c7;color:#92400e}
-    .overdue{background:#fee2e2;color:#991b1b}
-    .small-btn{padding:7px 10px;margin:2px;font-size:12px}
-    .empty{text-align:center;padding:28px;color:#64748b}
-    .section-title{margin:0 0 7px;font-size:20px}
-    .calculation{background:#eff6ff;border-radius:10px;padding:15px;margin-top:17px}
-    .calc-line{display:flex;justify-content:space-between;gap:12px;padding:5px 0}
-    @media(max-width:700px){.page{padding:14px}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}h1{font-size:24px}.stat-value{font-size:24px}}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f6f8fc;
+      color: #0f172a;
+      font-family: Arial, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 15px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .primary { background: #4f46e5; color: white; }
+    .secondary { background: #eef2ff; color: #3730a3; }
+    .danger { background: #fee2e2; color: #991b1b; }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 268px;
+      height: 100vh;
+      background: #111827;
+      padding: 26px 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      color: white;
+      font-size: 25px;
+      font-weight: 800;
+      text-decoration: none;
+      margin: 0 6px 30px;
+    }
+    .brand span {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+    }
+    nav { display: grid; gap: 8px; }
+    nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 15px;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    nav a:hover, nav a.active { background: #252c4b; color: white; }
+    .brand-note {
+      margin-top: auto;
+      padding-top: 24px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .page { margin-left: 268px; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: white;
+      padding: 24px 30px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    h1 { font-size: 25px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 0 0 16px; }
+    .muted {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .content { padding: 30px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .card {
+      padding: 24px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      min-width: 0;
+    }
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 21px;
+      margin-bottom: 16px;
+    }
+    .stat-value {
+      font-size: 27px;
+      font-weight: 800;
+      margin-top: 12px;
+      overflow-wrap: anywhere;
+    }
+    .toolbar, .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .toolbar input, .toolbar select {
+      width: auto;
+      min-width: 160px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      background: white;
+      color: #0f172a;
+    }
+    input:focus, select:focus {
+      outline: 2px solid #6366f1;
+      outline-offset: 2px;
+    }
+    .table-wrap { overflow-x: auto; margin-top: 18px; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    th, td {
+      padding: 14px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th { background: #f8fafc; color: #64748b; }
+    .pill {
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .paid { background: #dcfce7; color: #166534; }
+    .pending { background: #fef3c7; color: #92400e; }
+    .small-btn { padding: 7px 10px; margin: 2px; font-size: 12px; }
+    .message { font-size: 14px; line-height: 1.5; margin-top: 16px; }
+    .message:empty { display: none; }
+    .empty { text-align: center; padding: 30px; color: #64748b; }
+
+    dialog {
+      width: min(620px, calc(100% - 32px));
+      max-height: 90vh;
+      margin: auto;
+      padding: 24px;
+      border: 0;
+      border-radius: 18px;
+      overflow: auto;
+      color: #0f172a;
+    }
+    dialog::backdrop { background: #0f172a99; }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+    .dialog-head h2 { margin-bottom: 8px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 13px; font-weight: 600; }
+    .calculation {
+      padding: 16px;
+      background: #eef2ff;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    .calc-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 7px 0;
+    }
+    .calc-line[hidden] { display: none; }
+    .close { font-size: 22px; padding: 5px 12px; }
+    .footer { text-align: center; padding-top: 24px; }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 800px) {
+      .sidebar { position: static; width: 100%; height: auto; padding: 18px; }
+      .brand { margin-bottom: 16px; }
+      nav { display: flex; overflow: auto; }
+      nav a { flex-shrink: 0; white-space: nowrap; }
+      .brand-note { display: none; }
+      .page { margin-left: 0; }
+      .content { padding: 18px; }
+      .topbar { padding: 20px; }
+    }
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .card, dialog { padding: 18px; }
+      #addBtn { width: 100%; }
+      .toolbar input, .toolbar select { width: 100%; }
+    }
   </style>
 </head>
+
 <body>
-<main class="page">
-  <header class="topbar">
-    <div class="brand">RoomFlow</div>
-    <nav class="nav" aria-label="Main navigation">
-      <a href="home.html">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="rent.html">Rent Manager</a>
-      <a href="settings.html">Settings</a>
+  <aside class="sidebar">
+    <a class="brand" href="dashboard.html"><span>R</span>RoomFlow</a>
+    <nav aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html">▣ Rooms</a>
+      <a href="tenants.html">♙ Tenants</a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html" class="active" aria-current="page">
+        ⚡ Electricity
+      </a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
     </nav>
-  </header>
+    <p class="brand-note">RoomFlow · Jatav Industries</p>
+  </aside>
 
-  <section>
-    <h1>Electricity Manager</h1>
-    <p class="muted">Record meter readings, calculate electricity bills and track payments.</p>
-  </section>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>Electricity Manager</h1>
+        <p class="muted">Meter readings, bills and payment status.</p>
+      </div>
+      <button type="button" class="primary" id="addBtn" disabled>
+        + Add Reading
+      </button>
+    </header>
 
-  <section class="grid" aria-label="Electricity summary">
-    <div class="card">
-      <div class="stat-label">Total Units Recorded</div>
-      <div class="stat-value" id="totalUnits">0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Total Pending Bills</div>
-      <div class="stat-value" id="pendingBills">₹0</div>
-    </div>
-    <div class="card">
-      <div class="stat-label">Paid This Month</div>
-      <div class="stat-value" id="paidBills">₹0</div>
-    </div>
-  </section>
+    <div class="content">
+      <section class="grid" aria-label="Electricity summary">
+        <div class="card">
+          <div class="stat-icon">⚡</div>
+          <div class="muted">Units — Selected Month</div>
+          <div class="stat-value" id="totalUnits">—</div>
+        </div>
+        <div class="card">
+          <div class="stat-icon">₹</div>
+          <div class="muted">Pending — Selected Month</div>
+          <div class="stat-value" id="pendingBills">—</div>
+        </div>
+        <div class="card">
+          <div class="stat-icon">✓</div>
+          <div class="muted">Paid Bills — Selected Month</div>
+          <div class="stat-value" id="paidBills">—</div>
+        </div>
+      </section>
 
-  <section class="card">
-    <h2 class="section-title" id="formHeading">Add Meter Reading</h2>
-    <p class="muted">Enter the reading for the selected billing month.</p>
+      <section class="card">
+        <h2>Bill History</h2>
+        <div class="toolbar">
+          <input id="monthFilter" type="month" aria-label="Billing month">
+          <select id="filterStatus" aria-label="Payment status">
+            <option value="All">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+          </select>
+          <button type="button" class="secondary" id="refreshBtn" disabled>
+            Refresh
+          </button>
+        </div>
+
+        <p class="message" id="historyMessage" role="status"></p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Previous</th>
+                <th>Current</th>
+                <th>Units</th>
+                <th>Rate</th>
+                <th>Bill</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="billRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="muted footer">RoomFlow — Powered by Jatav Industries</p>
+    </div>
+  </main>
+
+  <dialog id="billDialog" aria-labelledby="formHeading">
+    <div class="dialog-head">
+      <div>
+        <h2 id="formHeading">Add Meter Reading</h2>
+        <p class="muted">Bill = units consumed × rate per unit.</p>
+      </div>
+      <button type="button" class="secondary close" id="closeBtn"
+              aria-label="Close form">×</button>
+    </div>
 
     <form id="billForm">
       <input type="hidden" id="recordId">
 
       <div class="form-grid">
         <div class="field">
-          <label for="billMonth">Billing Month</label>
+          <label for="billMonth">Billing Month *</label>
           <input id="billMonth" type="month" required>
         </div>
-        <div class="field">
-          <label for="readingDate">Reading Date</label>
-          <input id="readingDate" type="date" required>
-        </div>
-        <div class="field">
-          <label for="previousReading">Previous Meter Reading</label>
-          <input id="previousReading" type="number" min="0" max="1000000000" step="any" placeholder="e.g. 1250" required>
-        </div>
-        <div class="field">
-          <label for="currentReading">Current Meter Reading</label>
-          <input id="currentReading" type="number" min="0" max="1000000000" step="any" placeholder="e.g. 1380" required>
-        </div>
-        <div class="field">
-          <label for="rate">Rate Per Unit (₹)</label>
-          <input id="rate" type="number" min="0" max="1000000" step="0.01" value="8" required>
-        </div>
-        <div class="field">
-          <label for="extraCharges">Extra Charges (₹)</label>
-          <input id="extraCharges" type="number" min="0" max="100000000" step="0.01" value="0" required>
-        </div>
+
         <div class="field">
           <label for="billStatus">Payment Status</label>
-          <select id="billStatus" required>
+          <select id="billStatus">
             <option value="Pending">Pending</option>
             <option value="Paid">Paid</option>
           </select>
         </div>
+
         <div class="field">
-          <label for="paidDate">Payment Date (if paid)</label>
-          <input id="paidDate" type="date">
+          <label for="previousReading">Previous Reading *</label>
+          <input id="previousReading" type="number" min="0"
+                 max="1000000000" step="any" placeholder="1250" required>
         </div>
+
         <div class="field">
-          <label for="paymentMethod">Payment Method</label>
-          <select id="paymentMethod">
-            <option value="">Not specified</option>
-            <option>Cash</option>
-            <option>UPI</option>
-            <option>Bank Transfer</option>
-            <option>Debit/Credit Card</option>
-            <option>Other</option>
-          </select>
+          <label for="currentReading">Current Reading *</label>
+          <input id="currentReading" type="number" min="0"
+                 max="1000000000" step="any" placeholder="1380" required>
         </div>
+
         <div class="field">
-          <label for="billDueDate">Bill Due Date</label>
-          <input id="billDueDate" type="date" required>
-        </div>
-        <div class="field" style="grid-column:1/-1">
-          <label for="notes">Notes (optional)</label>
-          <textarea id="notes" rows="2" maxlength="500" placeholder="e.g. Bill reference or meter notes"></textarea>
+          <label for="rate">Rate Per Unit (₹) *</label>
+          <input id="rate" type="number" min="0" max="1000000"
+                 step="0.01" placeholder="Enter your rate" required>
         </div>
       </div>
 
       <div class="calculation" aria-live="polite">
-        <div class="calc-line"><span>Units Consumed</span><strong id="previewUnits">0</strong></div>
-        <div class="calc-line"><span>Energy Charges</span><strong id="previewEnergy">₹0.00</strong></div>
-        <div class="calc-line"><span>Extra Charges</span><strong id="previewExtra">₹0.00</strong></div>
-        <div class="calc-line"><span>Total Electricity Bill</span><strong id="previewTotal">₹0.00</strong></div>
+        <div class="calc-line">
+          <span>Units Consumed</span><strong id="previewUnits">—</strong>
+        </div>
+        <div class="calc-line" id="legacyExtraRow" hidden>
+          <span>Saved extra charges</span><strong id="previewExtra">—</strong>
+        </div>
+        <div class="calc-line">
+          <span>Total Bill</span><strong id="previewTotal">—</strong>
+        </div>
       </div>
+
+      <p class="message" id="formMessage" role="status"></p>
 
       <div class="actions">
-        <button class="primary" id="submitBtn" type="submit">Save Meter Reading</button>
-        <button class="secondary hidden" id="cancelEdit" type="button">Cancel Edit</button>
+        <button type="submit" class="primary" id="submitBtn">Save Bill</button>
+        <button type="button" class="secondary" id="cancelEdit">Cancel</button>
       </div>
-      <div class="message" id="formMessage" role="status"></div>
     </form>
-  </section>
+  </dialog>
 
-  <section class="card">
-    <h2 class="section-title">Meter Reading History</h2>
-    <p class="muted">Search bills, filter by status and export your records.</p>
+  <script type="module">
+    import { initializeApp, getApps, getApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDocs,
+      addDoc, updateDoc, deleteDoc, serverTimestamp
+    } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-    <div class="form-grid">
-      <div class="field">
-        <label for="searchInput">Search by month or notes</label>
-        <input id="searchInput" type="search" placeholder="Search...">
-      </div>
-      <div class="field">
-        <label for="filterStatus">Payment Status</label>
-        <select id="filterStatus">
-          <option value="All">All Statuses</option>
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-          <option value="Overdue">Overdue</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="secondary" id="exportBtn" type="button">Export CSV</button>
-    </div>
-    <div class="message" id="historyMessage" role="status"></div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Previous</th>
-            <th>Current</th>
-            <th>Units</th>
-            <th>Rate</th>
-            <th>Total Bill</th>
-            <th>Due Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="billRows"></tbody>
-      </table>
-      <div class="empty hidden" id="emptyState">No electricity records found.</div>
-    </div>
-  </section>
-
-  <p class="muted" style="text-align:center">RoomFlow · Powered by Jatav Industries</p>
-</main>
-
-<script type="module">
-  import { initializeApp, getApps, getApp }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged }
-    from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import {
-    getFirestore, collection, doc, getDocs, addDoc, updateDoc,
-    deleteDoc, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
-    authDomain: "roomflow-6c920.firebaseapp.com",
-    projectId: "roomflow-6c920",
-    storageBucket: "roomflow-6c920.firebasestorage.app",
-    messagingSenderId: "827966111309",
-    appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-    measurementId: "G-1YGPS03PKC"
-  };
-
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const $ = id => document.getElementById(id);
-
-  let currentUser = null;
-  let records = [];
-  let busy = false;
-
-  const today = () => {
-    const d = new Date();
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-      .toISOString().slice(0, 10);
-  };
-  const currentMonth = () => today().slice(0, 7);
-  const money = n => new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR", maximumFractionDigits: 2
-  }).format(Number(n) || 0);
-
-  function msg(id, text, error = false) {
-    $(id).textContent = text;
-    $(id).style.color = error ? "#b91c1c" : "#047857";
-  }
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;",
-      '"': "&quot;", "'": "&#39;"
-    }[ch]));
-  }
-
-  function calculate(r) {
-    const units = Number(r.currentReading) - Number(r.previousReading);
-    const energy = units * Number(r.rate);
-    const extra = Number(r.extraCharges || 0);
-    return { units, energy, extra, total: energy + extra };
-  }
-
-  function actualStatus(r) {
-    if (r.status === "Paid") return "Paid";
-    return r.dueDate && r.dueDate < today() ? "Overdue" : "Pending";
-  }
-
-  function updatePreview() {
-    const previous = Number($("previousReading").value);
-    const current = Number($("currentReading").value);
-    const rate = Number($("rate").value);
-    const extra = Number($("extraCharges").value);
-    const valid = $("previousReading").value !== "" &&
-      $("currentReading").value !== "" &&
-      previous >= 0 && current >= previous &&
-      rate >= 0 && extra >= 0;
-
-    const units = valid ? current - previous : 0;
-    const energy = valid ? units * rate : 0;
-    $("previewUnits").textContent = units.toLocaleString("en-IN");
-    $("previewEnergy").textContent = money(energy);
-    $("previewExtra").textContent = money(extra >= 0 ? extra : 0);
-    $("previewTotal").textContent = money(energy + (extra >= 0 ? extra : 0));
-  }
-
-  function resetForm() {
-    $("billForm").reset();
-    $("recordId").value = "";
-    $("billMonth").value = currentMonth();
-    $("readingDate").value = today();
-    $("billDueDate").value = currentMonth() + "-15";
-    $("previousReading").value = "";
-    $("currentReading").value = "";
-    $("rate").value = "8";
-    $("extraCharges").value = "0";
-    $("billStatus").value = "Pending";
-    $("paidDate").value = "";
-    $("formHeading").textContent = "Add Meter Reading";
-    $("submitBtn").textContent = "Save Meter Reading";
-    $("cancelEdit").classList.add("hidden");
-    updatePreview();
-  }
-
-  function render() {
-    const search = $("searchInput").value.trim().toLowerCase();
-    const filter = $("filterStatus").value;
-
-    const visible = records.filter(r => {
-      const status = actualStatus(r);
-      const haystack = `${r.month} ${r.notes || ""}`.toLowerCase();
-      return haystack.includes(search) && (filter === "All" || status === filter);
+    const app = getApps().length ? getApp() : initializeApp({
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
     });
 
-    $("billRows").innerHTML = visible.map(r => {
-      const c = calculate(r);
-      const status = actualStatus(r);
-      return `<tr>
-        <td>${escapeHTML(r.month)}</td>
-        <td>${Number(r.previousReading).toLocaleString("en-IN")}</td>
-        <td>${Number(r.currentReading).toLocaleString("en-IN")}</td>
-        <td>${c.units.toLocaleString("en-IN")}</td>
-        <td>${money(r.rate)}</td>
-        <td>${money(c.total)}</td>
-        <td>${escapeHTML(r.dueDate || "—")}</td>
-        <td><span class="pill ${status.toLowerCase()}">${status}</span></td>
-        <td>
-          <button class="small-btn secondary" data-action="edit" data-id="${escapeHTML(r.id)}">Edit</button>
-          <button class="small-btn danger" data-action="delete" data-id="${escapeHTML(r.id)}">Delete</button>
-        </td>
-      </tr>`;
-    }).join("");
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+    const dialog = $("billDialog");
 
-    $("emptyState").classList.toggle("hidden", visible.length !== 0);
+    let user = null;
+    let records = [];
+    let busy = false;
+    let loading = false;
+    let loaded = false;
 
-    $("totalUnits").textContent = records.reduce((sum, r) =>
-      sum + calculate(r).units, 0).toLocaleString("en-IN");
+    function today() {
+      const date = new Date();
+      return new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      ).toISOString().slice(0, 10);
+    }
 
-    $("pendingBills").textContent = money(records.reduce((sum, r) =>
-      sum + (actualStatus(r) !== "Paid" ? calculate(r).total : 0), 0));
+    const monthNow = () => today().slice(0, 7);
+    const money = value => new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2
+    }).format(value);
 
-    $("paidBills").textContent = money(records.reduce((sum, r) =>
-      sum + (r.month === currentMonth() && actualStatus(r) === "Paid"
-        ? calculate(r).total : 0), 0));
-  }
+    const escapeHTML = value => String(value ?? "")
+      .replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
 
-  async function loadRecords() {
-    if (!currentUser) return;
-    msg("historyMessage", "Loading electricity records...");
+    const statusOf = record =>
+      record.status === "Paid" ? "Paid" : "Pending";
 
-    try {
-      const q = query(
-        collection(db, "users", currentUser.uid, "electricityRecords"),
-        orderBy("month", "desc")
+    function billAmount(record) {
+      return (
+        Number(record.currentReading) - Number(record.previousReading)
+      ) * Number(record.rate) + Number(record.extraCharges || 0);
+    }
+
+    function message(id, text, error = false) {
+      $(id).textContent = text;
+      $(id).style.color = error ? "#b91c1c" : "#047857";
+    }
+
+    function controls() {
+      const locked = busy || loading || !user;
+      $("addBtn").disabled = locked || !loaded;
+      $("refreshBtn").disabled = locked;
+
+      ["submitBtn", "cancelEdit", "closeBtn"].forEach(id => {
+        $(id).disabled = busy;
+      });
+    }
+
+    function existingRecord() {
+      return records.find(record => record.id === $("recordId").value);
+    }
+
+    function updatePreview() {
+      const previous = Number($("previousReading").value);
+      const current = Number($("currentReading").value);
+      const rate = Number($("rate").value);
+      const extra = Number(existingRecord()?.extraCharges || 0);
+
+      const valid = ["previousReading", "currentReading", "rate"]
+        .every(id => $(id).value !== "") &&
+        [previous, current, rate, extra].every(Number.isFinite) &&
+        previous >= 0 && current >= previous && rate >= 0 && extra >= 0;
+
+      $("previewUnits").textContent =
+        valid ? (current - previous).toLocaleString("en-IN") : "—";
+
+      $("previewTotal").textContent =
+        valid ? money((current - previous) * rate + extra) : "—";
+
+      $("legacyExtraRow").hidden = extra === 0;
+      $("previewExtra").textContent = money(extra);
+    }
+
+    function openForm(record = null) {
+      $("billForm").reset();
+      $("recordId").value = record?.id || "";
+      $("billMonth").value = record?.month || monthNow();
+      $("previousReading").value = record?.previousReading ?? "";
+      $("currentReading").value = record?.currentReading ?? "";
+      $("rate").value = record?.rate ?? "";
+      $("billStatus").value = statusOf(record || {});
+
+      $("formHeading").textContent =
+        record ? "Edit Meter Reading" : "Add Meter Reading";
+      $("submitBtn").textContent = record ? "Update Bill" : "Save Bill";
+
+      message("formMessage", "");
+      updatePreview();
+      dialog.showModal();
+      $("billMonth").focus();
+    }
+
+    function render() {
+      if (!loaded) return;
+
+      const month = $("monthFilter").value;
+      const filter = $("filterStatus").value;
+      const monthly = records.filter(record =>
+        !month || record.month === month
       );
-      const snap = await getDocs(q);
-      records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      render();
-      msg("historyMessage", records.length
-        ? `${records.length} electricity record(s) loaded.`
-        : "No records yet. Add your first meter reading above.");
-    } catch (error) {
-      console.error(error);
-      records = [];
-      render();
-      msg("historyMessage",
-        "Could not load records. Check Firestore security rules and connection.", true);
-    }
-  }
 
-  ["previousReading", "currentReading", "rate", "extraCharges"].forEach(id => {
-    $(id).addEventListener("input", updatePreview);
-  });
+      const visible = monthly
+        .filter(record => filter === "All" || statusOf(record) === filter)
+        .sort((a, b) =>
+          String(b.month || "").localeCompare(String(a.month || ""))
+        );
 
-  $("billStatus").addEventListener("change", () => {
-    if ($("billStatus").value === "Paid" && !$("paidDate").value) {
-      $("paidDate").value = today();
-    } else if ($("billStatus").value !== "Paid") {
-      $("paidDate").value = "";
-    }
-  });
+      $("totalUnits").textContent = monthly.reduce((sum, record) =>
+        sum + Number(record.currentReading) -
+        Number(record.previousReading), 0
+      ).toLocaleString("en-IN");
 
-  $("billForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    if (!currentUser || busy) return;
+      $("pendingBills").textContent = money(
+        monthly.filter(record => statusOf(record) === "Pending")
+          .reduce((sum, record) => sum + billAmount(record), 0)
+      );
 
-    const month = $("billMonth").value;
-    const readingDate = $("readingDate").value;
-    const previousReading = Number($("previousReading").value);
-    const currentReading = Number($("currentReading").value);
-    const rate = Number($("rate").value);
-    const extraCharges = Number($("extraCharges").value);
-    const dueDate = $("billDueDate").value;
-    const paidDate = $("paidDate").value;
-    const status = $("billStatus").value;
+      $("paidBills").textContent = money(
+        monthly.filter(record => statusOf(record) === "Paid")
+          .reduce((sum, record) => sum + billAmount(record), 0)
+      );
 
-    if (!month || !readingDate || !dueDate ||
-        $("previousReading").value === "" ||
-        $("currentReading").value === "" ||
-        !Number.isFinite(previousReading) || !Number.isFinite(currentReading) ||
-        !Number.isFinite(rate) || !Number.isFinite(extraCharges)) {
-      msg("formMessage", "Please complete all required fields with valid values.", true);
-      return;
-    }
-
-    if (previousReading < 0 || currentReading < previousReading) {
-      msg("formMessage", "Current reading must be greater than or equal to previous reading.", true);
-      return;
-    }
-    if (rate < 0 || extraCharges < 0) {
-      msg("formMessage", "Rate and extra charges cannot be negative.", true);
-      return;
-    }
-    if (readingDate.slice(0, 7) !== month || dueDate.slice(0, 7) < month) {
-      msg("formMessage", "Reading date must be in the billing month and due date cannot be before that month.", true);
-      return;
-    }
-    if (status === "Paid" && !paidDate) {
-      msg("formMessage", "Please enter the payment date for a paid bill.", true);
-      return;
-    }
-    if (paidDate && paidDate > today()) {
-      msg("formMessage", "Payment date cannot be in the future.", true);
-      return;
+      $("billRows").innerHTML = visible.length
+        ? visible.map(record => `
+          <tr>
+            <td>${escapeHTML(record.month)}</td>
+            <td>${escapeHTML(record.previousReading)}</td>
+            <td>${escapeHTML(record.currentReading)}</td>
+            <td>${(
+              Number(record.currentReading) -
+              Number(record.previousReading)
+            ).toLocaleString("en-IN")}</td>
+            <td>${money(Number(record.rate))}</td>
+            <td>
+              ${money(billAmount(record))}
+              ${Number(record.extraCharges || 0)
+                ? '<div class="muted">Includes saved extra charges</div>'
+                : ""}
+            </td>
+            <td>
+              <span class="pill ${statusOf(record).toLowerCase()}">
+                ${statusOf(record)}
+              </span>
+            </td>
+            <td>
+              <button type="button" class="secondary small-btn"
+                data-action="edit" data-id="${escapeHTML(record.id)}">
+                Edit
+              </button>
+              <button type="button" class="danger small-btn"
+                data-action="delete" data-id="${escapeHTML(record.id)}">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join("")
+        : '<tr><td colspan="8" class="empty">No bills for this selection.</td></tr>';
     }
 
-    const units = currentReading - previousReading;
-    const amount = units * rate + extraCharges;
-    if (!Number.isFinite(amount) || amount > 1000000000000) {
-      msg("formMessage", "Calculated bill amount is outside the supported range.", true);
-      return;
+    async function loadRecords() {
+      if (!user || loading) return false;
+
+      loading = true;
+      controls();
+      message("historyMessage", "Loading bills...");
+
+      try {
+        const snapshot = await getDocs(
+          collection(db, "users", user.uid, "electricityRecords")
+        );
+
+        records = snapshot.docs.map(item => ({
+          ...item.data(),
+          id: item.id
+        }));
+
+        loaded = true;
+        render();
+
+        message(
+          "historyMessage",
+          records.length ? "Bills loaded." :
+            "No bills yet. Click + Add Reading."
+        );
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        message(
+          "historyMessage",
+          loaded
+            ? "Refresh failed. Previous data is still shown."
+            : "Could not load bills. Check connection and Firestore permissions.",
+          true
+        );
+        return false;
+      } finally {
+        loading = false;
+        controls();
+      }
     }
 
-    const id = $("recordId").value;
-    const data = {
-      month, readingDate, previousReading, currentReading,
-      units, rate, extraCharges, amount, dueDate,
-      paidDate: status === "Paid" ? paidDate : "",
-      status,
-      paymentMethod: $("paymentMethod").value,
-      notes: $("notes").value.trim().slice(0, 500),
-      updatedAt: serverTimestamp()
+    $("addBtn").onclick = () => {
+      if (!busy && !loading && loaded) openForm();
     };
 
-    busy = true;
-    $("submitBtn").disabled = true;
-    try {
-      if (id) {
-        if (!records.some(r => r.id === id)) throw new Error("Record not found.");
-        await updateDoc(doc(db, "users", currentUser.uid, "electricityRecords", id), data);
-        msg("formMessage", "Meter reading updated successfully.");
-      } else {
-        const duplicate = records.some(r => r.month === month);
-        if (duplicate && !confirm("A bill already exists for this month. Add another record anyway?")) {
-          return;
-        }
-        await addDoc(collection(db, "users", currentUser.uid, "electricityRecords"), {
-          ...data, createdAt: serverTimestamp()
-        });
-        msg("formMessage", "Meter reading saved successfully.");
+    $("refreshBtn").onclick = () => {
+      if (!busy) loadRecords();
+    };
+
+    ["monthFilter", "filterStatus"].forEach(id => {
+      $(id).onchange = render;
+    });
+
+    ["previousReading", "currentReading", "rate"].forEach(id => {
+      $(id).oninput = updatePreview;
+    });
+
+    ["closeBtn", "cancelEdit"].forEach(id => {
+      $(id).onclick = () => {
+        if (!busy) dialog.close();
+      };
+    });
+
+    dialog.addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
+
+    $("billForm").onsubmit = async event => {
+      event.preventDefault();
+      if (!user || busy || loading || !loaded) return;
+
+      const month = $("billMonth").value;
+      const previous = Number($("previousReading").value);
+      const current = Number($("currentReading").value);
+      const rate = Number($("rate").value);
+      const id = $("recordId").value;
+      const old = existingRecord();
+      const newStatus = $("billStatus").value;
+      const extra = Number(old?.extraCharges || 0);
+
+      if (
+        !month ||
+        !["previousReading", "currentReading", "rate"]
+          .every(key => $(key).value !== "") ||
+        ![previous, current, rate, extra].every(Number.isFinite) ||
+        previous < 0 || current < previous || rate < 0 || extra < 0 ||
+        current > 1000000000 || previous > 1000000000 || rate > 1000000
+      ) {
+        message(
+          "formMessage",
+          "Enter valid readings and rate. Current reading cannot be below previous reading.",
+          true
+        );
+        return;
       }
 
-      resetForm();
+      if (id && !old) {
+        message("formMessage", "Record not found. Refresh and try again.", true);
+        return;
+      }
+
+      const total = (current - previous) * rate + extra;
+
+      if (!Number.isFinite(total) || total > 1000000000000) {
+        message("formMessage", "Bill amount is outside the supported range.", true);
+        return;
+      }
+
+      if (
+        !id &&
+        records.some(record => record.month === month) &&
+        !confirm("A bill exists for this month. Add another bill?")
+      ) return;
+
+      const data = {
+        month,
+        previousReading: previous,
+        currentReading: current,
+        units: current - previous,
+        rate,
+        extraCharges: extra,
+        amount: total,
+        status: newStatus,
+        updatedAt: serverTimestamp()
+      };
+
+      if (newStatus === "Paid") {
+        data.paidDate = old?.status === "Paid"
+          ? (old.paidDate || today()) : today();
+      } else if (old?.status === "Paid") {
+        data.paidDate = "";
+      }
+
+      busy = true;
+      controls();
+
+      try {
+        if (id) {
+          // Fields removed from the form remain saved on the document.
+          await updateDoc(
+            doc(db, "users", user.uid, "electricityRecords", id),
+            data
+          );
+        } else {
+          await addDoc(
+            collection(db, "users", user.uid, "electricityRecords"),
+            { ...data, createdAt: serverTimestamp() }
+          );
+        }
+
+        dialog.close();
+        const refreshed = await loadRecords();
+
+        message(
+          "historyMessage",
+          refreshed
+            ? "Bill saved successfully."
+            : "Bill saved, but refresh failed. Click Refresh.",
+          !refreshed
+        );
+      } catch (error) {
+        console.error(error);
+        message(
+          "formMessage",
+          "Could not save. Check connection and Firestore permissions.",
+          true
+        );
+      } finally {
+        busy = false;
+        controls();
+      }
+    };
+
+    $("billRows").onclick = async event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button || !user || busy || loading) return;
+
+      const record = records.find(item => item.id === button.dataset.id);
+      if (!record) return;
+
+      if (button.dataset.action === "edit") {
+        openForm(record);
+        return;
+      }
+
+      if (
+        button.dataset.action !== "delete" ||
+        !confirm(`Delete the bill for ${record.month}? This cannot be undone.`)
+      ) return;
+
+      busy = true;
+      controls();
+
+      try {
+        await deleteDoc(
+          doc(db, "users", user.uid, "electricityRecords", record.id)
+        );
+
+        const refreshed = await loadRecords();
+
+        message(
+          "historyMessage",
+          refreshed
+            ? "Bill deleted."
+            : "Bill deleted, but refresh failed. Click Refresh.",
+          !refreshed
+        );
+      } catch (error) {
+        console.error(error);
+        message(
+          "historyMessage",
+          "Could not delete bill. Check connection and permissions.",
+          true
+        );
+      } finally {
+        busy = false;
+        controls();
+      }
+    };
+
+    $("monthFilter").value = monthNow();
+    controls();
+
+    onAuthStateChanged(auth, async account => {
+      if (!account) {
+        user = null;
+        location.replace("login.html?next=electricity.html");
+        return;
+      }
+
+      user = account;
       await loadRecords();
-    } catch (error) {
-      console.error(error);
-      msg("formMessage", "Could not save the bill. Check your internet and Firestore rules.", true);
-    } finally {
-      busy = false;
-      $("submitBtn").disabled = false;
-    }
-  });
-
-  $("cancelEdit").addEventListener("click", () => {
-    resetForm();
-    msg("formMessage", "Edit cancelled.");
-  });
-
-  $("billRows").addEventListener("click", async event => {
-    const button = event.target.closest("button[data-action]");
-    if (!button || !currentUser || busy) return;
-    const r = records.find(item => item.id === button.dataset.id);
-    if (!r) return;
-
-    if (button.dataset.action === "edit") {
-      $("recordId").value = r.id;
-      $("billMonth").value = r.month || "";
-      $("readingDate").value = r.readingDate || "";
-      $("previousReading").value = r.previousReading ?? "";
-      $("currentReading").value = r.currentReading ?? "";
-      $("rate").value = r.rate ?? 8;
-      $("extraCharges").value = r.extraCharges ?? 0;
-      $("billStatus").value = r.status === "Paid" ? "Paid" : "Pending";
-      $("paidDate").value = r.paidDate || "";
-      $("paymentMethod").value = r.paymentMethod || "";
-      $("billDueDate").value = r.dueDate || "";
-      $("notes").value = r.notes || "";
-      $("formHeading").textContent = "Edit Meter Reading";
-      $("submitBtn").textContent = "Update Meter Reading";
-      $("cancelEdit").classList.remove("hidden");
-      updatePreview();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (!confirm(`Delete the electricity bill for ${r.month}? This cannot be undone.`)) return;
-
-    busy = true;
-    button.disabled = true;
-    try {
-      await deleteDoc(doc(db, "users", currentUser.uid, "electricityRecords", r.id));
-      msg("historyMessage", "Electricity record deleted.");
-      await loadRecords();
-    } catch (error) {
-      console.error(error);
-      msg("historyMessage", "Could not delete record. Check Firestore security rules.", true);
-    } finally {
-      busy = false;
-    }
-  });
-
-  $("searchInput").addEventListener("input", render);
-  $("filterStatus").addEventListener("change", render);
-
-  $("exportBtn").addEventListener("click", () => {
-    if (!records.length) {
-      msg("historyMessage", "There are no records to export.", true);
-      return;
-    }
-
-    const headers = [
-      "Month", "Reading Date", "Previous Reading", "Current Reading",
-      "Units", "Rate", "Extra Charges", "Total Bill", "Due Date",
-      "Paid Date", "Status", "Payment Method", "Notes"
-    ];
-    const cell = value => `"${String(value ?? "").replace(/"/g, '""')}"`;
-    const rows = records.map(r => [
-      r.month, r.readingDate, r.previousReading, r.currentReading,
-      calculate(r).units, r.rate, r.extraCharges, calculate(r).total,
-      r.dueDate, r.paidDate, actualStatus(r), r.paymentMethod, r.notes
-    ]);
-    const csv = [headers, ...rows].map(row => row.map(cell).join(",")).join("\r\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `roomflow-electricity-${currentMonth()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  onAuthStateChanged(auth, async user => {
-    if (!user) {
-      window.location.replace("login.html?next=electricity.html");
-      return;
-    }
-    currentUser = user;
-    resetForm();
-    await loadRecords();
-  });
-</script>
+    });
+  </script>
 </body>
 </html>
