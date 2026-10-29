@@ -792,6 +792,415 @@
     }
   })();
 </script>
+  <style>
+  body {
+    margin: 0;
+    background: #f6f8fc;
+    color: #0f172a;
+  }
+
+  #rfRentSidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    height: 100vh;
+    padding: 26px 18px;
+    box-sizing: border-box;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .rf-rent-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 6px 32px;
+    color: white;
+    font-size: 25px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .rf-rent-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+  }
+
+  .rf-rent-nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .rf-rent-nav a {
+    padding: 15px;
+    border-radius: 11px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .rf-rent-nav a:hover,
+  .rf-rent-nav a.active {
+    background: #252c4b;
+    color: white;
+  }
+
+  .rf-rent-bottom {
+    margin-top: auto;
+    padding-top: 24px;
+    color: #94a3b8;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  main.page.rf-rent-page {
+    max-width: none;
+    width: calc(100% - 268px);
+    margin: 0 0 0 268px;
+    padding: 30px;
+    box-sizing: border-box;
+  }
+
+  .rf-rent-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: white;
+  }
+
+  .rf-rent-heading h1 {
+    font-size: 25px;
+  }
+
+  .rf-rent-heading p {
+    margin: 0;
+  }
+
+  .rf-rent-page .card {
+    border-radius: 16px;
+    border-color: #e2e8f0;
+    padding: 24px;
+  }
+
+  .rf-rent-page .grid {
+    gap: 18px;
+  }
+
+  .rf-rent-page .grid .card::before {
+    content: "₹";
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 21px;
+  }
+
+  .rf-rent-page .primary,
+  #rfRentDialog .primary {
+    background: #4f46e5;
+    color: white;
+    border-radius: 10px;
+  }
+
+  .rf-rent-page .secondary,
+  #rfRentDialog .secondary {
+    background: #eef2ff;
+    color: #3730a3;
+  }
+
+  .rf-rent-page input,
+  .rf-rent-page select,
+  .rf-rent-page textarea,
+  #rfRentDialog input,
+  #rfRentDialog select,
+  #rfRentDialog textarea {
+    border-color: #dbe2ea;
+    border-radius: 10px;
+  }
+
+  #rfRentDialog {
+    width: min(720px, calc(100% - 32px));
+    max-height: 90vh;
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: 18px;
+    background: white;
+    color: #0f172a;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  #rfRentDialog::backdrop {
+    background: #0f172a99;
+  }
+
+  #rfRentDialog .card {
+    margin: 0;
+    padding: 24px;
+    border: none;
+    box-shadow: none;
+  }
+
+  .rf-rent-dialog-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 16px 0;
+  }
+
+  .rf-rent-dialog-bar button {
+    padding: 6px 12px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 23px;
+  }
+
+  #rfRentPageNotice:empty {
+    display: none;
+  }
+
+  #rfRentPageNotice {
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  @media (max-width: 1000px) {
+    .rf-rent-page .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 800px) {
+    #rfRentSidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 18px;
+    }
+
+    .rf-rent-brand {
+      margin-bottom: 16px;
+    }
+
+    .rf-rent-nav {
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .rf-rent-nav a {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rf-rent-bottom {
+      display: none;
+    }
+
+    main.page.rf-rent-page {
+      width: 100%;
+      margin: 0;
+      padding: 18px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    #rfAddRent {
+      width: 100%;
+    }
+
+    #rfRentDialog .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .rf-rent-heading,
+    .rf-rent-page .card {
+      padding: 18px;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    function setupRentLayout() {
+      if (document.getElementById("rfRentSidebar")) return;
+
+      const main = document.querySelector("main.page");
+      const form = document.getElementById("rentForm");
+      const panel = form?.closest("section.card");
+      const title = main?.querySelector("h1");
+      const heading = title?.closest("section");
+
+      if (!main || !form || !panel || !heading) return;
+
+      const sidebar = document.createElement("aside");
+      sidebar.id = "rfRentSidebar";
+
+      sidebar.innerHTML = `
+        <a href="dashboard.html" class="rf-rent-brand">
+          <span class="rf-rent-mark">R</span>
+          RoomFlow
+        </a>
+
+        <nav class="rf-rent-nav" aria-label="Main navigation">
+          <a href="dashboard.html">▦ Dashboard</a>
+          <a href="properties.html">⌂ Properties</a>
+          <a href="rooms.html">▣ Rooms</a>
+          <a href="tenants.html">♙ Tenants</a>
+          <a href="rent.html" class="active" aria-current="page">
+            ₹ Rent Manager
+          </a>
+          <a href="electricity.html">⚡ Electricity</a>
+          <a href="payments.html">▤ Payments</a>
+          <a href="profile.html">♙ My Profile</a>
+          <a href="settings.html">⚙ Settings</a>
+        </nav>
+
+        <div class="rf-rent-bottom">
+          RoomFlow · Jatav Industries
+        </div>
+      `;
+
+      main.before(sidebar);
+      main.classList.add("rf-rent-page");
+
+      /* Replace the old horizontal navigation with the sidebar. */
+      const oldHeader = main.querySelector("header.topbar");
+      if (oldHeader) oldHeader.hidden = true;
+      if (oldHeader) oldHeader.style.display = "none";
+
+      heading.classList.add("rf-rent-heading");
+
+      const headingText = document.createElement("div");
+
+      while (heading.firstChild) {
+        headingText.append(heading.firstChild);
+      }
+
+      const addButton = document.createElement("button");
+      addButton.id = "rfAddRent";
+      addButton.type = "button";
+      addButton.className = "primary";
+      addButton.textContent = "+ Add Rent";
+
+      heading.append(headingText, addButton);
+
+      const notice = document.createElement("p");
+      notice.id = "rfRentPageNotice";
+      notice.setAttribute("role", "status");
+      heading.after(notice);
+
+      /* Move the existing form into a popup, preserving its handlers. */
+      const dialog = document.createElement("dialog");
+      dialog.id = "rfRentDialog";
+      dialog.setAttribute("aria-labelledby", "formHeading");
+
+      const bar = document.createElement("div");
+      bar.className = "rf-rent-dialog-bar";
+
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.textContent = "×";
+      closeButton.setAttribute("aria-label", "Close rent form");
+      bar.append(closeButton);
+
+      dialog.append(bar, panel);
+      document.body.append(dialog);
+
+      const submitButton = document.getElementById("submitBtn");
+      const cancelButton = document.getElementById("cancelEdit");
+      const formMessage = document.getElementById("formMessage");
+
+      function openDialog() {
+        if (!dialog.open) dialog.showModal();
+        document.getElementById("rentMonth")?.focus();
+      }
+
+      addButton.addEventListener("click", () => {
+        if (submitButton?.disabled) return;
+
+        /* Existing cancel handler restores default month and due date. */
+        cancelButton?.click();
+
+        if (formMessage) formMessage.textContent = "";
+        notice.textContent = "";
+        openDialog();
+      });
+
+      closeButton.addEventListener("click", () => {
+        if (!submitButton?.disabled) dialog.close();
+      });
+
+      dialog.addEventListener("cancel", event => {
+        if (submitButton?.disabled) event.preventDefault();
+      });
+
+      cancelButton?.addEventListener("click", () => {
+        if (dialog.open && !submitButton?.disabled) {
+          dialog.close();
+        }
+      });
+
+      document.addEventListener("click", event => {
+        const edit = event.target.closest(
+          '#rentRows button[data-action="edit"]'
+        );
+
+        if (
+          edit &&
+          !submitButton?.disabled &&
+          document.getElementById("recordId")?.value
+        ) {
+          if (formMessage) formMessage.textContent = "";
+          openDialog();
+        }
+      });
+
+      if (formMessage) {
+        new MutationObserver(() => {
+          if (!dialog.open) return;
+
+          const text = formMessage.textContent || "";
+
+          if (/Rent record (saved|updated) successfully/i.test(text)) {
+            notice.textContent = text;
+            dialog.close();
+          }
+        }).observe(formMessage, {
+          childList: true,
+          subtree: true,
+          characterData: true
+        });
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupRentLayout);
+    } else {
+      setupRentLayout();
+    }
+  })();
+</script>
 </body>
 </html>
 
