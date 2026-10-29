@@ -4,94 +4,380 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Profile | RoomFlow</title>
-  <link rel="stylesheet" href="assets/style.css">
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #172033;
+      background: #f5f7fc;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 268px;
+      padding: 26px 18px;
+      background: #111827;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 6px;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+    }
+
+    .sidebar-nav {
+      display: grid;
+      gap: 8px;
+      margin-top: 34px;
+    }
+
+    .sidebar-nav a {
+      padding: 17px 15px;
+      border-radius: 11px;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: #252e4c;
+      color: #fff;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 30px;
+    }
+
+    .logout-button {
+      width: 100%;
+      padding: 15px;
+      border: 0;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .logout-button:hover {
+      background: #4338ca;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .app-main {
+      margin-left: 268px;
+      min-height: 100vh;
+      min-width: 0;
+    }
+
+    .topbar {
+      min-height: 104px;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .topbar h1 {
+      margin: 0 0 6px;
+      font-size: 25px;
+    }
+
+    .muted {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .back-button {
+      padding: 14px 19px;
+      border: 1px solid #dce3ef;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .back-button:hover {
+      background: #f1f5f9;
+    }
+
+    .app-content {
+      padding: 30px 32px;
+    }
+
+    #message {
+      margin: 0 0 20px;
+      padding: 14px 16px;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      color: #b91c1c;
+      background: #fff1f2;
+      line-height: 1.5;
+    }
+
+    #message:empty {
+      display: none;
+    }
+
     .profile-card {
-      max-width: 680px;
-      padding: 28px;
-      background: white;
+      width: 100%;
+      padding: 30px;
+      background: #fff;
       border: 1px solid #e2e8f0;
       border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.03);
     }
-    .profile-card dl { margin-top: 24px; }
-    .profile-card dt {
+
+    .profile-heading {
+      padding-bottom: 22px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .profile-heading h2 {
+      margin: 0 0 7px;
+      font-size: 22px;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+      margin: 28px 0 0;
+    }
+
+    .detail {
+      min-width: 0;
+    }
+
+    .detail dt {
+      margin: 0 0 10px;
       color: #64748b;
       font-size: 13px;
-      margin-top: 22px;
     }
-    .profile-card dd {
-      margin: 6px 0 0;
+
+    .detail dd {
+      margin: 0;
       color: #0f172a;
-      font-size: 17px;
+      font-size: 16px;
+      line-height: 1.5;
       overflow-wrap: anywhere;
     }
-    #message { color: #b91c1c; margin-bottom: 18px; }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 11px;
+      border-radius: 20px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge.verified {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge.unverified {
+      background: #fff7ed;
+      color: #9a3412;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid #818cf8;
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 1100px) {
+      .details-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        padding: 20px;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 20px;
+      }
+
+      .sidebar-nav a {
+        padding: 12px;
+      }
+
+      .sidebar-bottom {
+        padding-top: 18px;
+      }
+
+      .logout-button {
+        width: auto;
+        padding: 12px 24px;
+      }
+
+      .app-main {
+        margin-left: 0;
+      }
+
+      .topbar {
+        padding: 22px 20px;
+        flex-wrap: wrap;
+      }
+
+      .app-content {
+        padding: 22px 20px;
+      }
+
+      .profile-card {
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .details-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="app-layout">
-    <aside class="sidebar">
-      <a href="dashboard.html" class="brand">
-        <span class="brand-mark">R</span> RoomFlow
+  <aside class="sidebar">
+    <a href="dashboard.html" class="brand">
+      <span class="brand-mark">R</span>
+      <span>RoomFlow</span>
+    </a>
+
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html" class="active" aria-current="page">
+        ♙ My Profile
       </a>
+    </nav>
 
-      <nav class="sidebar-nav" aria-label="Main navigation">
-        <a href="dashboard.html">▦ Dashboard</a>
-        <a href="rent.html">₹ Rent Manager</a>
-        <a href="electricity.html">⚡ Electricity</a>
-        <a href="payments.html">▤ Payments</a>
-        <a href="profile.html" class="active"
-           aria-current="page">♙ My Profile</a>
-      </nav>
+    <div class="sidebar-bottom">
+      <button id="logoutButton" type="button" class="logout-button">
+        Log out
+      </button>
+    </div>
+  </aside>
 
-      <div class="sidebar-bottom">
-        <button id="logoutButton" type="button"
-                class="btn btn-outline btn-block">Log out</button>
+  <main class="app-main">
+    <header class="topbar">
+      <div>
+        <h1>My Profile</h1>
+        <p class="muted">Your RoomFlow account details</p>
       </div>
-    </aside>
 
-    <main class="app-main">
-      <header class="topbar">
-        <div>
-          <h1>My Profile</h1>
-          <p class="muted">Your RoomFlow account details</p>
+      <a href="dashboard.html" class="back-button">
+        Back to Dashboard
+      </a>
+    </header>
+
+    <div class="app-content">
+      <p id="message" role="status" aria-live="polite"></p>
+
+      <section class="profile-card" aria-labelledby="accountHeading">
+        <div class="profile-heading">
+          <h2 id="accountHeading">Account details</h2>
+          <p class="muted">Your personal and account information</p>
         </div>
-        <a href="dashboard.html" class="btn btn-outline">
-          Back to Dashboard
-        </a>
-      </header>
 
-      <div class="app-content">
-        <p id="message" role="status" aria-live="polite"></p>
-
-        <section class="profile-card">
-          <h2>Account details</h2>
-          <dl>
+        <dl class="details-grid">
+          <div class="detail">
             <dt>Full name</dt>
             <dd id="fullName">Loading…</dd>
+          </div>
 
+          <div class="detail">
             <dt>Email address</dt>
             <dd id="email">—</dd>
+          </div>
 
+          <div class="detail">
             <dt>Account type</dt>
-            <dd id="role">—</dd>
+            <dd>
+              <span id="role" class="badge">—</span>
+            </dd>
+          </div>
 
+          <div class="detail">
             <dt>Email verification</dt>
-            <dd id="verification">—</dd>
+            <dd>
+              <span id="verification" class="badge">—</span>
+            </dd>
+          </div>
 
+          <div class="detail">
             <dt>Account created</dt>
             <dd id="created">—</dd>
-          </dl>
-        </section>
-      </div>
-    </main>
-  </div>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </main>
 
   <script type="module">
     import { initializeApp } from
       "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
     import { getAuth, onAuthStateChanged, signOut } from
       "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
     import { getFirestore, doc, getDoc } from
       "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
@@ -106,10 +392,13 @@
 
     const auth = getAuth(app);
     const db = getFirestore(app);
+
     const message = document.getElementById("message");
-    const show = (id, value) => {
+    const logoutButton = document.getElementById("logoutButton");
+
+    function show(id, value) {
       document.getElementById(id).textContent = value;
-    };
+    }
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -117,43 +406,70 @@
         return;
       }
 
+      message.textContent = "";
+      show("fullName", user.displayName || "RoomFlow User");
       show("email", user.email || "No email");
-      show("verification", user.emailVerified ? "Verified" : "Not verified");
 
-      const created = new Date(user.metadata.creationTime);
-      show("created", Number.isNaN(created.getTime())
-        ? "—"
-        : created.toLocaleDateString("en-IN"));
+      const verification = document.getElementById("verification");
+
+      verification.textContent = user.emailVerified
+        ? "Verified"
+        : "Not verified";
+
+      verification.className = user.emailVerified
+        ? "badge verified"
+        : "badge unverified";
+
+      const creationTime = user.metadata.creationTime;
+      const created = creationTime ? new Date(creationTime) : null;
+
+      show(
+        "created",
+        created && !Number.isNaN(created.getTime())
+          ? created.toLocaleDateString("en-IN")
+          : "—"
+      );
 
       try {
         const snapshot = await getDoc(doc(db, "users", user.uid));
 
+        if (auth.currentUser?.uid !== user.uid) return;
+
         if (!snapshot.exists()) {
-          show("fullName", user.displayName || "RoomFlow User");
+          show("role", "Not configured");
           message.textContent =
             "Your account profile is missing. Please contact support.";
           return;
         }
 
         const profile = snapshot.data();
-        show("fullName",
-          profile.fullName || user.displayName || "RoomFlow User");
+
+        show(
+          "fullName",
+          profile.fullName || user.displayName || "RoomFlow User"
+        );
 
         const role = profile.role;
-        show("role", role === "landlord" || role === "tenant"
-          ? role.charAt(0).toUpperCase() + role.slice(1)
-          : "Role not configured");
+
+        show(
+          "role",
+          role === "landlord" || role === "tenant"
+            ? role.charAt(0).toUpperCase() + role.slice(1)
+            : "Not configured"
+        );
       } catch (error) {
         console.error(error);
-        show("fullName", "Profile unavailable");
+
+        if (auth.currentUser?.uid !== user.uid) return;
+
+        show("role", "Unavailable");
         message.textContent =
           "Could not load your profile. Check your connection and permissions.";
       }
     });
 
-    document.getElementById("logoutButton").onclick = async event => {
-      const button = event.currentTarget;
-      button.disabled = true;
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
 
       try {
         await signOut(auth);
@@ -161,66 +477,9 @@
       } catch (error) {
         console.error(error);
         message.textContent = "Logout failed. Please try again.";
-        button.disabled = false;
+        logoutButton.disabled = false;
       }
-    };
+    });
   </script>
-  
-  .profile-card {
-  width: 100%;
-  max-width: none;
-  padding: 28px;
-}
-
-.profile-card dl {
-  display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 180px minmax(0, 1fr);
-  align-items: start;
-  gap: 24px 16px;
-  margin-top: 28px;
-}
-
-.profile-card dt,
-.profile-card dd {
-  margin: 0;
-  padding: 12px 0;
-  overflow-wrap: anywhere;
-}
-
-.profile-card dt {
-  color: #64748b;
-  font-size: 13px;
-}
-
-.profile-card dd {
-  color: #0f172a;
-  font-size: 16px;
-}
-
-@media (max-width: 1200px) {
-  .profile-card dl {
-    grid-template-columns: 160px minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .profile-card {
-    padding: 20px;
-  }
-
-  .profile-card dl {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
-  }
-
-  .profile-card dt {
-    padding: 14px 0 0;
-  }
-
-  .profile-card dd {
-    padding: 0 0 10px;
-  }
-}
-  
 </body>
 </html>
