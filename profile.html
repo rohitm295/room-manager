@@ -165,5 +165,60 @@
       }
     };
   </script>
+  .profile-card {
+  width: 100%;
+  max-width: none;
+  padding: 28px;
+}
+
+.profile-card dl {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 180px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px 16px;
+  margin-top: 28px;
+}
+
+.profile-card dt,
+.profile-card dd {
+  margin: 0;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-card dt {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.profile-card dd {
+  color: #0f172a;
+  font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+  .profile-card dl {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-card {
+    padding: 20px;
+  }
+
+  .profile-card dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .profile-card dt {
+    padding: 14px 0 0;
+  }
+
+  .profile-card dd {
+    padding: 0 0 10px;
+  }
+}
 </body>
 </html>
