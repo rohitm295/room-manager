@@ -1482,5 +1482,197 @@
     }
   })();
 </script>
+<style>
+  #rfTenantPopup {
+    width: min(600px, calc(100% - 32px));
+    max-height: 85vh;
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: 18px;
+    background: white;
+    color: #0f172a;
+    overflow-y: auto;
+  }
+
+  #rfTenantPopup::backdrop {
+    background: #0f172a99;
+  }
+
+  #rfTenantPopup .tenant-panel {
+    margin: 0;
+    padding: 24px;
+    border: none;
+  }
+
+  .rf-popup-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 18px 0;
+  }
+
+  .rf-popup-close {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    background: #eef2ff;
+    color: #3730a3;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  #rfAddTenantTop {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tenant-layout.rf-list-only {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .tenant-layout.rf-list-only > .tenant-panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #rfPopupError:empty {
+    display: none;
+  }
+
+  #rfPopupError {
+    margin: 12px 24px;
+    color: #b91c1c;
+  }
+</style>
+
+<script>
+  (() => {
+    function setupTenantPopup() {
+      /* Do nothing if a previous popup version is already installed. */
+      if (
+        document.getElementById("rfTenantPopup") ||
+        document.getElementById("rfTenantDialog")
+      ) return;
+
+      const form = document.getElementById("tenantForm");
+      const header = document.querySelector(".tenant-header");
+      const panel = form?.closest(".tenant-panel");
+      const layout = panel?.parentElement;
+
+      if (!form || !header || !panel) return;
+
+      const popup = document.createElement("dialog");
+      popup.id = "rfTenantPopup";
+      popup.setAttribute("aria-labelledby", "formTitle");
+
+      const bar = document.createElement("div");
+      bar.className = "rf-popup-bar";
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "rf-popup-close";
+      close.setAttribute("aria-label", "Close tenant form");
+      close.textContent = "×";
+      bar.append(close);
+
+      const error = document.createElement("p");
+      error.id = "rfPopupError";
+      error.setAttribute("role", "status");
+
+      popup.append(bar, error, panel);
+      document.body.append(popup);
+
+      if (layout?.classList.contains("tenant-layout")) {
+        layout.classList.add("rf-list-only");
+      }
+
+      let actions = header.querySelector(".tenant-actions");
+
+      if (!actions) {
+        actions = document.createElement("div");
+        actions.className = "tenant-actions";
+        header.append(actions);
+      }
+
+      const add = document.createElement("button");
+      add.id = "rfAddTenantTop";
+      add.type = "button";
+      add.textContent = "+ Add Tenant";
+      actions.prepend(add);
+
+      const save = document.getElementById("saveBtn");
+      const cancel = document.getElementById("cancelBtn");
+
+      function openPopup() {
+        error.textContent = "";
+        if (!popup.open) popup.showModal();
+        document.getElementById("tenantName")?.focus();
+      }
+
+      add.addEventListener("click", () => {
+        if (cancel) cancel.click();
+        else form.reset();
+        openPopup();
+      });
+
+      close.addEventListener("click", () => {
+        if (!save?.disabled) popup.close();
+      });
+
+      popup.addEventListener("cancel", event => {
+        if (save?.disabled) event.preventDefault();
+      });
+
+      popup.addEventListener("close", () => {
+        cancel?.click();
+      });
+
+      /* Existing Edit logic fills the same form before opening it. */
+      document.addEventListener("click", event => {
+        if (event.target.closest("#tenantsBody [data-edit]")) {
+          openPopup();
+        }
+      });
+
+      const message = document.getElementById("tenantMessage");
+
+      if (message) {
+        new MutationObserver(() => {
+          if (!popup.open) return;
+
+          const text = message.textContent || "";
+
+          if (message.classList.contains("error")) {
+            error.textContent = text;
+          } else if (
+            message.classList.contains("success") &&
+            /tenant (added|updated) successfully/i.test(text)
+          ) {
+            popup.close();
+          }
+        }).observe(message, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+          attributes: true,
+          attributeFilter: ["class"]
+        });
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupTenantPopup);
+    } else {
+      setupTenantPopup();
+    }
+  })();
+</script>
 </body>
 </html>
