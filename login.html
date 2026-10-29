@@ -81,6 +81,7 @@
       getAuth,
       signInWithEmailAndPassword,
       sendPasswordResetEmail,
+      sendEmailVerification,
       signOut
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -150,6 +151,7 @@
         );
 
         if (!result.user.emailVerified) {
+          await sendEmailVerification(result.user);
           await signOut(auth);
           showMessage(
             "Please verify your email first. Open the verification link sent to your inbox, then log in again."
