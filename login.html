@@ -164,7 +164,7 @@ await signInWithEmailAndPassword(
       } finally {
         button.disabled = false;
         button.textContent = "Log in";
-      }
+      
     });
 
     forgotLink.addEventListener("click", async (event) => {
@@ -192,8 +192,8 @@ await signInWithEmailAndPassword(
         showMessage(readableError(error));
       } finally {
         forgotLink.style.pointerEvents = "auto";
-      }
-    });
+      
+    })
   </script>
 </body>
 </html>
