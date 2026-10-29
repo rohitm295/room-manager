@@ -78,13 +78,13 @@
       "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
     import {
-      getAuth,
-      signInWithEmailAndPassword,
-      sendPasswordResetEmail,
-      sendEmailVerification,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
     const firebaseConfig = {
       apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
       authDomain: "roomflow-6c920.firebaseapp.com",
