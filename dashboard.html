@@ -1,121 +1,66 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard | RoomFlow</title>
   <link rel="stylesheet" href="assets/style.css">
-
   <style>
-    .welcome-panel {
+    .welcome {
       padding: 26px;
-      margin-bottom: 25px;
+      margin-bottom: 24px;
       border-radius: 16px;
       background: linear-gradient(125deg, #4338ca, #6366f1);
       color: white;
     }
-
-    .welcome-panel h2 {
-      margin-bottom: 8px;
-      font-size: 27px;
-    }
-
-    .welcome-panel p {
-      margin-bottom: 0;
-      color: #e0e7ff;
-    }
-
-    .quick-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .quick-actions .btn {
-      background: white;
-      color: #4338ca;
-    }
-
-    .quick-actions .btn-outline {
-      background: transparent;
-      border-color: rgba(255,255,255,.6);
-      color: white;
-    }
-
-    .profile-row {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .avatar {
+    .welcome p { margin-top: 8px; }
+    .page-links {
       display: grid;
-      place-items: center;
-      width: 52px;
-      height: 52px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: #e0e7ff;
-      color: #4338ca;
-      font-size: 20px;
-      font-weight: 800;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+      margin: 24px 0;
     }
-
-    .profile-row h3 {
-      margin: 0 0 4px;
+    .page-link {
+      display: block;
+      padding: 24px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      color: #172554;
+      text-decoration: none;
     }
-
-    .profile-row p {
-      margin: 0;
-      color: var(--text-muted);
-      overflow-wrap: anywhere;
+    .page-link:hover {
+      border-color: #6366f1;
+      background: #f8faff;
     }
-
-    .role-label {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: #eef2ff;
-      color: #4338ca;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: capitalize;
-    }
-
-    .notice {
-      margin-bottom: 18px;
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: #eff6ff;
-      color: #1e40af;
-    }
+    .page-link h2 { font-size: 19px; margin-bottom: 8px; }
+    .page-link p { color: #64748b; font-size: 14px; }
+    #message { margin-bottom: 16px; color: #b91c1c; }
   </style>
 </head>
-
 <body>
   <div class="app-layout">
     <aside class="sidebar">
       <a href="dashboard.html" class="brand">
-        <span class="brand-mark">R</span>
-        RoomFlow
+        <span class="brand-mark">R</span> RoomFlow
       </a>
 
       <nav class="sidebar-nav" aria-label="Main navigation">
-        <a href="dashboard.html" class="active">▦ Dashboard</a>
-        <a href="#rentOverview">₹ Rent Overview</a>
-        <a href="#electricity">⚡ Electricity</a>
-        <a href="#payments">▤ Payments</a>
-        <a href="#profile">♙ My Profile</a>
+        <a href="dashboard.html" class="active"
+           aria-current="page">▦ Dashboard</a>
+        <a href="properties.html" data-landlord hidden>⌂ Properties</a>
+        <a href="rooms.html" data-landlord hidden>▣ Rooms</a>
+        <a href="tenants.html" data-landlord hidden>♙ Tenants</a>
+        <a href="rent.html">₹ Rent Manager</a>
+        <a href="electricity.html">⚡ Electricity</a>
+        <a href="payments.html">▤ Payments</a>
+        <a href="profile.html">♙ My Profile</a>
       </nav>
 
       <div class="sidebar-bottom">
-        <button type="button" id="logoutButton" class="btn btn-outline btn-block">
-          Log out
-        </button>
-        <p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:16px">
+        <button id="logoutButton" type="button"
+                class="btn btn-outline btn-block">Log out</button>
+        <p style="color:#94a3b8;font-size:11px;margin-top:16px">
           RoomFlow · Jatav Industries
         </p>
       </div>
@@ -125,307 +70,148 @@
       <header class="topbar">
         <div>
           <h1>Dashboard</h1>
-          <span class="muted" style="font-size:13px">
-            Your rental management overview
-          </span>
+          <p class="muted">Your rental management overview</p>
         </div>
-        <span class="badge badge-info" id="accountStatus">Loading account…</span>
+        <span class="badge badge-info" id="accountRole">
+          Loading…
+        </span>
       </header>
 
       <div class="app-content">
-        <div id="pageMessage" class="form-message" role="status" hidden></div>
+        <p id="message" role="status" aria-live="polite"></p>
 
-        <section class="welcome-panel">
+        <section class="welcome">
           <h2>Welcome, <span id="welcomeName">there</span>!</h2>
-          <p id="welcomeText">
-            Your RoomFlow account is ready. Here is your account overview.
-          </p>
-
-          <div class="quick-actions">
-            <a href="#rentOverview" class="btn">View rent overview</a>
-            <a href="#profile" class="btn btn-outline">My profile</a>
-          </div>
+          <p>Choose a section below to manage your records.</p>
         </section>
 
-        <section class="stats-grid" aria-label="Account summary">
-          <article class="stat-card">
-            <div class="stat-icon">₹</div>
-            <div class="stat-label">Monthly Rent</div>
-            <p class="stat-value" id="monthlyRent">—</p>
-            <div class="stat-note">Configured rent amount</div>
-          </article>
+        <div class="page-links">
+          <a class="page-link" href="properties.html"
+             data-landlord hidden>
+            <h2>⌂ Properties</h2>
+            <p>Add and manage your properties.</p>
+          </a>
 
-          <article class="stat-card">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-label">Electricity</div>
-            <p class="stat-value" id="electricityAmount">—</p>
-            <div class="stat-note">Electricity charges</div>
-          </article>
+          <a class="page-link" href="rooms.html"
+             data-landlord hidden>
+            <h2>▣ Rooms</h2>
+            <p>Manage rooms and availability.</p>
+          </a>
 
-          <article class="stat-card">
-            <div class="stat-icon">▤</div>
-            <div class="stat-label">Pending Amount</div>
-            <p class="stat-value" id="pendingAmount">—</p>
-            <div class="stat-note">Unpaid charges</div>
-          </article>
+          <a class="page-link" href="tenants.html"
+             data-landlord hidden>
+            <h2>♙ Tenants</h2>
+            <p>Manage tenant records.</p>
+          </a>
 
-          <article class="stat-card">
-            <div class="stat-icon">⌂</div>
-            <div class="stat-label" id="roleCardLabel">Account Type</div>
-            <p class="stat-value" id="accountRole">—</p>
-            <div class="stat-note">Your RoomFlow role</div>
-          </article>
-        </section>
+          <a class="page-link" href="rent.html">
+            <h2>₹ Rent Manager</h2>
+            <p>Open rent records and due dates.</p>
+          </a>
 
-        <section class="panel" id="rentOverview">
-          <div class="panel-header">
-            <h2>Rent Overview</h2>
-            <span class="badge badge-neutral">Getting started</span>
-          </div>
-          <div class="empty-state">
-            <div class="empty-icon">🏠</div>
-            <h3>Your rent records will appear here</h3>
-            <p>
-              Rent totals and payment records will be displayed when the
-              rent-management features and database are connected.
-            </p>
-          </div>
-        </section>
+          <a class="page-link" href="electricity.html">
+            <h2>⚡ Electricity</h2>
+            <p>Open meter readings and bills.</p>
+          </a>
 
-        <section class="panel" id="electricity">
-          <div class="panel-header">
-            <h2>Electricity Overview</h2>
-            <span class="badge badge-neutral">Not connected yet</span>
-          </div>
-          <div class="empty-state">
-            <div class="empty-icon">⚡</div>
-            <h3>Meter readings and bills</h3>
-            <p>
-              Previous reading, current reading, units consumed and bill
-              amounts will be shown here after electricity records are added.
-            </p>
-          </div>
-        </section>
+          <a class="page-link" href="payments.html">
+            <h2>▤ Payments</h2>
+            <p>Open payment history.</p>
+          </a>
 
-        <section class="panel" id="payments">
-          <div class="panel-header">
-            <h2>Recent Payments</h2>
-          </div>
-          <div class="empty-state">
-            <div class="empty-icon">💳</div>
-            <h3>No payment records displayed</h3>
-            <p>
-              This section will show rent and electricity payments after
-              the payment-history feature is implemented.
-            </p>
-          </div>
-        </section>
+          <a class="page-link" href="profile.html">
+            <h2>♙ My Profile</h2>
+            <p>View your account details.</p>
+          </a>
+        </div>
 
-        <section class="panel" id="profile">
-          <div class="panel-header">
-            <h2>My Profile</h2>
-          </div>
-
-          <div class="profile-row">
-            <div class="avatar" id="profileAvatar">R</div>
-            <div>
-              <h3 id="profileName">Loading profile…</h3>
-              <p id="profileEmail">—</p>
-              <span class="role-label" id="profileRole">—</span>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <p><strong>Account created:</strong> <span id="createdAt">—</span></p>
-          <p><strong>Email verification:</strong> <span id="emailVerification">—</span></p>
-        </section>
-
-        <footer class="site-footer" style="border-radius:12px">
-          <p style="margin:0;font-size:13px;color:var(--text-muted)">
-            © <span data-current-year></span> RoomFlow — Powered by Jatav Industries
-          </p>
+        <footer class="site-footer">
+          RoomFlow — Powered by Jatav Industries
         </footer>
       </div>
     </main>
   </div>
 
   <script type="module">
-    import { initializeApp, getApp, getApps }
-      from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-    import {
-      getFirestore,
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
       authDomain: "roomflow-6c920.firebaseapp.com",
       projectId: "roomflow-6c920",
       storageBucket: "roomflow-6c920.firebasestorage.app",
       messagingSenderId: "827966111309",
-      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-      measurementId: "G-1YGPS03PKC"
-    };
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
+    });
 
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    const pageMessage = document.getElementById("pageMessage");
-    const logoutButton = document.getElementById("logoutButton");
-
-    function showMessage(text, type = "info") {
-      pageMessage.textContent = text;
-      pageMessage.className = `form-message ${type}`;
-      pageMessage.hidden = false;
-    }
-
-    function formatMoney(value) {
-      const amount = Number(value);
-      if (!Number.isFinite(amount)) return "—";
-
-      return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 2
-      }).format(amount);
-    }
-
-    function formatDate(value) {
-      if (!value) return "—";
-
-      let date;
-
-      if (typeof value.toDate === "function") {
-        date = value.toDate();
-      } else {
-        date = new Date(value);
-      }
-
-      if (Number.isNaN(date.getTime())) return "—";
-
-      return new Intl.DateTimeFormat("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      }).format(date);
-    }
-
-    function safeRole(value) {
-      return value === "landlord" || value === "tenant"
-        ? value
-        : "user";
-    }
-
-    function displayProfile(user, profile) {
-      const name =
-        profile.fullName ||
-        user.displayName ||
-        "RoomFlow User";
-
-      const role = safeRole(profile.role);
-
-      document.getElementById("welcomeName").textContent = name;
-      document.getElementById("profileName").textContent = name;
-      document.getElementById("profileEmail").textContent = user.email || "No email";
-      document.getElementById("profileRole").textContent = role;
-      document.getElementById("accountRole").textContent =
-        role.charAt(0).toUpperCase() + role.slice(1);
-      document.getElementById("roleCardLabel").textContent = "Account Type";
-      document.getElementById("profileAvatar").textContent =
-        name.trim().charAt(0).toUpperCase() || "R";
-      document.getElementById("accountStatus").textContent = "Signed in";
-      document.getElementById("emailVerification").textContent =
-        user.emailVerified ? "Verified" : "Not verified";
-      document.getElementById("createdAt").textContent =
-        formatDate(user.metadata.creationTime);
-
-      // Only show amounts if the profile contains actual configured values.
-      document.getElementById("monthlyRent").textContent =
-        profile.monthlyRent != null
-          ? formatMoney(profile.monthlyRent)
-          : "Not set";
-
-      document.getElementById("electricityAmount").textContent =
-        profile.electricityAmount != null
-          ? formatMoney(profile.electricityAmount)
-          : "Not set";
-
-      document.getElementById("pendingAmount").textContent =
-        profile.pendingAmount != null
-          ? formatMoney(profile.pendingAmount)
-          : "Not set";
-
-      document.getElementById("welcomeText").textContent =
-        role === "landlord"
-          ? "Manage your rental properties and tenant records from one place."
-          : role === "tenant"
-            ? "Keep track of your rental information and payment records."
-            : "Your account overview is ready.";
-    }
+    const message = document.getElementById("message");
 
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        window.location.replace("login.html");
+        location.replace("login.html");
         return;
       }
 
       try {
-        const profileRef = doc(db, "users", user.uid);
-        const profileSnapshot = await getDoc(profileRef);
+        const snapshot = await getDoc(doc(db, "users", user.uid));
 
-        if (!profileSnapshot.exists()) {
-          showMessage(
-            "Your account profile could not be found. Please contact support.",
-            "error"
-          );
-          document.getElementById("accountStatus").textContent =
+        if (!snapshot.exists()) {
+          document.getElementById("accountRole").textContent =
             "Profile missing";
+          message.textContent =
+            "Your account profile is missing. Please contact support.";
           return;
         }
 
-        displayProfile(user, profileSnapshot.data());
+        const profile = snapshot.data();
+        const role = profile.role;
+        const validRole = role === "landlord" || role === "tenant";
 
+        document.getElementById("welcomeName").textContent =
+          profile.fullName || user.displayName || "RoomFlow User";
+
+        document.getElementById("accountRole").textContent =
+          validRole
+            ? role.charAt(0).toUpperCase() + role.slice(1)
+            : "Role not configured";
+
+        document.querySelectorAll("[data-landlord]").forEach(item => {
+          item.hidden = role !== "landlord";
+        });
+
+        if (!validRole) {
+          message.textContent =
+            "Your account role needs to be configured.";
+        }
       } catch (error) {
-        console.error("RoomFlow profile loading failed:", error);
-
-        showMessage(
-          "We couldn't load your profile. Check your internet connection and Firestore permissions.",
-          "error"
-        );
-
-        document.getElementById("accountStatus").textContent =
-          "Profile unavailable";
+        console.error(error);
+        document.getElementById("accountRole").textContent =
+          "Account unavailable";
+        message.textContent =
+          "Could not load your account. Check your connection and permissions.";
       }
     });
 
-    logoutButton.addEventListener("click", async () => {
-      logoutButton.disabled = true;
-      logoutButton.textContent = "Logging out…";
+    document.getElementById("logoutButton").onclick = async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
 
       try {
         await signOut(auth);
-        window.location.replace("login.html");
+        location.replace("login.html");
       } catch (error) {
-        console.error("RoomFlow logout failed:", error);
-        showMessage("Unable to log out. Please try again.", "error");
-        logoutButton.disabled = false;
-        logoutButton.textContent = "Log out";
+        console.error(error);
+        message.textContent = "Logout failed. Please try again.";
+        button.disabled = false;
       }
-    });
-
-    document.querySelectorAll("[data-current-year]").forEach(element => {
-      element.textContent = new Date().getFullYear();
-    });
+    };
   </script>
 </body>
 </html>
