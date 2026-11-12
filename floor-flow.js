@@ -883,3 +883,421 @@ onAuthStateChanged(auth, async currentUser => {
 });
 
 controls();
+/* Search, filters and summary cards */
+(() => {
+  if (document.getElementById("ffToolbar")) return;
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+    .ff-stats{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+      margin:18px 0 22px;
+    }
+    .ff-stat{
+      padding:22px;
+      background:white;
+      border:1px solid #dbe2ea;
+      border-radius:16px;
+      min-width:0;
+    }
+    .ff-stat span{
+      display:block;
+      color:#64748b;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .ff-stat strong{
+      display:block;
+      margin-top:12px;
+      font-size:26px;
+      overflow-wrap:anywhere;
+    }
+    .ff-toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:18px;
+      margin-bottom:20px;
+      background:white;
+      border:1px solid #dbe2ea;
+      border-radius:16px;
+    }
+    .ff-toolbar input{
+      flex:2;
+      min-width:190px;
+    }
+    .ff-toolbar select{
+      flex:1;
+      min-width:145px;
+    }
+    .ff-toolbar button{
+      margin:0;
+      background:#eef2ff;
+      color:#3730a3;
+    }
+    .ff-count{
+      color:#64748b;
+      font-size:13px;
+      margin:0 0 16px;
+    }
+    #list article[hidden]{
+      display:none!important;
+    }
+    .ff-empty{
+      grid-column:1/-1;
+      padding:35px;
+      background:white;
+      border:1px dashed #cbd5e1;
+      border-radius:14px;
+      text-align:center;
+      color:#64748b;
+    }
+    @media(max-width:1100px){
+      .ff-stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+    @media(max-width:520px){
+      .ff-toolbar input,
+      .ff-toolbar select{
+        width:100%;
+        min-width:0;
+        flex:auto;
+      }
+      .ff-stat{padding:16px}
+      .ff-stat strong{font-size:22px}
+    }
+  `;
+
+  document.head.append(style);
+
+  const summary = document.createElement("section");
+  summary.className = "ff-stats";
+  summary.setAttribute("aria-label", "Summary");
+
+  const toolbar = document.createElement("div");
+  toolbar.id = "ffToolbar";
+  toolbar.className = "ff-toolbar";
+
+  toolbar.innerHTML = `
+    <input
+      id="ffSearch"
+      type="search"
+      aria-label="Search records"
+      placeholder="Search name, room, address, phone..."
+    >
+
+    ${kind !== "properties" ? `
+      <select id="ffProperty" aria-label="Filter property"></select>
+      <select id="ffFloor" aria-label="Filter floor"></select>
+    ` : ""}
+
+    <select id="ffStatus" aria-label="Filter status"></select>
+
+    <button id="ffClear" type="button">Clear filters</button>
+  `;
+
+  const count = document.createElement("p");
+  count.className = "ff-count";
+  count.setAttribute("role", "status");
+  count.setAttribute("aria-live", "polite");
+
+  $("list").before(summary, toolbar, count);
+
+  const statuses = kind === "rooms"
+    ? ["Available", "Occupied", "Maintenance", "Inactive"]
+    : kind === "tenants"
+      ? ["Active", "Inactive"]
+      : ["active", "inactive"];
+
+  $("ffStatus").add(new Option("All statuses", ""));
+
+  statuses.forEach(status => {
+    const text = kind === "tenants" && status === "Inactive"
+      ? "Moved out"
+      : status.charAt(0).toUpperCase() + status.slice(1);
+
+    $("ffStatus").add(new Option(text, status));
+  });
+
+  const scopedProperty = kind === "rooms"
+    ? new URLSearchParams(location.search).get("propertyId") || ""
+    : "";
+
+  function syncFilters() {
+    if (kind === "properties") return;
+
+    const propertySelect = $("ffProperty");
+    const previousProperty =
+      scopedProperty || propertySelect.value;
+
+    propertySelect.replaceChildren(
+      new Option("All properties", "")
+    );
+
+    records.properties.forEach(property => {
+      propertySelect.add(
+        new Option(label(property), property.id)
+      );
+    });
+
+    propertySelect.value = previousProperty;
+    propertySelect.disabled = Boolean(scopedProperty);
+
+    const floorSelect = $("ffFloor");
+    const previousFloor = floorSelect.value;
+    const propertyId = propertySelect.value;
+    const floorNames = new Set();
+
+    records.properties
+      .filter(property =>
+        !propertyId || property.id === propertyId
+      )
+      .forEach(property => {
+        floors(property).forEach(floor => floorNames.add(floor));
+      });
+
+    records[kind]
+      .filter(record =>
+        !propertyId || record.propertyId === propertyId
+      )
+      .forEach(record => {
+        if (record.floor) floorNames.add(record.floor);
+      });
+
+    floorSelect.replaceChildren(
+      new Option("All floors", "")
+    );
+
+    floorNames.forEach(floor => {
+      floorSelect.add(new Option(floor, floor));
+    });
+
+    if (floorNames.has(previousFloor)) {
+      floorSelect.value = previousFloor;
+    }
+  }
+
+  function recordMatches(record, filters) {
+    const property = records.properties.find(
+      property => property.id === record.propertyId
+    );
+
+    const text = [
+      record.name,
+      record.propertyName,
+      property?.name,
+      property?.propertyName,
+      record.address,
+      record.floor,
+      record.roomName,
+      record.phone,
+      record.email,
+      record.occupantName,
+      record.type,
+      record.notes,
+      ...(Array.isArray(record.floors) ? record.floors : [])
+    ].join(" ").toLowerCase();
+
+    const status = record.status ||
+      (
+        kind === "properties"
+          ? "active"
+          : kind === "tenants"
+            ? "Active"
+            : ""
+      );
+
+    return text.includes(filters.search) &&
+      (
+        !filters.propertyId ||
+        record.propertyId === filters.propertyId
+      ) &&
+      (!filters.floor || record.floor === filters.floor) &&
+      (!filters.status || status === filters.status);
+  }
+
+  function updateSummary(base) {
+    let items;
+
+    if (kind === "properties") {
+      items = [
+        ["Total Properties", base.length],
+        [
+          "Active Properties",
+          base.filter(property =>
+            (property.status || "active") === "active"
+          ).length
+        ],
+        [
+          "Total Floors",
+          base.reduce(
+            (sum, property) => sum + floors(property).length,
+            0
+          )
+        ],
+        [
+          "Total Rooms",
+          records.rooms.filter(room =>
+            base.some(property =>
+              property.id === room.propertyId
+            )
+          ).length
+        ]
+      ];
+    } else if (kind === "rooms") {
+      items = [
+        ["Total Rooms", base.length],
+        [
+          "Available",
+          base.filter(room =>
+            room.status === "Available" &&
+            !room.occupantTenantId &&
+            !room.occupantName &&
+            !records.tenants.some(tenant =>
+              active(tenant) && tenant.roomId === room.id
+            )
+          ).length
+        ],
+        [
+          "Occupied",
+          base.filter(room =>
+            room.status === "Occupied" ||
+            room.occupantTenantId ||
+            records.tenants.some(tenant =>
+              active(tenant) && tenant.roomId === room.id
+            )
+          ).length
+        ],
+        [
+          "Monthly Room Rent",
+          money(
+            base
+              .filter(room => room.status !== "Inactive")
+              .reduce(
+                (sum, room) => sum + (Number(room.rent) || 0),
+                0
+              )
+          )
+        ]
+      ];
+    } else {
+      items = [
+        ["Total Tenant Entries", base.length],
+        ["Active Tenants", base.filter(active).length],
+        [
+          "Moved Out",
+          base.filter(tenant => !active(tenant)).length
+        ],
+        [
+          "Active Monthly Rent",
+          money(
+            base
+              .filter(active)
+              .reduce(
+                (sum, tenant) =>
+                  sum + (Number(tenant.monthlyRent) || 0),
+                0
+              )
+          )
+        ]
+      ];
+    }
+
+    summary.replaceChildren();
+
+    items.forEach(([title, value]) => {
+      const card = document.createElement("div");
+      card.className = "ff-stat";
+
+      const caption = document.createElement("span");
+      caption.textContent = title;
+
+      const number = document.createElement("strong");
+      number.textContent = loaded ? value : "—";
+
+      card.append(caption, number);
+      summary.append(card);
+    });
+  }
+
+  const originalRender = render;
+
+  render = function () {
+    originalRender();
+    syncFilters();
+
+    const base = records[kind].filter(record =>
+      !scopedProperty ||
+      record.propertyId === scopedProperty
+    );
+
+    const filters = {
+      search: $("ffSearch").value.trim().toLowerCase(),
+      propertyId: kind === "properties"
+        ? ""
+        : $("ffProperty").value,
+      floor: kind === "properties"
+        ? ""
+        : $("ffFloor").value,
+      status: $("ffStatus").value
+    };
+
+    let shown = 0;
+    const cards = $("list").querySelectorAll("article");
+
+    base.forEach((record, index) => {
+      const matches = recordMatches(record, filters);
+
+      if (cards[index]) {
+        cards[index].hidden = !matches;
+      }
+
+      if (matches) shown++;
+    });
+
+    if (base.length && !shown) {
+      const empty = document.createElement("p");
+      empty.className = "ff-empty";
+      empty.textContent =
+        "No records match your search or filters.";
+
+      $("list").append(empty);
+    }
+
+    count.textContent = loaded
+      ? `Showing ${shown} of ${base.length} records`
+      : "Loading records…";
+
+    updateSummary(base);
+  };
+
+  $("ffSearch").addEventListener("input", () => render());
+  $("ffStatus").addEventListener("change", () => render());
+
+  if (kind !== "properties") {
+    $("ffProperty").addEventListener("change", () => {
+      $("ffFloor").value = "";
+      render();
+    });
+
+    $("ffFloor").addEventListener("change", () => render());
+  }
+
+  $("ffClear").addEventListener("click", () => {
+    $("ffSearch").value = "";
+    $("ffStatus").value = "";
+
+    if (kind !== "properties") {
+      $("ffProperty").value = scopedProperty;
+      $("ffFloor").value = "";
+    }
+
+    render();
+  });
+
+  render();
+})();
