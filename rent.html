@@ -1,949 +1,1223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#4f46e5">
-  <title>Rent Manager | RoomFlow</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rent Manager | RoomFlow</title>
 
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: #f6f8fc;
-      color: #0f172a;
-      font-family: Arial, sans-serif;
-    }
-
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    button:disabled { opacity: .55; cursor: not-allowed; }
-
-    .sidebar {
-      position: fixed;
-      inset: 0 auto 0 0;
-      width: 268px;
-      height: 100vh;
-      padding: 26px 18px;
-      background: #111827;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      z-index: 50;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0 6px 32px;
-      color: white;
-      font-size: 25px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-
-    .brand span {
-      display: grid;
-      place-items: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #818cf8, #4f46e5);
-    }
-
-    .sidebar nav { display: grid; gap: 8px; }
-
-    .sidebar nav a {
-      padding: 15px;
-      border-radius: 11px;
-      color: #cbd5e1;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .sidebar nav a:hover,
-    .sidebar nav a.active {
-      background: #252c4b;
-      color: white;
-    }
-
-    .brand-note {
-      margin-top: auto;
-      padding-top: 24px;
-      color: #94a3b8;
-      font-size: 11px;
-      text-align: center;
-    }
-
-    .page {
-      margin-left: 268px;
-      min-height: 100vh;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-      padding: 24px 30px;
-      background: white;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    h1 { font-size: 25px; margin: 0 0 8px; }
-    .topbar p { margin: 0; }
-    .content { padding: 30px; }
-    .muted { color: #64748b; font-size: 14px; line-height: 1.5; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-      margin-bottom: 24px;
-    }
-
-    .card {
-      padding: 24px;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      background: white;
-      box-shadow: 0 3px 12px #0f172a08;
-    }
-
-    .stat-icon {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      margin-bottom: 18px;
-      border-radius: 12px;
-      background: #eef2ff;
-      color: #4f46e5;
-      font-size: 21px;
-    }
-
-    .stat-label { color: #64748b; font-size: 14px; }
-    .stat-value {
-      margin-top: 12px;
-      font-size: 27px;
-      font-weight: 800;
-      overflow-wrap: anywhere;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    .field label { font-size: 14px; font-weight: 600; }
-    .full { grid-column: 1 / -1; }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #dbe2ea;
-      border-radius: 10px;
-      background: white;
-      color: #0f172a;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid #6366f1;
-      outline-offset: 2px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    button {
-      padding: 12px 16px;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-    }
-
-    .primary { background: #4f46e5; color: white; }
-    .primary:hover { background: #4338ca; }
-    .secondary { background: #eef2ff; color: #3730a3; }
-    .danger { background: #fee2e2; color: #991b1b; }
-    .small-btn { padding: 7px 10px; margin: 2px; font-size: 12px; }
-
-    .table-wrap { overflow-x: auto; margin-top: 18px; }
-    table { width: 100%; border-collapse: collapse; min-width: 760px; }
-
-    th, td {
-      padding: 14px 11px;
-      border-bottom: 1px solid #e2e8f0;
-      text-align: left;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-
-    th { background: #f8fafc; color: #64748b; }
-
-    .pill {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .paid { background: #dcfce7; color: #166534; }
-    .pending { background: #fef3c7; color: #92400e; }
-    .overdue { background: #fee2e2; color: #991b1b; }
-    .message { font-size: 14px; margin-top: 12px; line-height: 1.5; }
-    .message:empty { display: none; }
-    .hidden { display: none !important; }
-    .empty { text-align: center; padding: 30px; color: #64748b; }
-    .section-title { margin: 0 0 8px; font-size: 20px; }
-    .footer { padding-top: 24px; text-align: center; }
-
-    #rentDialog {
-      width: min(720px, calc(100% - 32px));
-      max-height: 90vh;
-      margin: auto;
-      padding: 24px;
-      border: none;
-      border-radius: 18px;
-      background: white;
-      color: #0f172a;
-      overflow-y: auto;
-    }
-
-    #rentDialog::backdrop { background: #0f172a99; }
-
-    .dialog-heading {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .dialog-heading p { margin: 0; }
-    .close-btn { padding: 6px 12px; font-size: 24px; }
-
-    @media (max-width: 1100px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 800px) {
-      .sidebar {
-        position: static;
-        width: 100%;
-        height: auto;
-        padding: 18px;
-      }
-
-      .brand { margin-bottom: 16px; }
-      .sidebar nav { display: flex; overflow-x: auto; }
-      .sidebar nav a { flex-shrink: 0; white-space: nowrap; }
-      .brand-note { display: none; }
-      .page { margin-left: 0; }
-      .topbar { padding: 20px; }
-      .content { padding: 18px; }
-    }
-
-    @media (max-width: 520px) {
-      .form-grid { grid-template-columns: 1fr; }
-      #addRentBtn { width: 100%; }
-      .card, #rentDialog { padding: 18px; }
-      .stat-value { font-size: 24px; }
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f8fc;color:#0f172a;font-family:Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;padding:12px 16px;border:0;border-radius:10px;font-weight:600}
+button:disabled{opacity:.55;cursor:not-allowed}
+.sidebar{position:fixed;inset:0 auto 0 0;width:268px;height:100vh;padding:26px 18px;background:#111827;display:flex;flex-direction:column;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:12px;margin:0 6px 32px;color:white;font-size:25px;font-weight:800;text-decoration:none}
+.brand span{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#818cf8,#4f46e5)}
+.sidebar nav{display:grid;gap:8px}
+.sidebar nav a{padding:15px;border-radius:11px;color:#cbd5e1;font-size:14px;font-weight:600;text-decoration:none}
+.sidebar nav a:hover,.sidebar nav a.active{background:#252c4b;color:white}
+.brand-note{margin-top:auto;padding-top:24px;color:#94a3b8;font-size:11px;text-align:center}
+.page{margin-left:268px;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:24px 30px;background:white;border-bottom:1px solid #e2e8f0}
+h1{font-size:25px;margin:0 0 8px}
+.topbar p{margin:0}
+.content{padding:30px}
+.muted{color:#64748b;font-size:14px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:24px}
+.card{padding:24px;border:1px solid #e2e8f0;border-radius:16px;background:white}
+.stat-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:18px;border-radius:12px;background:#eef2ff;color:#4f46e5;font-size:21px}
+.stat-label{color:#64748b;font-size:14px}
+.stat-value{margin-top:12px;font-size:27px;font-weight:800;overflow-wrap:anywhere}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:14px;font-weight:600}
+.full{grid-column:1/-1}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:10px;background:white;color:#0f172a}
+input:focus,select:focus,textarea:focus{outline:2px solid #818cf8;outline-offset:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.primary{background:#4f46e5;color:white}
+.primary:hover{background:#4338ca}
+.secondary{background:#eef2ff;color:#3730a3}
+.danger{background:#fee2e2;color:#991b1b}
+.small-btn{padding:7px 10px;margin:2px;font-size:12px}
+.table-wrap{overflow-x:auto;margin-top:18px}
+table{width:100%;border-collapse:collapse;min-width:1050px}
+th,td{padding:14px 11px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:14px;white-space:nowrap}
+th{background:#f8fafc;color:#64748b}
+.pill{display:inline-block;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.draft{background:#e0e7ff;color:#3730a3}
+.paid{background:#dcfce7;color:#166534}
+.pending{background:#fef3c7;color:#92400e}
+.overdue{background:#fee2e2;color:#991b1b}
+.message{font-size:14px;margin-top:12px;line-height:1.6}
+.message:empty{display:none}
+.hidden{display:none!important}
+.empty{text-align:center;padding:30px;color:#64748b}
+.section-title{margin:0 0 8px;font-size:20px}
+.footer{padding-top:24px;text-align:center}
+#rentDialog{width:min(720px,calc(100% - 32px));max-height:90vh;margin:auto;padding:24px;border:0;border-radius:18px;background:white;color:#0f172a;overflow-y:auto}
+#rentDialog::backdrop{background:#0f172a99}
+.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.dialog-heading p{margin:0}
+.close-btn{padding:6px 12px;font-size:24px}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+@media(max-width:800px){
+.sidebar{position:static;width:100%;height:auto;padding:18px}
+.brand{margin-bottom:16px}
+.sidebar nav{display:flex;overflow-x:auto}
+.sidebar nav a{flex-shrink:0;white-space:nowrap}
+.brand-note{display:none}
+.page{margin-left:0}
+.topbar{padding:20px}
+.content{padding:18px}
+}
+@media(max-width:520px){
+.form-grid{grid-template-columns:1fr}
+.card,#rentDialog{padding:18px}
+.stat-value{font-size:24px}
+}
+</style>
 </head>
 
 <body>
-  <aside class="sidebar">
-    <a href="dashboard.html" class="brand">
-      <span>R</span>RoomFlow
-    </a>
+<aside class="sidebar">
+  <a href="dashboard.html" class="brand"><span>R</span>RoomFlow</a>
 
-    <nav aria-label="Main navigation">
-      <a href="dashboard.html">▦ Dashboard</a>
-      <a href="properties.html">⌂ Properties</a>
-      <a href="rooms.html">▣ Rooms</a>
-      <a href="tenants.html">♙ Tenants</a>
-      <a href="rent.html" class="active" aria-current="page">
-        ₹ Rent Manager
-      </a>
-      <a href="electricity.html">⚡ Electricity</a>
-      <a href="payments.html">▤ Payments</a>
-      <a href="profile.html">♙ My Profile</a>
-      <a href="settings.html">⚙ Settings</a>
-    </nav>
+  <nav aria-label="Main navigation">
+    <a href="dashboard.html">▦ Dashboard</a>
+    <a href="properties.html">⌂ Properties</a>
+    <a href="rooms.html">▣ Rooms</a>
+    <a href="tenants.html">♙ Tenants</a>
+    <a href="rent.html" class="active" aria-current="page">₹ Rent Manager</a>
+    <a href="electricity.html">⚡ Electricity</a>
+    <a href="payments.html">▤ Payments</a>
+    <a href="profile.html">♙ My Profile</a>
+    <a href="settings.html">⚙ Settings</a>
+  </nav>
 
-    <p class="brand-note">RoomFlow · Jatav Industries</p>
-  </aside>
+  <p class="brand-note">RoomFlow · Jatav Industries</p>
+</aside>
 
-  <main class="page">
-    <header class="topbar">
-      <div>
-        <h1>Rent Manager</h1>
-        <p class="muted">Track monthly rent, due dates and payment history.</p>
-      </div>
-      <button class="primary" id="addRentBtn" type="button" disabled>
-        + Add Rent
+<main class="page">
+  <header class="topbar">
+    <div>
+      <h1>Rent Manager</h1>
+      <p class="muted">Tenant bills and monthly rent history.</p>
+    </div>
+
+    <div class="actions" style="margin:0">
+      <button class="primary" id="generateBtn" type="button" disabled>
+        Save Monthly Bills
       </button>
-    </header>
+      <button class="secondary" id="addRentBtn" type="button" disabled>
+        + Add / Link Bill
+      </button>
+    </div>
+  </header>
 
-    <div class="content">
-      <section class="grid" aria-label="Rent summary">
-        <div class="card">
-          <div class="stat-icon">₹</div>
-          <div class="stat-label">Total Rent Recorded</div>
-          <div class="stat-value" id="totalRent">—</div>
-        </div>
+  <div class="content">
+    <section class="grid" aria-label="Rent summary">
+      <div class="card">
+        <div class="stat-icon">₹</div>
+        <div class="stat-label">Selected Rent — Saved + Drafts</div>
+        <div class="stat-value" id="totalRent">—</div>
+      </div>
 
-        <div class="card">
-          <div class="stat-icon">◷</div>
-          <div class="stat-label">Total Pending</div>
-          <div class="stat-value" id="pendingRent">—</div>
-        </div>
+      <div class="card">
+        <div class="stat-icon">◷</div>
+        <div class="stat-label">Unpaid Rent — Saved + Drafts</div>
+        <div class="stat-value" id="pendingRent">—</div>
+      </div>
 
-        <div class="card">
-          <div class="stat-icon">✓</div>
-          <div class="stat-label">Paid Rent for This Rent Month</div>
-          <div class="stat-value" id="paidRent">—</div>
-        </div>
-      </section>
+      <div class="card">
+        <div class="stat-icon">✓</div>
+        <div class="stat-label">Paid Rent — Saved Bills</div>
+        <div class="stat-value" id="paidRent">—</div>
+      </div>
+    </section>
 
-      <section class="card">
-        <h2 class="section-title">Rent History</h2>
-        <p class="muted">Search and filter your rent records.</p>
+    <section class="card">
+      <h2 class="section-title">Monthly Rent & History</h2>
 
-        <div class="form-grid">
-          <div class="field">
-            <label for="searchInput">Search month or notes</label>
-            <input id="searchInput" type="search" placeholder="Search...">
-          </div>
-
-          <div class="field">
-            <label for="filterStatus">Filter by status</label>
-            <select id="filterStatus">
-              <option value="All">All Statuses</option>
-              <option value="Paid">Paid</option>
-              <option value="Pending">Pending</option>
-              <option value="Overdue">Overdue</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="secondary" id="exportBtn" type="button">
-            Export CSV
-          </button>
-          <button class="secondary" id="refreshBtn" type="button" disabled>
-            Refresh
-          </button>
-        </div>
-
-        <div class="message" id="historyMessage"
-             role="status" aria-live="polite"></div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Paid Date</th>
-                <th>Status</th>
-                <th>Method</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rentRows"></tbody>
-          </table>
-
-          <div class="empty hidden" id="emptyState">
-            No rent records found.
-          </div>
-        </div>
-      </section>
-
-      <p class="muted footer">
-        RoomFlow — Powered by Jatav Industries
+      <p class="muted">
+        Select a month to see saved bills and tenant drafts.
+        Clear the month to see all saved history.
+        Full monthly rent is used; review partial-month amounts before saving.
+        Marking a bill Paid here does not add a separate Payment History entry.
       </p>
-    </div>
-  </main>
 
-  <dialog id="rentDialog" aria-labelledby="formHeading">
-    <div class="dialog-heading">
-      <div>
-        <h2 class="section-title" id="formHeading">Add Rent Record</h2>
-        <p class="muted">Enter your rent details below.</p>
-      </div>
-      <button class="secondary close-btn" id="closeRentBtn"
-              type="button" aria-label="Close rent form">×</button>
-    </div>
-
-    <form id="rentForm">
-      <input type="hidden" id="recordId">
-
-      <div class="form-grid">
+      <div class="form-grid" style="margin-bottom:16px">
         <div class="field">
-          <label for="rentMonth">Rent Month *</label>
-          <input id="rentMonth" type="month" required>
+          <label for="monthFilter">Rent Month</label>
+          <input id="monthFilter" type="month">
         </div>
 
         <div class="field">
-          <label for="rentAmount">Rent Amount (₹) *</label>
-          <input id="rentAmount" type="number" min="0.01"
-                 max="100000000" step="0.01"
-                 placeholder="e.g. 8000" required>
+          <label for="dueDay">Due day for new drafts</label>
+          <input id="dueDay" type="number" min="1" max="31" value="5">
         </div>
 
         <div class="field">
-          <label for="dueDate">Due Date *</label>
-          <input id="dueDate" type="date" required>
+          <label for="propertyFilter">Property</label>
+          <select id="propertyFilter">
+            <option value="">All properties</option>
+          </select>
         </div>
 
         <div class="field">
-          <label for="paidDate">Payment Date (if paid)</label>
-          <input id="paidDate" type="date">
+          <label for="floorFilter">Floor</label>
+          <select id="floorFilter">
+            <option value="">All floors</option>
+          </select>
         </div>
 
         <div class="field">
-          <label for="rentStatus">Payment Status</label>
-          <select id="rentStatus" required>
-            <option value="Pending">Pending</option>
+          <label for="searchInput">Search tenant, room, month or notes</label>
+          <input id="searchInput" type="search" placeholder="Search...">
+        </div>
+
+        <div class="field">
+          <label for="filterStatus">Status</label>
+          <select id="filterStatus">
+            <option value="All">All Statuses</option>
+            <option value="Draft">Draft — not saved</option>
             <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Overdue">Overdue</option>
           </select>
-        </div>
-
-        <div class="field">
-          <label for="paymentMethod">Payment Method</label>
-          <select id="paymentMethod">
-            <option value="">Not specified</option>
-            <option>Cash</option>
-            <option>UPI</option>
-            <option>Bank Transfer</option>
-            <option>Debit/Credit Card</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div class="field full">
-          <label for="rentNotes">Notes</label>
-          <textarea id="rentNotes" rows="3" maxlength="500"
-                    placeholder="Optional notes"></textarea>
         </div>
       </div>
 
-      <div class="message" id="formMessage"
-           role="status" aria-live="polite"></div>
+      <p id="setupNote" class="message" style="color:#9a3412" role="status"></p>
 
       <div class="actions">
-        <button class="primary" id="submitBtn" type="submit">
-          Save Rent Record
+        <button class="secondary" id="exportBtn" type="button" disabled>
+          Export CSV
         </button>
-        <button class="secondary" id="cancelEdit" type="button">
-          Cancel
+        <button class="secondary" id="refreshBtn" type="button" disabled>
+          Refresh
         </button>
       </div>
-    </form>
-  </dialog>
 
-  <script type="module">
-    import { initializeApp, getApps, getApp } from
-      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+      <div class="message" id="historyMessage"
+           role="status" aria-live="polite"></div>
 
-    import { getAuth, onAuthStateChanged } from
-      "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+      <p id="recordCount" class="muted" role="status"></p>
 
-    import {
-      getFirestore, collection, doc, getDocs,
-      addDoc, updateDoc, deleteDoc, query,
-      orderBy, serverTimestamp
-    } from
-      "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Tenant</th>
+              <th>Property / Floor / Room</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Paid Date</th>
+              <th>Status</th>
+              <th>Method</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rentRows"></tbody>
+        </table>
 
-    const app = getApps().length ? getApp() : initializeApp({
-      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
-      authDomain: "roomflow-6c920.firebaseapp.com",
-      projectId: "roomflow-6c920",
-      storageBucket: "roomflow-6c920.firebasestorage.app",
-      messagingSenderId: "827966111309",
-      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-      measurementId: "G-1YGPS03PKC"
-    });
+        <div class="empty hidden" id="emptyState">
+          No rent records found.
+        </div>
+      </div>
+    </section>
 
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const $ = id => document.getElementById(id);
-    const dialog = $("rentDialog");
+    <p class="muted footer">RoomFlow — Powered by Jatav Industries</p>
+  </div>
+</main>
 
-    let currentUser = null;
-    let records = [];
-    let busy = false;
-    let loading = false;
-    let loaded = false;
+<dialog id="rentDialog" aria-labelledby="formHeading">
+  <div class="dialog-heading">
+    <div>
+      <h2 class="section-title" id="formHeading">Save Rent Bill</h2>
+      <p class="muted">
+        Review the tenant, month and amount.
+        Saved linked bills keep their tenant and month.
+      </p>
+    </div>
+    <button class="secondary close-btn" id="closeRentBtn"
+            type="button" aria-label="Close rent form">×</button>
+  </div>
 
-    const money = value => new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 2
-    }).format(Number(value) || 0);
+  <form id="rentForm">
+    <input type="hidden" id="recordId">
 
-    function today() {
-      const date = new Date();
-      return new Date(
-        date.getTime() - date.getTimezoneOffset() * 60000
-      ).toISOString().slice(0, 10);
+    <div class="form-grid">
+      <div class="field full">
+        <label for="tenantSelect">Tenant *</label>
+        <select id="tenantSelect" required></select>
+      </div>
+
+      <div class="field">
+        <label for="rentMonth">Rent Month *</label>
+        <input id="rentMonth" type="month" required>
+      </div>
+
+      <div class="field">
+        <label for="rentAmount">Rent Amount ₹ *</label>
+        <input id="rentAmount" type="number" min="0"
+               max="100000000" step="0.01" required>
+      </div>
+
+      <div class="field">
+        <label for="dueDate">Due Date *</label>
+        <input id="dueDate" type="date" required>
+      </div>
+
+      <div class="field">
+        <label for="paidDate">Payment Date</label>
+        <input id="paidDate" type="date">
+      </div>
+
+      <div class="field">
+        <label for="rentStatus">Payment Status</label>
+        <select id="rentStatus" required>
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="paymentMethod">Payment Method</label>
+        <select id="paymentMethod">
+          <option value="">Not specified</option>
+          <option>Cash</option>
+          <option>UPI</option>
+          <option>Bank Transfer</option>
+          <option>Debit/Credit Card</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="rentNotes">Notes</label>
+        <textarea id="rentNotes" rows="3" maxlength="2000"></textarea>
+      </div>
+    </div>
+
+    <div class="message" id="formMessage"
+         role="status" aria-live="polite"></div>
+
+    <div class="actions">
+      <button class="primary" id="submitBtn" type="submit">Save Rent Bill</button>
+      <button class="secondary" id="cancelEdit" type="button">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module">
+import {initializeApp,getApps,getApp} from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+import {getAuth,onAuthStateChanged} from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import {
+  getFirestore,collection,doc,getDocs,runTransaction,serverTimestamp
+} from
+  "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const app=getApps().length?getApp():initializeApp({
+  apiKey:"AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+  authDomain:"roomflow-6c920.firebaseapp.com",
+  projectId:"roomflow-6c920",
+  storageBucket:"roomflow-6c920.firebasestorage.app",
+  messagingSenderId:"827966111309",
+  appId:"1:827966111309:web:85a6bdb0b98f3a865a2604"
+});
+
+const auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+
+let user=null,tenants=[],records=[],properties=[],rooms=[];
+let loaded=false,busy=false,editing=null,visible=[];
+
+const col=name=>collection(db,"users",user.uid,name);
+const ref=(name,id)=>doc(db,"users",user.uid,name,id);
+
+const money=value=>new Intl.NumberFormat("en-IN",{
+  style:"currency",currency:"INR",maximumFractionDigits:2
+}).format(Number(value)||0);
+
+const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+function today(){
+  const d=new Date();
+  return new Date(
+    d.getTime()-d.getTimezoneOffset()*60000
+  ).toISOString().slice(0,10);
+}
+
+function validMonth(month){
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(month)&&
+    Number(month.slice(0,4))>=1900&&
+    Number(month.slice(0,4))<=2200;
+}
+
+function validDate(date){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date||""))return false;
+  const d=new Date(date+"T12:00:00Z");
+  return !Number.isNaN(d.getTime())&&
+    d.toISOString().slice(0,10)===date;
+}
+
+function monthEnd(month){
+  const [year,n]=month.split("-").map(Number);
+  return month+"-"+String(
+    new Date(Date.UTC(year,n,0)).getUTCDate()
+  ).padStart(2,"0");
+}
+
+function dueFor(month){
+  const day=Math.min(
+    Math.max(Number($("dueDay").value)||5,1),
+    31,
+    Number(monthEnd(month).slice(-2))
+  );
+  return month+"-"+String(day).padStart(2,"0");
+}
+
+function message(id,text,error=false){
+  $(id).textContent=text;
+  $(id).style.color=error?"#b91c1c":"#047857";
+}
+
+function active(tenant){
+  return (tenant.status||"Active")==="Active";
+}
+
+function eligible(tenant,month){
+  if(
+    !validMonth(month)||
+    !tenant.roomId||
+    !validDate(tenant.moveInDate)||
+    tenant.moveInDate>monthEnd(month)
+  )return false;
+
+  if(
+    tenant.moveOutDate&&
+    (
+      !validDate(tenant.moveOutDate)||
+      tenant.moveOutDate<month+"-01"
+    )
+  )return false;
+
+  if(!active(tenant)&&!validDate(tenant.moveOutDate))return false;
+
+  return true;
+}
+
+function snapshot(tenant){
+  const room=rooms.find(r=>r.id===tenant.roomId);
+  const property=properties.find(p=>p.id===tenant.propertyId);
+
+  return {
+    tenantId:tenant.id,
+    tenantName:tenant.name||"Unnamed tenant",
+    propertyId:tenant.propertyId||"",
+    propertyName:tenant.propertyName||
+      property?.name||property?.propertyName||"",
+    floor:tenant.floor||room?.floor||"",
+    roomId:tenant.roomId||"",
+    roomName:tenant.roomName||room?.name||room?.roomName||""
+  };
+}
+
+function state(record){
+  if(record.draft)return "Draft";
+  if(record.status==="Paid")return "Paid";
+  return record.dueDate&&record.dueDate<today()
+    ?"Overdue":"Pending";
+}
+
+function buildRows(month){
+  const saved=records
+    .filter(r=>!month||r.month===month)
+    .map(r=>({...r,draft:false}));
+
+  if(!validMonth(month))return saved;
+
+  const drafts=tenants.filter(tenant=>
+    eligible(tenant,month)&&
+    !records.some(record=>
+      record.tenantId===tenant.id&&record.month===month
+    )
+  ).map(tenant=>({
+    ...snapshot(tenant),
+    id:"draft:"+tenant.id,
+    month,
+    amount:Number(tenant.monthlyRent)||0,
+    dueDate:dueFor(month),
+    paidDate:"",
+    status:"Pending",
+    paymentMethod:"",
+    notes:"",
+    draft:true
+  }));
+
+  return [...saved,...drafts].sort((a,b)=>
+    String(b.month).localeCompare(String(a.month))||
+    String(a.tenantName||"").localeCompare(String(b.tenantName||""))
+  );
+}
+
+function fillFilters(){
+  const select=$("propertyFilter"),previous=select.value;
+
+  const names=new Map(properties.map(property=>[
+    property.id,
+    property.name||property.propertyName||"Unnamed property"
+  ]));
+
+  for(const record of records){
+    if(record.propertyId&&!names.has(record.propertyId)){
+      names.set(
+        record.propertyId,
+        record.propertyName||"Previous property"
+      );
+    }
+  }
+
+  select.replaceChildren(new Option("All properties",""));
+  for(const [id,name]of names)select.add(new Option(name,id));
+  if(names.has(previous))select.value=previous;
+
+  fillFloors();
+}
+
+function fillFloors(){
+  const propertyId=$("propertyFilter").value;
+  const select=$("floorFilter"),previous=select.value;
+
+  const names=new Set(
+    [...tenants.map(snapshot),...records]
+      .filter(r=>!propertyId||r.propertyId===propertyId)
+      .map(r=>r.floor)
+      .filter(Boolean)
+  );
+
+  select.replaceChildren(new Option("All floors",""));
+  for(const name of names)select.add(new Option(name,name));
+  if(names.has(previous))select.value=previous;
+}
+
+function controls(){
+  for(const id of [
+    "addRentBtn","generateBtn","refreshBtn","exportBtn"
+  ]){
+    $(id).disabled=busy||!user||
+      (id!=="refreshBtn"&&!loaded)||
+      (id==="generateBtn"&&!validMonth($("monthFilter").value));
+  }
+
+  for(const id of ["submitBtn","cancelEdit","closeRentBtn"]){
+    $(id).disabled=busy||!loaded;
+  }
+
+  for(const id of [
+    "monthFilter","dueDay","propertyFilter",
+    "floorFilter","filterStatus","searchInput"
+  ]){
+    $(id).disabled=busy||!loaded;
+  }
+
+  document.querySelectorAll("#rentRows button").forEach(button=>{
+    button.disabled=busy||!loaded;
+  });
+}
+
+function render(){
+  if(!loaded)return;
+
+  const all=buildRows($("monthFilter").value);
+  const search=$("searchInput").value.trim().toLowerCase();
+  const propertyId=$("propertyFilter").value;
+  const floor=$("floorFilter").value;
+  const status=$("filterStatus").value;
+
+  const scope=all.filter(record=>
+    (!propertyId||record.propertyId===propertyId)&&
+    (!floor||record.floor===floor)
+  );
+
+  visible=scope.filter(record=>
+    [
+      record.month,record.tenantName,record.propertyName,
+      record.floor,record.roomName,record.notes,record.paymentMethod
+    ].join(" ").toLowerCase().includes(search)&&
+    (status==="All"||state(record)===status)
+  );
+
+  $("rentRows").innerHTML=visible.map(record=>{
+    const status=state(record);
+
+    return `
+      <tr>
+        <td>${esc(record.month)}</td>
+        <td>
+          <strong>${esc(record.tenantName||"Unlinked old record")}</strong>
+          ${!record.tenantId?`
+            <div class="muted">Use Edit to link a tenant</div>
+          `:""}
+        </td>
+        <td>
+          ${esc(record.propertyName||"—")}
+          <div class="muted">
+            ${esc(
+              [record.floor,record.roomName].filter(Boolean).join(" · ")||"—"
+            )}
+          </div>
+        </td>
+        <td>${esc(money(record.amount))}</td>
+        <td>${esc(record.dueDate||"—")}</td>
+        <td>${esc(record.paidDate||"—")}</td>
+        <td>
+          <span class="pill ${status.toLowerCase()}">${status}</span>
+        </td>
+        <td>${esc(record.paymentMethod||"—")}</td>
+        <td>
+          <button type="button" class="small-btn secondary"
+            data-open="${esc(record.id)}">
+            ${record.draft?"Review / Save":"Edit"}
+          </button>
+          ${!record.draft?`
+            <button type="button" class="small-btn danger"
+              data-delete="${esc(record.id)}">Delete</button>
+          `:""}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  $("emptyState").classList.toggle("hidden",visible.length>0);
+
+  $("totalRent").textContent=money(
+    scope.reduce((sum,r)=>sum+(Number(r.amount)||0),0)
+  );
+
+  $("pendingRent").textContent=money(
+    scope.filter(r=>r.status!=="Paid")
+      .reduce((sum,r)=>sum+(Number(r.amount)||0),0)
+  );
+
+  $("paidRent").textContent=money(
+    scope.filter(r=>!r.draft&&r.status==="Paid")
+      .reduce((sum,r)=>sum+(Number(r.amount)||0),0)
+  );
+
+  $("recordCount").textContent=
+    `Showing ${visible.length} of ${scope.length} entries · `+
+    `${scope.filter(r=>r.draft).length} unsaved drafts. `+
+    "Totals follow month/property/floor filters.";
+
+  const missing=tenants.filter(tenant=>
+    active(tenant)&&
+    (!tenant.roomId||!validDate(tenant.moveInDate))
+  ).length;
+
+  $("setupNote").textContent=missing
+    ?`${missing} active tenant(s) need a room and valid move-in date on the Tenants page before their monthly drafts can appear.`
+    :"";
+
+  controls();
+}
+
+async function reload(){
+  const uid=user.uid;
+
+  const snapshots=await Promise.all(
+    ["tenants","rentRecords","properties","rooms"].map(name=>
+      getDocs(col(name))
+    )
+  );
+
+  if(user?.uid!==uid)throw Error("Session changed. Reload this page.");
+
+  [tenants,records,properties,rooms]=snapshots.map(snapshot=>
+    snapshot.docs.map(doc=>({...doc.data(),id:doc.id}))
+  );
+
+  loaded=true;
+  fillFilters();
+  render();
+}
+
+function open(record=null){
+  if(!loaded||busy)return;
+
+  editing=record&&!record.draft?{...record}:null;
+  if(editing)delete editing.draft;
+
+  $("rentForm").reset();
+  $("recordId").value=editing?.id||"";
+
+  const month=record?.month||
+    $("monthFilter").value||today().slice(0,7);
+
+  const select=$("tenantSelect");
+
+  select.replaceChildren(new Option(
+    editing?"Keep old record unlinked":"Select tenant",""
+  ));
+
+  const choices=tenants.filter(tenant=>
+    eligible(tenant,month)||tenant.id===record?.tenantId
+  );
+
+  for(const tenant of choices){
+    const s=snapshot(tenant);
+    select.add(new Option(
+      `${s.tenantName} — ${s.propertyName} / ${s.floor} / ${s.roomName}`,
+      tenant.id
+    ));
+  }
+
+  if(
+    record?.tenantId&&
+    !choices.some(tenant=>tenant.id===record.tenantId)
+  ){
+    select.add(new Option(
+      record.tenantName||"Previous tenant",record.tenantId
+    ));
+  }
+
+  select.value=record?.tenantId||"";
+  select.disabled=Boolean(editing?.tenantId);
+  select.required=!editing;
+
+  $("rentMonth").value=month;
+  $("rentMonth").disabled=Boolean(editing?.tenantId);
+  $("rentAmount").value=record?.amount??"";
+  $("dueDate").value=record?.dueDate||dueFor(month);
+  $("paidDate").value=record?.paidDate||"";
+  $("rentStatus").value=record?.status==="Paid"?"Paid":"Pending";
+
+  const method=$("paymentMethod");
+
+  if(
+    record?.paymentMethod&&
+    ![...method.options].some(option=>
+      option.value===record.paymentMethod
+    )
+  ){
+    method.add(new Option(record.paymentMethod,record.paymentMethod));
+  }
+
+  method.value=record?.paymentMethod||"";
+  $("rentNotes").value=record?.notes||"";
+  $("formHeading").textContent=editing
+    ?"Edit Rent Record":"Save Tenant Rent Bill";
+  $("submitBtn").textContent=editing
+    ?"Update Rent Record":"Save Rent Bill";
+
+  message("formMessage","");
+  $("rentDialog").showModal();
+}
+
+function billKey(tenantId,month){
+  return "tenant_"+encodeURIComponent(tenantId)+"_"+month;
+}
+
+async function saveBill(data,expected=null){
+  if(
+    !validMonth(data.month)||
+    !Number.isFinite(data.amount)||
+    data.amount<0||data.amount>100000000||
+    !validDate(data.dueDate)||
+    data.dueDate.slice(0,7)!==data.month
+  ){
+    throw Error("Invalid bill amount, month or due date. Review the draft.");
+  }
+
+  const tenantId=data.tenantId||"";
+  const key=tenantId?billKey(tenantId,data.month):"";
+
+  if(!expected&&!tenantId)throw Error("Select a tenant.");
+
+  const target=expected
+    ?ref("rentRecords",expected.id)
+    :ref("rentRecords",key);
+
+  const known=tenantId?records.filter(record=>
+    record.tenantId===tenantId&&
+    record.month===data.month&&
+    record.id!==expected?.id
+  ):[];
+
+  return runTransaction(db,async transaction=>{
+    const oldSnap=await transaction.get(target);
+    const old=oldSnap.exists()?oldSnap.data():null;
+
+    const claimRef=tenantId?ref("rentMonthKeys",key):null;
+    const claim=claimRef?await transaction.get(claimRef):null;
+
+    if(
+      expected&&
+      (
+        !old||
+        JSON.stringify({...old,id:oldSnap.id})!==
+          JSON.stringify(expected)
+      )
+    ){
+      throw Error("Bill changed. Close the form, refresh and try again.");
     }
 
-    const currentMonth = () => today().slice(0, 7);
-
-    function showMessage(id, text, error = false) {
-      $(id).textContent = text;
-      $(id).style.color = error ? "#b91c1c" : "#047857";
+    if(!expected&&old){
+      throw Error(
+        "This tenant already has a bill for this month. Refresh to see it."
+      );
     }
 
-    function actualStatus(record) {
-      if (record.status === "Paid") return "Paid";
-      if (record.dueDate && record.dueDate < today()) return "Overdue";
-      return "Pending";
+    if(claim?.exists()&&claim.data().recordId!==target.id){
+      throw Error("This tenant already has a bill for this month.");
     }
 
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
+    for(const record of known){
+      const snapshot=await transaction.get(ref("rentRecords",record.id));
+
+      if(
+        snapshot.exists()&&
+        snapshot.data().tenantId===tenantId&&
+        snapshot.data().month===data.month
+      ){
+        throw Error(
+          "A bill already exists for this tenant/month. Edit that bill instead."
+        );
+      }
     }
 
-    function setDefaultForm() {
-      $("rentMonth").value = currentMonth();
-      $("rentAmount").value = "";
-      $("dueDate").value = currentMonth() + "-05";
-      $("paidDate").value = "";
-      $("rentStatus").value = "Pending";
-      $("paymentMethod").value = "";
-      $("rentNotes").value = "";
-      $("recordId").value = "";
-      $("formHeading").textContent = "Add Rent Record";
-      $("submitBtn").textContent = "Save Rent Record";
-      showMessage("formMessage", "");
+    if(
+      old?.tenantId&&
+      (old.tenantId!==tenantId||old.month!==data.month)
+    ){
+      throw Error("Tenant and month of a linked bill cannot be changed.");
     }
 
-    function openDialog() {
-      if (!dialog.open) dialog.showModal();
-      $("rentMonth").focus();
+    let payload={...data,updatedAt:serverTimestamp()};
+
+    if(tenantId){
+      const tenantSnap=await transaction.get(ref("tenants",tenantId));
+
+      if(!expected?.tenantId){
+        if(
+          !tenantSnap.exists()||
+          !eligible({...tenantSnap.data(),id:tenantId},data.month)
+        ){
+          throw Error("Tenant dates or room changed. Refresh before billing.");
+        }
+
+        const tenant={...tenantSnap.data(),id:tenantId};
+        payload={...payload,...snapshot(tenant)};
+
+        if(
+          !expected&&
+          Number(tenant.monthlyRent)!==Number(data.agreedRentAtDraft)
+        ){
+          throw Error("Tenant rent changed. Refresh and review the new rent.");
+        }
+      }else{
+        for(const key of [
+          "tenantName","propertyId","propertyName",
+          "floor","roomId","roomName"
+        ]){
+          payload[key]=old[key]||"";
+        }
+      }
     }
 
-    function closeDialog() {
-      if (!busy) dialog.close();
-    }
+    delete payload.agreedRentAtDraft;
 
-    function updateButtons() {
-      const unavailable = !currentUser || busy || loading;
-      $("addRentBtn").disabled = unavailable || !loaded;
-      $("refreshBtn").disabled = unavailable;
-      $("exportBtn").disabled = unavailable || !loaded;
-      $("submitBtn").disabled = busy;
-      $("cancelEdit").disabled = busy;
-      $("closeRentBtn").disabled = busy;
-    }
-
-    $("addRentBtn").addEventListener("click", () => {
-      if (!currentUser || busy || loading || !loaded) return;
-      setDefaultForm();
-      openDialog();
-    });
-
-    $("closeRentBtn").addEventListener("click", closeDialog);
-    $("cancelEdit").addEventListener("click", closeDialog);
-
-    dialog.addEventListener("cancel", event => {
-      if (busy) event.preventDefault();
-    });
-
-    $("rentMonth").addEventListener("change", () => {
-      const month = $("rentMonth").value;
-      if (month) $("dueDate").value = month + "-05";
-    });
-
-    function render() {
-      if (!loaded) return;
-
-      const search = $("searchInput").value.trim().toLowerCase();
-      const filter = $("filterStatus").value;
-
-      const visible = records.filter(record => {
-        const text = [
-          record.month, record.notes || "", record.paymentMethod || ""
-        ].join(" ").toLowerCase();
-
-        return text.includes(search) &&
-          (filter === "All" || actualStatus(record) === filter);
+    if(expected){
+      transaction.update(target,payload);
+    }else{
+      transaction.set(target,{
+        ...payload,createdAt:serverTimestamp()
       });
-
-      $("rentRows").innerHTML = visible.map(record => {
-        const status = actualStatus(record);
-
-        return `
-          <tr>
-            <td>${escapeHTML(record.month)}</td>
-            <td>${money(record.amount)}</td>
-            <td>${escapeHTML(record.dueDate || "—")}</td>
-            <td>${escapeHTML(record.paidDate || "—")}</td>
-            <td>
-              <span class="pill ${status.toLowerCase()}">${status}</span>
-            </td>
-            <td>${escapeHTML(record.paymentMethod || "—")}</td>
-            <td>
-              <button type="button" class="small-btn secondary"
-                data-action="edit" data-id="${escapeHTML(record.id)}">
-                Edit
-              </button>
-              <button type="button" class="small-btn danger"
-                data-action="delete" data-id="${escapeHTML(record.id)}">
-                Delete
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      $("emptyState").classList.toggle("hidden", visible.length !== 0);
-
-      $("totalRent").textContent = money(
-        records.reduce((sum, record) =>
-          sum + Number(record.amount || 0), 0)
-      );
-
-      $("pendingRent").textContent = money(
-        records.reduce((sum, record) =>
-          sum + (actualStatus(record) !== "Paid"
-            ? Number(record.amount || 0) : 0), 0)
-      );
-
-      $("paidRent").textContent = money(
-        records.reduce((sum, record) =>
-          sum + (
-            record.month === currentMonth() &&
-            actualStatus(record) === "Paid"
-              ? Number(record.amount || 0) : 0
-          ), 0)
-      );
     }
 
-    async function loadRecords() {
-      if (!currentUser || loading) return false;
-
-      loading = true;
-      updateButtons();
-      showMessage("historyMessage", "Loading rent records...");
-
-      try {
-        const snapshot = await getDocs(query(
-          collection(db, "users", currentUser.uid, "rentRecords"),
-          orderBy("month", "desc")
-        ));
-
-        records = snapshot.docs.map(item => ({
-          ...item.data(),
-          id: item.id
-        }));
-
-        loaded = true;
-        render();
-
-        showMessage(
-          "historyMessage",
-          records.length
-            ? `${records.length} rent record(s) loaded.`
-            : "No records yet. Click + Add Rent to get started."
-        );
-
-        return true;
-      } catch (error) {
-        console.error(error);
-
-        showMessage(
-          "historyMessage",
-          loaded
-            ? "Refresh failed. Previously loaded records are still shown."
-            : "Could not load rent data. Check your connection and Firestore rules.",
-          true
-        );
-
-        return false;
-      } finally {
-        loading = false;
-        updateButtons();
-      }
+    if(claimRef){
+      transaction.set(claimRef,{
+        tenantId,
+        month:data.month,
+        recordId:target.id,
+        updatedAt:serverTimestamp()
+      });
     }
+  });
+}
 
-    $("rentForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      if (!currentUser || busy || loading || !loaded) return;
+async function afterSave(text){
+  $("rentDialog").close();
+  editing=null;
 
-      const month = $("rentMonth").value;
-      const amount = Number($("rentAmount").value);
-      const dueDate = $("dueDate").value;
-      const paidDate = $("paidDate").value;
-      const status = $("rentStatus").value;
-      const id = $("recordId").value;
+  try{
+    await reload();
+    message("historyMessage",text);
+  }catch(error){
+    loaded=false;
+    message(
+      "historyMessage",
+      text+" List refresh failed; click Refresh before another change.",
+      true
+    );
+  }
+}
 
-      if (
-        !month || !dueDate ||
-        !Number.isFinite(amount) || amount <= 0 ||
-        amount > 100000000
-      ) {
-        showMessage(
-          "formMessage",
-          "Please enter a valid month, due date and rent amount.",
-          true
-        );
-        return;
+$("rentForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  if(busy||!loaded)return;
+
+  const tenant=tenants.find(t=>t.id===$("tenantSelect").value);
+
+  const data={
+    month:$("rentMonth").value,
+    tenantId:$("tenantSelect").value,
+    amount:Number($("rentAmount").value),
+    dueDate:$("dueDate").value,
+    paidDate:$("rentStatus").value==="Paid"?$("paidDate").value:"",
+    status:$("rentStatus").value,
+    paymentMethod:$("paymentMethod").value,
+    notes:$("rentNotes").value.trim(),
+    agreedRentAtDraft:Number(tenant?.monthlyRent)
+  };
+
+  if(
+    !validMonth(data.month)||
+    !validDate(data.dueDate)||
+    data.dueDate.slice(0,7)!==data.month||
+    !Number.isFinite(data.amount)||
+    data.amount<0||data.amount>100000000
+  ){
+    message(
+      "formMessage",
+      "Enter a valid amount, month and due date within that month.",
+      true
+    );
+    return;
+  }
+
+  if(
+    data.status==="Paid"&&
+    (!validDate(data.paidDate)||data.paidDate>today())
+  ){
+    message(
+      "formMessage",
+      "Enter a valid payment date, up to today.",
+      true
+    );
+    return;
+  }
+
+  busy=true;
+  controls();
+
+  try{
+    await saveBill(data,editing);
+    await afterSave("Rent bill saved.");
+  }catch(error){
+    console.error(error);
+    message(
+      "formMessage",
+      error.message||"Save failed. Check connection and permissions.",
+      true
+    );
+  }finally{
+    busy=false;
+    controls();
+  }
+});
+
+$("generateBtn").addEventListener("click",async()=>{
+  if(busy||!loaded||!validMonth($("monthFilter").value))return;
+
+  const drafts=buildRows($("monthFilter").value).filter(record=>
+    record.draft&&
+    (
+      !$("propertyFilter").value||
+      record.propertyId===$("propertyFilter").value
+    )&&
+    (
+      !$("floorFilter").value||
+      record.floor===$("floorFilter").value
+    )
+  );
+
+  if(!drafts.length){
+    message(
+      "historyMessage",
+      "No unsaved drafts in the selected month/property/floor."
+    );
+    return;
+  }
+
+  if(!confirm(
+    `Save ${drafts.length} monthly bills at full agreed monthly rents? `+
+    "Partial months are not prorated. "+
+    "Search and status filters do not limit this action."
+  ))return;
+
+  busy=true;
+  controls();
+
+  let done=0,failed=0,reason="";
+
+  for(const record of drafts){
+    message(
+      "historyMessage",
+      `Saving bills: ${done+failed} / ${drafts.length}…`
+    );
+
+    try{
+      const {id,draft,...data}=record;
+      await saveBill({
+        ...data,
+        agreedRentAtDraft:Number(record.amount)
+      });
+      done++;
+    }catch(error){
+      console.error(error);
+      failed++;
+      reason=error.message;
+    }
+  }
+
+  try{
+    await reload();
+    message(
+      "historyMessage",
+      `${done} bills saved. ${failed} not saved.`+
+      (failed?" "+reason:""),
+      failed>0
+    );
+  }catch(error){
+    loaded=false;
+    message(
+      "historyMessage",
+      `${done} bills saved, ${failed} not saved. Refresh failed; click Refresh.`,
+      true
+    );
+  }finally{
+    busy=false;
+    controls();
+  }
+});
+
+$("rentRows").addEventListener("click",async event=>{
+  const button=event.target.closest("button");
+  if(!button||busy||!loaded)return;
+
+  if(button.dataset.open){
+    const record=visible.find(r=>r.id===button.dataset.open);
+    if(record)open(record);
+    return;
+  }
+
+  if(!button.dataset.delete)return;
+
+  const record=records.find(r=>r.id===button.dataset.delete);
+  if(!record)return;
+
+  if(!confirm(
+    `Delete this saved rent bill for ${record.month}? `+
+    "If the tenant lived in this month, an unsaved draft will appear again. "+
+    "Payment History is not changed."
+  ))return;
+
+  busy=true;
+  controls();
+
+  try{
+    await runTransaction(db,async transaction=>{
+      const target=ref("rentRecords",record.id);
+      const snapshot=await transaction.get(target);
+
+      if(!snapshot.exists()){
+        throw Error("Bill no longer exists. Refresh.");
       }
 
-      if (dueDate.slice(0, 7) !== month) {
-        showMessage(
-          "formMessage",
-          "Due date must be within the selected rent month.",
-          true
-        );
-        return;
+      if(
+        JSON.stringify({...snapshot.data(),id:snapshot.id})!==
+        JSON.stringify(record)
+      ){
+        throw Error("Bill changed. Refresh before deleting.");
       }
 
-      if (status === "Paid" && !paidDate) {
-        showMessage(
-          "formMessage",
-          "Please enter the payment date for a paid record.",
-          true
-        );
-        return;
-      }
+      const claimRef=record.tenantId
+        ?ref("rentMonthKeys",billKey(record.tenantId,record.month))
+        :null;
 
-      if (paidDate && paidDate > today()) {
-        showMessage(
-          "formMessage",
-          "Payment date cannot be in the future.",
-          true
-        );
-        return;
-      }
+      const claim=claimRef?await transaction.get(claimRef):null;
 
-      if (
-        !id &&
-        records.some(record => record.month === month) &&
-        !confirm(
-          "A record already exists for this month. Add another record anyway?"
-        )
-      ) return;
+      transaction.delete(target);
 
-      const data = {
-        month,
-        amount,
-        dueDate,
-        paidDate: status === "Paid" ? paidDate : "",
-        status,
-        paymentMethod: $("paymentMethod").value,
-        notes: $("rentNotes").value.trim().slice(0, 500),
-        updatedAt: serverTimestamp()
-      };
-
-      busy = true;
-      updateButtons();
-
-      try {
-        if (id) {
-          if (!records.some(record => record.id === id)) {
-            throw new Error("Record not found.");
-          }
-
-          await updateDoc(
-            doc(db, "users", currentUser.uid, "rentRecords", id),
-            data
-          );
-        } else {
-          await addDoc(
-            collection(db, "users", currentUser.uid, "rentRecords"),
-            { ...data, createdAt: serverTimestamp() }
-          );
-        }
-
-        dialog.close();
-        setDefaultForm();
-
-        const refreshed = await loadRecords();
-
-        if (refreshed) {
-          showMessage(
-            "historyMessage",
-            id ? "Rent record updated successfully." :
-              "Rent record saved successfully."
-          );
-        } else {
-          showMessage(
-            "historyMessage",
-            "Record saved, but the list could not refresh. Click Refresh.",
-            true
-          );
-        }
-      } catch (error) {
-        console.error(error);
-        showMessage(
-          "formMessage",
-          "Could not save the record. Check your connection and Firestore rules.",
-          true
-        );
-      } finally {
-        busy = false;
-        updateButtons();
+      if(claim?.exists()&&claim.data().recordId===record.id){
+        transaction.delete(claimRef);
       }
     });
 
-    $("rentRows").addEventListener("click", async event => {
-      const button = event.target.closest("button[data-action]");
-      if (!button || !currentUser || busy || loading) return;
+    await afterSave("Rent bill deleted.");
+  }catch(error){
+    message("historyMessage",error.message,true);
+  }finally{
+    busy=false;
+    controls();
+  }
+});
 
-      const record = records.find(item => item.id === button.dataset.id);
-      if (!record) return;
+$("tenantSelect").addEventListener("change",()=>{
+  if(editing)return;
+  const tenant=tenants.find(t=>t.id===$("tenantSelect").value);
+  if(tenant)$("rentAmount").value=tenant.monthlyRent??0;
+});
 
-      if (button.dataset.action === "edit") {
-        $("recordId").value = record.id;
-        $("rentMonth").value = record.month || "";
-        $("rentAmount").value = record.amount ?? "";
-        $("dueDate").value = record.dueDate || "";
-        $("paidDate").value = record.paidDate || "";
-        $("rentStatus").value =
-          record.status === "Paid" ? "Paid" : "Pending";
-        $("paymentMethod").value = record.paymentMethod || "";
-        $("rentNotes").value = record.notes || "";
-        $("formHeading").textContent = "Edit Rent Record";
-        $("submitBtn").textContent = "Update Rent Record";
+$("rentMonth").addEventListener("change",()=>{
+  const month=$("rentMonth").value;
+  if(!validMonth(month))return;
 
-        showMessage("formMessage", "");
-        openDialog();
-        return;
-      }
+  $("dueDate").value=dueFor(month);
+  if(editing?.tenantId)return;
 
-      if (button.dataset.action !== "delete") return;
+  const select=$("tenantSelect"),previous=select.value;
 
-      if (!confirm(
-        `Delete rent record for ${record.month}? This cannot be undone.`
-      )) return;
+  select.replaceChildren(new Option(
+    editing?"Keep old record unlinked":"Select tenant",""
+  ));
 
-      busy = true;
-      button.disabled = true;
-      updateButtons();
+  for(const tenant of tenants.filter(t=>eligible(t,month))){
+    const s=snapshot(tenant);
+    select.add(new Option(
+      `${s.tenantName} — ${s.propertyName} / ${s.floor} / ${s.roomName}`,
+      tenant.id
+    ));
+  }
 
-      try {
-        await deleteDoc(
-          doc(db, "users", currentUser.uid, "rentRecords", record.id)
-        );
+  select.value=previous;
+});
 
-        const refreshed = await loadRecords();
+$("addRentBtn").addEventListener("click",()=>open());
 
-        showMessage(
-          "historyMessage",
-          refreshed
-            ? "Rent record deleted."
-            : "Record deleted, but the list could not refresh. Click Refresh.",
-          !refreshed
-        );
-      } catch (error) {
-        console.error(error);
-        showMessage(
-          "historyMessage",
-          "Could not delete record. Check your connection and Firestore rules.",
-          true
-        );
-      } finally {
-        busy = false;
-        button.disabled = false;
-        updateButtons();
-      }
-    });
+for(const id of ["closeRentBtn","cancelEdit"]){
+  $(id).addEventListener("click",()=>{
+    if(!busy)$("rentDialog").close();
+  });
+}
 
-    $("searchInput").addEventListener("input", render);
-    $("filterStatus").addEventListener("change", render);
+$("rentDialog").addEventListener("cancel",event=>{
+  if(busy)event.preventDefault();
+});
 
-    $("refreshBtn").addEventListener("click", () => {
-      if (!busy) loadRecords();
-    });
+for(const id of ["monthFilter","dueDay","floorFilter","filterStatus"]){
+  $(id).addEventListener("change",render);
+}
 
-    $("exportBtn").addEventListener("click", () => {
-      if (!loaded || busy || loading) return;
+$("searchInput").addEventListener("input",render);
 
-      if (!records.length) {
-        showMessage("historyMessage", "There are no records to export.", true);
-        return;
-      }
+$("propertyFilter").addEventListener("change",()=>{
+  fillFloors();
+  render();
+});
 
-      const csvCell = value => {
-        let text = String(value ?? "");
+$("refreshBtn").addEventListener("click",async()=>{
+  if(busy||!user)return;
 
-        /* Keep spreadsheet formulas from executing when CSV is opened. */
-        if (/^[\s]*[=+\-@]/.test(text)) text = "'" + text;
+  busy=true;
+  controls();
 
-        return '"' + text.replace(/"/g, '""') + '"';
-      };
+  try{
+    await reload();
+    message("historyMessage","Records refreshed.");
+  }catch(error){
+    loaded=false;
+    message(
+      "historyMessage",
+      "Refresh failed. Check connection and permissions.",
+      true
+    );
+  }finally{
+    busy=false;
+    controls();
+  }
+});
 
-      const rows = [
-        [
-          "Month", "Amount", "Due Date", "Paid Date",
-          "Status", "Payment Method", "Notes"
-        ],
-        ...records.map(record => [
-          record.month,
-          record.amount,
-          record.dueDate,
-          record.paidDate,
-          actualStatus(record),
-          record.paymentMethod,
-          record.notes
-        ])
-      ];
+$("exportBtn").addEventListener("click",()=>{
+  if(busy||!loaded)return;
 
-      const csv = "\uFEFF" +
-        rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+  const cell=value=>{
+    let text=String(value??"");
+    if(/^\s*[=+@-]/.test(text))text="'"+text;
+    return '"'+text.replace(/"/g,'""')+'"';
+  };
 
-      const url = URL.createObjectURL(
-        new Blob([csv], { type: "text/csv;charset=utf-8;" })
-      );
+  const rows=[
+    [
+      "Month","Tenant","Property","Floor","Room","Rent",
+      "Due Date","Paid Date","Status","Saved","Method","Notes"
+    ],
+    ...visible.map(record=>[
+      record.month,record.tenantName,record.propertyName,
+      record.floor,record.roomName,record.amount,
+      record.dueDate,record.paidDate,state(record),
+      record.draft?"No":"Yes",record.paymentMethod,record.notes
+    ])
+  ];
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `roomflow-rent-${currentMonth()}.csv`;
-      document.body.append(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
+  const csv="\uFEFF"+
+    rows.map(row=>row.map(cell).join(",")).join("\r\n");
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        currentUser = null;
-        window.location.replace("login.html?next=rent.html");
-        return;
-      }
+  const url=URL.createObjectURL(
+    new Blob([csv],{type:"text/csv;charset=utf-8"})
+  );
 
-      currentUser = user;
-      setDefaultForm();
-      await loadRecords();
-    });
+  const link=document.createElement("a");
+  link.href=url;
+  link.download="roomflow-rent.csv";
+  link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 
-    updateButtons();
-  </script>
+$("monthFilter").value=today().slice(0,7);
+controls();
+
+onAuthStateChanged(auth,async currentUser=>{
+  user=currentUser;
+  loaded=false;
+  controls();
+
+  if(!currentUser){
+    location.replace("login.html");
+    return;
+  }
+
+  busy=true;
+  controls();
+
+  try{
+    await reload();
+    message(
+      "historyMessage",
+      "Drafts are displayed automatically. Save Monthly Bills records them permanently."
+    );
+  }catch(error){
+    console.error(error);
+    message(
+      "historyMessage",
+      "Could not load records. Check connection and database permissions.",
+      true
+    );
+  }finally{
+    busy=false;
+    controls();
+  }
+});
+</script>
 </body>
 </html>
