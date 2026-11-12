@@ -2,91 +2,875 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Rooms | RoomFlow</title>
-  <link rel="stylesheet" href="floor-flow.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room Manager | RoomFlow</title>
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f6f8fc;color:#0f172a;font-family:Arial,sans-serif}
+    a{text-decoration:none}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:268px;padding:26px 18px;background:#111827;display:flex;flex-direction:column;overflow-y:auto}
+    .brand{display:flex;align-items:center;gap:12px;margin:0 6px 30px;color:white;font-size:25px;font-weight:800}
+    .brand span{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#818cf8,#4f46e5)}
+    .sidebar nav{display:grid;gap:8px}
+    .sidebar nav a{padding:15px;border-radius:11px;color:#cbd5e1;font-size:14px;font-weight:600}
+    .sidebar nav a:hover,.sidebar nav a.active{background:#252c4b;color:white}
+    .sidebar-bottom{margin-top:auto;padding-top:28px}
+    .sidebar-bottom a{display:block;padding:14px;border-radius:10px;background:#4f46e5;color:white;text-align:center}
+    main{margin-left:268px;min-width:0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;padding:24px 30px;background:white;border-bottom:1px solid #e2e8f0}
+    h1{margin:0 0 7px;font-size:25px;overflow-wrap:anywhere}
+    .muted{color:#64748b;font-size:14px;line-height:1.5}
+    .topbar p{margin:0}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .page-wrap{padding:30px}
+    .primary,.secondary{display:inline-block;border:0;border-radius:10px;padding:12px 16px;font-weight:600}
+    .primary{background:#4f46e5;color:white}
+    .primary:hover{background:#4338ca}
+    .secondary{background:#eef2ff;color:#3730a3}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:24px}
+    .stat{padding:24px;background:white;border:1px solid #e2e8f0;border-radius:16px}
+    .stat strong{display:block;font-size:27px;margin-top:12px;overflow-wrap:anywhere}
+    .panel{padding:24px;border:1px solid #e2e8f0;border-radius:16px;background:white}
+    .panel h2{margin:0 0 20px;font-size:20px}
+    .toolbar{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:10px;background:white;color:#0f172a}
+    input:focus,select:focus,textarea:focus{outline:2px solid #818cf8;outline-offset:2px}
+    .toolbar input{flex:1;min-width:180px}
+    .toolbar select{width:165px}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;min-width:800px;border-collapse:collapse}
+    th,td{padding:15px 12px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:middle}
+    th{background:#f8fafc;color:#64748b;font-size:12px;text-transform:uppercase}
+    .status{display:inline-block;border-radius:30px;padding:6px 10px;font-size:12px;font-weight:600}
+    .available{background:#dcfce7;color:#166534}
+    .occupied{background:#dbeafe;color:#1d4ed8}
+    .maintenance{background:#fef3c7;color:#92400e}
+    .inactive{background:#e5e7eb;color:#374151}
+    .actions{display:flex;gap:7px;flex-wrap:wrap}
+    .actions button{padding:8px 10px;font-size:13px}
+    .empty{text-align:center;padding:45px 12px;color:#64748b}
+    #recordCount{margin:20px 0 0}
+    #notice:empty,#formMessage:empty{display:none}
+    #notice{padding:14px 16px;margin-bottom:20px;border-radius:10px;line-height:1.5}
+    #notice.error,#formMessage{background:#fff1f2;color:#b91c1c}
+    #notice.success{background:#f0fdf4;color:#15803d}
+    dialog{width:min(680px,calc(100% - 32px));max-height:90vh;margin:auto;padding:26px;border:0;border-radius:18px;overflow:auto;color:#0f172a}
+    dialog::backdrop{background:#0f172a99}
+    .dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .dialog-head h2{margin:0;font-size:22px}
+    .close{padding:5px 12px;border:0;border-radius:9px;background:#eef2ff;color:#3730a3;font-size:25px}
+    #formMessage{padding:12px;border-radius:9px;line-height:1.5}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .field label{display:block;font-size:13px;margin-bottom:8px;font-weight:600}
+    .field.full{grid-column:1/-1}
+    textarea{resize:vertical}
+    .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+    .note{color:#64748b;font-size:12px;line-height:1.6}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:800px){
+      .sidebar{position:static;width:100%}
+      .brand{margin-bottom:16px}
+      .sidebar nav{display:flex;overflow-x:auto}
+      .sidebar nav a{white-space:nowrap}
+      .sidebar-bottom{display:none}
+      main{margin-left:0}
+      .topbar{padding:20px}
+      .page-wrap{padding:18px}
+    }
+    @media(max-width:520px){
+      .stat{padding:16px}
+      .stat strong{font-size:22px}
+      .stats{gap:10px}
+      .panel{padding:16px}
+      .toolbar input,.toolbar select{width:100%;min-width:0;flex:auto}
+      .form-grid{grid-template-columns:1fr}
+      dialog{padding:20px}
+    }
+  </style>
 </head>
 
-<body data-page="rooms">
-  <nav aria-label="Main navigation">
-    <a href="dashboard.html">RoomFlow</a>
-    <a href="properties.html">Properties</a>
-    <a href="rooms.html" aria-current="page">Rooms</a>
-    <a href="tenants.html">Tenants</a>
-    <a href="rent.html">Rent</a>
-    <a href="electricity.html">Electricity</a>
-    <a href="payments.html">Payments</a>
-    <a href="profile.html">My Profile</a>
-  </nav>
+<body>
+  <aside class="sidebar">
+    <a href="dashboard.html" class="brand">
+      <span>R</span>RoomFlow
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html" class="active" aria-current="page">▣ Rooms</a>
+      <a href="tenants.html">♙ Tenants</a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="dashboard.html">← Dashboard</a>
+    </div>
+  </aside>
 
   <main>
-    <header>
-      <h1>Rooms</h1>
+    <header class="topbar">
       <div>
-        <button id="refresh" type="button" disabled>Refresh</button>
-        <button id="add" type="button" disabled>+ Add Room</button>
+        <h1 id="pageTitle">Room Manager</h1>
+        <p class="muted" id="pageSubtitle">
+          Manage rooms and their monthly rent.
+        </p>
+      </div>
+
+      <div class="top-actions">
+        <a href="properties.html" class="secondary">← Properties</a>
+        <button id="refreshBtn" type="button" class="secondary" disabled>
+          Refresh
+        </button>
+        <button id="addBtn" type="button" class="primary" disabled>
+          + Add Room
+        </button>
       </div>
     </header>
 
-    <div id="notice" role="status" aria-live="polite">Loading…</div>
-    <section id="list"></section>
+    <div class="page-wrap">
+      <div id="notice" role="status" aria-live="polite"></div>
+
+      <section class="stats">
+        <div class="stat">
+          <span class="muted">Total Rooms</span>
+          <strong id="totalRooms">—</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Available</span>
+          <strong id="availableRooms">—</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Occupied</span>
+          <strong id="occupiedRooms">—</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Monthly Room Rent Total</span>
+          <strong id="rentTotal">—</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Your Rooms</h2>
+
+        <div class="toolbar">
+          <input id="searchInput" type="search"
+                 aria-label="Search rooms"
+                 placeholder="Search room, property or tenant...">
+
+          <select id="statusFilter" aria-label="Filter room status">
+            <option value="">All statuses</option>
+            <option value="Available">Available</option>
+            <option value="Occupied">Occupied</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+
+          <select id="typeFilter" aria-label="Filter room type">
+            <option value="">All room types</option>
+            <option value="Single">Single</option>
+            <option value="Shared">Shared</option>
+            <option value="Studio">Studio</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Property</th>
+                <th>Type</th>
+                <th>Monthly Rent</th>
+                <th>Occupant</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="roomsBody">
+              <tr>
+                <td colspan="7" class="empty">Checking login...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="muted" id="recordCount"></p>
+      </section>
+    </div>
   </main>
 
-  <dialog id="dialog" aria-labelledby="formTitle">
-    <p id="formNotice" role="status" aria-live="polite"></p>
+  <dialog id="roomDialog" aria-labelledby="modalTitle">
+    <div class="dialog-head">
+      <h2 id="modalTitle">Add Room</h2>
+      <button id="closeBtn" type="button" class="close"
+              aria-label="Close room form">×</button>
+    </div>
 
-    <form id="form">
-      <h2 id="formTitle">Add Room</h2>
+    <p id="formMessage" role="status" aria-live="polite"></p>
 
-      <label for="name">Room name / number *</label>
-      <input id="name" name="name" required maxlength="100"
-             placeholder="e.g. Room 101">
+    <form id="roomForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="roomName">Room name / number *</label>
+          <input id="roomName" maxlength="80" required
+                 placeholder="e.g. Room 101">
+        </div>
 
-      <label for="propertyId">Property *</label>
-      <select id="propertyId" name="propertyId" required></select>
+        <div class="field">
+          <label for="propertyId">Property *</label>
+          <select id="propertyId" required>
+            <option value="">Select property</option>
+          </select>
+        </div>
 
-      <label for="floor">Floor *</label>
-      <select id="floor" name="floor" required></select>
+        <div class="field">
+          <label for="roomType">Room type *</label>
+          <select id="roomType" required>
+            <option value="Single">Single</option>
+            <option value="Shared">Shared</option>
+            <option value="Studio">Studio</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
 
-      <label for="type">Room type</label>
-      <select id="type" name="type" required>
-        <option value="Single">Single</option>
-        <option value="Shared">Shared</option>
-        <option value="Studio">Studio</option>
-        <option value="Other">Other</option>
-      </select>
+        <div class="field">
+          <label for="roomRent">Monthly rent (₹) *</label>
+          <input id="roomRent" type="number" min="0"
+                 max="100000000" step="0.01" required
+                 placeholder="e.g. 5000">
+        </div>
 
-      <label for="rent">Monthly rent ₹ *</label>
-      <input id="rent" name="rent" type="number"
-             required min="0" step="0.01">
+        <div class="field">
+          <label for="roomStatus">Status *</label>
+          <select id="roomStatus" required>
+            <option value="Available">Available</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Occupied" disabled>Occupied — linked tenant</option>
+          </select>
+        </div>
 
-      <label for="status">Status</label>
-      <select id="status" name="status" required>
-        <option value="Available">Available</option>
-        <option value="Maintenance">Maintenance</option>
-        <option value="Inactive">Inactive</option>
-        <option value="Occupied">Occupied</option>
-      </select>
+        <div class="field">
+          <label for="roomFloor">Floor</label>
+          <input id="roomFloor" maxlength="40" placeholder="First floor">
+        </div>
 
-      <small>
-        Assign the occupant from the Tenants page.
-        Existing tenant rent stays separate from room rent.
-      </small>
+        <div class="field">
+          <label for="roomSize">Room size</label>
+          <input id="roomSize" maxlength="40" placeholder="12 x 10 ft">
+        </div>
 
-      <label for="size">Room size</label>
-      <input id="size" name="size" maxlength="100"
-             placeholder="e.g. 12 x 10 ft">
+        <div class="field full">
+          <label for="roomNotes">Notes</label>
+          <textarea id="roomNotes" rows="3" maxlength="1000"
+                    placeholder="Optional details"></textarea>
+        </div>
+      </div>
 
-      <label for="notes">Notes</label>
-      <textarea id="notes" name="notes" maxlength="2000"></textarea>
-
-      <p>
-        <button id="save" type="submit" disabled>Save</button>
-        <button id="cancel" type="button">Close</button>
+      <p class="note">
+        Add the occupant from the Tenants page.
+        Changing the room rent here will not change an existing tenant's agreed rent.
       </p>
+
+      <div class="form-actions">
+        <button id="cancelBtn" type="button" class="secondary">Cancel</button>
+        <button id="saveBtn" type="submit" class="primary">Save Room</button>
+      </div>
     </form>
   </dialog>
 
-  <script type="module" src="floor-flow.js"></script>
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, getDoc,
+      doc, runTransaction, serverTimestamp
+    } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
+      authDomain: "roomflow-6c920.firebaseapp.com",
+      projectId: "roomflow-6c920",
+      storageBucket: "roomflow-6c920.firebasestorage.app",
+      messagingSenderId: "827966111309",
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
+    });
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
+
+    const selectedPropertyId =
+      new URLSearchParams(location.search).get("propertyId") || "";
+
+    let currentUser = null;
+    let rooms = [];
+    let properties = [];
+    let tenants = [];
+    let editing = null;
+    let busy = false;
+    let loaded = false;
+
+    const userCollection = kind =>
+      collection(db, "users", currentUser.uid, kind);
+
+    const ref = (kind, id) =>
+      doc(db, "users", currentUser.uid, kind, id);
+
+    const money = value =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+      }).format(Number(value) || 0);
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function showNotice(text, error = false) {
+      $("notice").textContent = text;
+      $("notice").className = error ? "error" : "success";
+    }
+
+    function formError(text = "") {
+      $("formMessage").textContent = text;
+    }
+
+    function controls() {
+      $("addBtn").disabled = busy || !loaded;
+      $("refreshBtn").disabled = busy || !currentUser;
+      $("saveBtn").disabled = busy || !loaded;
+      $("cancelBtn").disabled = busy;
+      $("closeBtn").disabled = busy;
+
+      document.querySelectorAll("#roomsBody button").forEach(button => {
+        button.disabled = busy || !loaded;
+      });
+    }
+
+    function propertyName(id) {
+      const property = properties.find(p => p.id === id);
+      return property?.name || property?.propertyName ||
+        (id ? "Property unavailable" : "Not linked");
+    }
+
+    function activeTenant(tenant) {
+      return (tenant.status || "Active") === "Active";
+    }
+
+    function roomHasTenant(room) {
+      return Boolean(
+        room.occupantTenantId ||
+        room.occupantName ||
+        room.status === "Occupied" ||
+        tenants.some(t => t.roomId === room.id && activeTenant(t))
+      );
+    }
+
+    async function loadRecords() {
+      const uid = currentUser.uid;
+
+      const [roomSnap, propertySnap, tenantSnap] = await Promise.all([
+        getDocs(userCollection("rooms")),
+        getDocs(userCollection("properties")),
+        getDocs(userCollection("tenants"))
+      ]);
+
+      if (currentUser?.uid !== uid) return;
+
+      properties = propertySnap.docs.map(d => ({
+        ...d.data(), id: d.id
+      }));
+
+      tenants = tenantSnap.docs.map(d => ({
+        ...d.data(), id: d.id
+      }));
+
+      rooms = roomSnap.docs.map(d => ({
+        ...d.data(), id: d.id
+      })).filter(room =>
+        !selectedPropertyId || room.propertyId === selectedPropertyId
+      );
+
+      if (selectedPropertyId) {
+        const selected = properties.find(p => p.id === selectedPropertyId);
+
+        if (!selected) {
+          throw new Error("Property no longer exists. Return to Properties.");
+        }
+
+        $("pageTitle").textContent =
+          (selected.name || selected.propertyName || "Property") + " — Rooms";
+
+        $("pageSubtitle").textContent =
+          selected.address || "Manage rooms in this property.";
+      }
+
+      loaded = true;
+      render();
+    }
+
+    function render() {
+      if (!loaded) return;
+
+      const search = $("searchInput").value.trim().toLowerCase();
+      const status = $("statusFilter").value;
+      const type = $("typeFilter").value;
+
+      const filtered = rooms.filter(room => {
+        const text = [
+          room.name, propertyName(room.propertyId),
+          room.occupantName, room.type, room.floor
+        ].join(" ").toLowerCase();
+
+        return text.includes(search) &&
+          (!status || room.status === status) &&
+          (!type || room.type === type);
+      });
+
+      $("totalRooms").textContent = rooms.length;
+      $("availableRooms").textContent =
+        rooms.filter(r => r.status === "Available").length;
+      $("occupiedRooms").textContent =
+        rooms.filter(r => r.status === "Occupied").length;
+
+      $("rentTotal").textContent = money(
+        rooms.filter(r => r.status !== "Inactive")
+          .reduce((sum, r) => sum + (Number(r.rent) || 0), 0)
+      );
+
+      $("recordCount").textContent =
+        `Showing ${filtered.length} of ${rooms.length} rooms`;
+
+      if (!filtered.length) {
+        $("roomsBody").innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">
+              ${rooms.length
+                ? "No rooms match your filters."
+                : "No rooms added yet. Click Add Room to get started."}
+            </td>
+          </tr>
+        `;
+        controls();
+        return;
+      }
+
+      const statusClasses = {
+        Available: "available",
+        Occupied: "occupied",
+        Maintenance: "maintenance",
+        Inactive: "inactive"
+      };
+
+      $("roomsBody").innerHTML = filtered.map(room => `
+        <tr>
+          <td>
+            <strong>${escapeHTML(room.name || "Unnamed room")}</strong>
+            <div class="muted">${escapeHTML(room.floor || "")}</div>
+          </td>
+          <td>${escapeHTML(propertyName(room.propertyId))}</td>
+          <td>${escapeHTML(room.type || "Other")}</td>
+          <td>${escapeHTML(money(room.rent))}</td>
+          <td>${escapeHTML(room.occupantName || "—")}</td>
+          <td>
+            <span class="status ${statusClasses[room.status] || "inactive"}">
+              ${escapeHTML(room.status || "Inactive")}
+            </span>
+          </td>
+          <td>
+            <div class="actions">
+              <button type="button" class="secondary"
+                data-edit="${escapeHTML(room.id)}">Edit</button>
+              <button type="button" class="secondary"
+                data-archive="${escapeHTML(room.id)}">
+                ${room.status === "Inactive" ? "Activate" : "Archive"}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      controls();
+    }
+
+    function fillPropertyOptions(selected) {
+      const select = $("propertyId");
+      select.replaceChildren(new Option("Select property", ""));
+
+      properties.forEach(property => {
+        select.add(new Option(
+          property.name || property.propertyName || "Unnamed property",
+          property.id
+        ));
+      });
+
+      select.value = selected;
+    }
+
+    function openForm(room = null) {
+      if (busy || !loaded) return;
+
+      editing = room ? { ...room } : null;
+      $("roomForm").reset();
+
+      $("modalTitle").textContent = room ? "Edit Room" : "Add Room";
+      $("saveBtn").textContent = room ? "Update Room" : "Save Room";
+
+      $("roomName").value = room?.name || "";
+
+      fillPropertyOptions(room?.propertyId || selectedPropertyId);
+
+      const linked = room ? roomHasTenant(room) : false;
+
+      $("propertyId").disabled = Boolean(selectedPropertyId || linked);
+      $("roomType").value = room?.type || "Single";
+      $("roomRent").value = room?.rent ?? "";
+      $("roomStatus").value = room?.status || "Available";
+      $("roomStatus").disabled = linked;
+      $("roomFloor").value = room?.floor || "";
+      $("roomSize").value = room?.size || "";
+      $("roomNotes").value = room?.notes || "";
+
+      formError();
+      controls();
+      $("roomDialog").showModal();
+      $("roomName").focus();
+    }
+
+    async function persistRoom(data, expected) {
+      const target = expected
+        ? ref("rooms", expected.id)
+        : doc(userCollection("rooms"));
+
+      const knownActiveTenants = expected
+        ? tenants.filter(t =>
+            t.roomId === expected.id && activeTenant(t)
+          )
+        : [];
+
+      await runTransaction(db, async transaction => {
+        const roomSnap = await transaction.get(target);
+        const old = roomSnap.exists() ? roomSnap.data() : null;
+
+        if (expected && !old) {
+          throw new Error("This room was removed. Refresh and try again.");
+        }
+
+        if (
+          expected &&
+          JSON.stringify({ ...old, id: roomSnap.id }) !==
+          JSON.stringify(expected)
+        ) {
+          throw new Error(
+            "This room changed in another window. Close the form and refresh."
+          );
+        }
+
+        const propertySnap = await transaction.get(
+          ref("properties", data.propertyId)
+        );
+
+        if (!propertySnap.exists()) {
+          throw new Error("Selected property no longer exists.");
+        }
+
+        const relatedSnaps = [];
+
+        for (const tenant of knownActiveTenants) {
+          relatedSnaps.push(
+            await transaction.get(ref("tenants", tenant.id))
+          );
+        }
+
+        const linked = old && (
+          old.occupantTenantId ||
+          old.occupantName ||
+          old.status === "Occupied" ||
+          relatedSnaps.some(snapshot =>
+            snapshot.exists() &&
+            activeTenant(snapshot.data()) &&
+            snapshot.data().roomId === target.id
+          )
+        );
+
+        if (linked && data.propertyId !== old.propertyId) {
+          throw new Error(
+            "Move out the linked tenant before changing this room's property."
+          );
+        }
+
+        const payload = {
+          ...data,
+          propertyName: propertySnap.data().name ||
+            propertySnap.data().propertyName || "",
+          updatedAt: serverTimestamp()
+        };
+
+        if (linked) {
+          payload.status = old.status || "Occupied";
+        }
+
+        if (old) {
+          transaction.update(target, payload);
+        } else {
+          transaction.set(target, {
+            ...payload,
+            occupantName: "",
+            occupantTenantId: "",
+            createdAt: serverTimestamp()
+          });
+        }
+      });
+    }
+
+    async function archiveRoom(room) {
+      const linkedTenants = tenants.filter(t =>
+        t.roomId === room.id && activeTenant(t)
+      );
+
+      await runTransaction(db, async transaction => {
+        const target = ref("rooms", room.id);
+        const snapshot = await transaction.get(target);
+
+        if (!snapshot.exists()) {
+          throw new Error("Room no longer exists. Refresh the page.");
+        }
+
+        const current = snapshot.data();
+        const tenantSnaps = [];
+
+        for (const tenant of linkedTenants) {
+          tenantSnaps.push(
+            await transaction.get(ref("tenants", tenant.id))
+          );
+        }
+
+        if (
+          current.occupantTenantId ||
+          current.occupantName ||
+          current.status === "Occupied" ||
+          tenantSnaps.some(s =>
+            s.exists() &&
+            activeTenant(s.data()) &&
+            s.data().roomId === room.id
+          )
+        ) {
+          throw new Error(
+            "This room has an occupant. Use Move out on the Tenants page first."
+          );
+        }
+
+        transaction.update(target, {
+          status: current.status === "Inactive" ? "Available" : "Inactive",
+          updatedAt: serverTimestamp()
+        });
+      });
+    }
+
+    async function refreshAfterSave(text) {
+      showNotice(text);
+
+      try {
+        await loadRecords();
+      } catch (error) {
+        console.error(error);
+        loaded = false;
+        showNotice(
+          "Saved successfully, but refresh failed. Click Refresh before making another change.",
+          true
+        );
+      }
+    }
+
+    $("addBtn").addEventListener("click", () => openForm());
+
+    for (const id of ["cancelBtn", "closeBtn"]) {
+      $(id).addEventListener("click", () => {
+        if (!busy) $("roomDialog").close();
+      });
+    }
+
+    $("roomDialog").addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
+
+    for (const id of ["searchInput", "statusFilter", "typeFilter"]) {
+      $(id).addEventListener(id === "searchInput" ? "input" : "change", render);
+    }
+
+    $("roomsBody").addEventListener("click", async event => {
+      if (busy || !loaded) return;
+
+      const button = event.target.closest(
+        "button[data-edit], button[data-archive]"
+      );
+
+      if (!button) return;
+
+      const room = rooms.find(r =>
+        r.id === (button.dataset.edit || button.dataset.archive)
+      );
+
+      if (!room) return;
+
+      if (button.dataset.edit) {
+        openForm(room);
+        return;
+      }
+
+      if (!confirm(
+        room.status === "Inactive"
+          ? "Make this room available again?"
+          : "Archive this room? Its previous records will remain."
+      )) return;
+
+      busy = true;
+      controls();
+
+      try {
+        await archiveRoom(room);
+        await refreshAfterSave("Room status updated.");
+      } catch (error) {
+        console.error(error);
+        showNotice(error.message || "Could not update room.", true);
+      } finally {
+        busy = false;
+        controls();
+      }
+    });
+
+    $("roomForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (busy || !loaded || !currentUser) return;
+
+      formError();
+
+      const data = {
+        name: $("roomName").value.trim(),
+        propertyId: $("propertyId").value,
+        type: $("roomType").value,
+        rent: Number($("roomRent").value),
+        status: $("roomStatus").value,
+        floor: $("roomFloor").value.trim(),
+        size: $("roomSize").value.trim(),
+        notes: $("roomNotes").value.trim()
+      };
+
+      if (!data.name || !data.propertyId) {
+        formError("Enter the room name and select its property.");
+        return;
+      }
+
+      if (
+        !Number.isFinite(data.rent) ||
+        data.rent < 0 ||
+        data.rent > 100000000
+      ) {
+        formError("Enter a valid monthly rent.");
+        return;
+      }
+
+      const duplicate = rooms.some(room =>
+        room.id !== editing?.id &&
+        room.propertyId === data.propertyId &&
+        String(room.name || "").trim().toLowerCase() === data.name.toLowerCase()
+      );
+
+      if (duplicate) {
+        formError("A room with this name already exists in this property.");
+        return;
+      }
+
+      const expected = editing ? { ...editing } : null;
+      busy = true;
+      controls();
+
+      try {
+        await persistRoom(data, expected);
+        $("roomDialog").close();
+        editing = null;
+        await refreshAfterSave("Room saved successfully.");
+      } catch (error) {
+        console.error(error);
+        formError(
+          error.code
+            ? `Could not save (${error.code}). Check connection and permissions.`
+            : error.message
+        );
+      } finally {
+        busy = false;
+        controls();
+      }
+    });
+
+    $("refreshBtn").addEventListener("click", async () => {
+      if (!currentUser || busy) return;
+
+      busy = true;
+      controls();
+
+      try {
+        await loadRecords();
+        showNotice("Room records refreshed.");
+      } catch (error) {
+        console.error(error);
+        loaded = false;
+        showNotice(error.message || "Could not refresh records.", true);
+      } finally {
+        busy = false;
+        controls();
+      }
+    });
+
+    controls();
+
+    onAuthStateChanged(auth, async user => {
+      currentUser = user;
+      loaded = false;
+
+      if (!user) {
+        location.replace("login.html");
+        return;
+      }
+
+      busy = true;
+      controls();
+
+      try {
+        await loadRecords();
+      } catch (error) {
+        console.error(error);
+        $("roomsBody").innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">
+              Could not load room records. Use Refresh to try again.
+            </td>
+          </tr>
+        `;
+        showNotice(error.message || "Check connection and permissions.", true);
+      } finally {
+        busy = false;
+        controls();
+      }
+    });
+  </script>
 </body>
 </html>
