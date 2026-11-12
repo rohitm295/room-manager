@@ -1,0 +1,213 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6f8fc;
+  color: #172033;
+  font: 15px Arial, sans-serif;
+}
+
+nav {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 250px;
+  padding: 26px 18px;
+  background: #111827;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  overflow: auto;
+}
+
+nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+nav a:first-child {
+  font-size: 25px;
+  color: white;
+  margin-bottom: 18px;
+}
+
+nav a:hover,
+nav a[aria-current] {
+  background: #252c4b;
+  color: white;
+}
+
+main {
+  margin-left: 250px;
+  padding: 28px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+h1 {
+  font-size: 26px;
+}
+
+#list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+article {
+  min-width: 0;
+  background: white;
+  padding: 24px;
+  border: 1px solid #dbe2ea;
+  border-radius: 16px;
+  overflow-wrap: anywhere;
+}
+
+article h2 {
+  margin-top: 0;
+}
+
+article a {
+  color: #4f46e5;
+}
+
+label {
+  display: block;
+  margin: 16px 0 7px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  color: #172033;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+button {
+  font: inherit;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: white;
+  cursor: pointer;
+  margin: 4px 6px 4px 0;
+}
+
+button:hover {
+  background: #4338ca;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: wait;
+}
+
+#notice,
+#formNotice {
+  white-space: pre-wrap;
+  color: #9a3412;
+  line-height: 1.6;
+}
+
+#notice {
+  padding: 16px 0;
+}
+
+#formNotice:empty {
+  display: none;
+}
+
+h2 {
+  font-size: 21px;
+}
+
+p {
+  line-height: 1.6;
+}
+
+small {
+  display: block;
+  color: #64748b;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+dialog {
+  width: min(620px, calc(100% - 32px));
+  max-height: 90vh;
+  margin: auto;
+  padding: 26px;
+  border: 0;
+  border-radius: 18px;
+  overflow: auto;
+  color: #172033;
+}
+
+dialog::backdrop {
+  background: #0f172a99;
+}
+
+dialog h2 {
+  margin-top: 0;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+@media (max-width: 1000px) {
+  #list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 750px) {
+  nav {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 14px;
+    gap: 4px;
+  }
+
+  nav a {
+    padding: 10px;
+  }
+
+  nav a:first-child {
+    margin: 0;
+    width: 100%;
+  }
+
+  main {
+    margin-left: 0;
+    padding: 18px;
+  }
+}
