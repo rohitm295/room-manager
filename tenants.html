@@ -1,59 +1,508 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tenant Manager | RoomFlow</title>
-  <link rel="stylesheet" href="assets/style.css">
+
   <style>
-    .tenant-wrap{max-width:1250px;margin:auto;padding:24px}
-    .tenant-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
-    .tenant-header h1{margin:0 0 6px}
-    .muted{color:var(--muted,#777);font-size:13px}
-    .tenant-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}
-    .tenant-card,.tenant-panel{background:var(--card,#fff);border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:18px}
-    .stat-number{font-size:27px;font-weight:700;margin-top:8px}
-    .tenant-layout{display:grid;grid-template-columns:minmax(280px,350px) minmax(0,1fr);gap:20px;align-items:start}
-    .tenant-panel h2{font-size:19px;margin:0 0 16px}
-    .tenant-form label{display:block;font-size:13px;font-weight:600;margin:13px 0 6px}
-    .tenant-form input,.tenant-form select,.tenant-form textarea,.tenant-filters input,.tenant-filters select{
-      width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--border,#d1d5db);
-      border-radius:8px;background:var(--input-bg,#fff);color:inherit;font:inherit
+    * {
+      box-sizing: border-box;
     }
-    .tenant-form textarea{min-height:70px;resize:vertical}
-    .tenant-btn{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600;background:var(--primary,#2563eb);color:#fff}
-    .tenant-btn.secondary{background:#64748b}
-    .tenant-btn.danger{background:#dc2626}
-    .tenant-btn.small{padding:6px 9px;font-size:12px;margin:2px}
-    .tenant-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-    .tenant-filters{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:15px}
-    .tenant-table-wrap{overflow-x:auto}
-    .tenant-table{width:100%;border-collapse:collapse;min-width:850px}
-    .tenant-table th,.tenant-table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border,#e5e7eb);font-size:13px;vertical-align:top}
-    .tenant-table th{font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-    .tenant-badge{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-    .badge-active{background:#dcfce7;color:#166534}
-    .badge-inactive{background:#e2e8f0;color:#334155}
-    .tenant-empty{text-align:center;padding:32px 10px;color:var(--muted,#777)}
-    #tenantMessage{margin-bottom:14px;font-size:14px}
-    #tenantMessage.error{color:#dc2626}
-    #tenantMessage.success{color:#15803d}
-    .tenant-note{font-size:12px;line-height:1.5;color:var(--muted,#777);margin-top:12px}
-    @media(max-width:900px){.tenant-layout{grid-template-columns:1fr}.tenant-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:480px){.tenant-wrap{padding:14px}.tenant-card{padding:12px}.stat-number{font-size:22px}.tenant-filters{grid-template-columns:1fr}}
+
+    body {
+      margin: 0;
+      background: #f6f8fc;
+      color: #0f172a;
+      font-family: Arial, sans-serif;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 268px;
+      padding: 26px 18px;
+      background: #111827;
+      color: white;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 6px 30px;
+      color: white;
+      font-size: 25px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand span {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #818cf8, #4f46e5);
+    }
+
+    .sidebar nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .sidebar nav a {
+      padding: 15px;
+      border-radius: 11px;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: #252c4b;
+      color: white;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 28px;
+    }
+
+    .sidebar-bottom a {
+      display: block;
+      padding: 14px;
+      border-radius: 10px;
+      background: #4f46e5;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .tenant-wrap {
+      margin-left: 268px;
+      min-width: 0;
+    }
+
+    .tenant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 24px 30px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tenant-header h1 {
+      margin: 0 0 6px;
+      font-size: 25px;
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .tenant-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tenant-btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 15px;
+      background: #4f46e5;
+      color: white;
+      font-weight: 600;
+    }
+
+    .tenant-btn:hover {
+      background: #4338ca;
+    }
+
+    .tenant-btn.secondary {
+      background: #64748b;
+    }
+
+    .tenant-btn.small {
+      padding: 7px 10px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .tenant-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin: 26px 30px;
+    }
+
+    .tenant-card,
+    .tenant-panel {
+      padding: 22px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      min-width: 0;
+    }
+
+    .stat-number {
+      margin-top: 12px;
+      font-size: 27px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .tenant-layout {
+      margin: 0 30px 30px;
+    }
+
+    .tenant-panel h2 {
+      margin: 0 0 18px;
+      font-size: 20px;
+    }
+
+    .tenant-filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dbe2ea;
+      border-radius: 9px;
+      background: white;
+      color: #0f172a;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid #818cf8;
+      outline-offset: 2px;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .tenant-table-wrap {
+      overflow-x: auto;
+    }
+
+    .tenant-table {
+      width: 100%;
+      min-width: 850px;
+      border-collapse: collapse;
+    }
+
+    .tenant-table th,
+    .tenant-table td {
+      padding: 13px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .tenant-table th {
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .tenant-badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-inactive {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .tenant-empty {
+      text-align: center !important;
+      padding: 32px 10px !important;
+      color: #64748b;
+    }
+
+    #tenantMessage:empty,
+    #formMessage:empty {
+      display: none;
+    }
+
+    #tenantMessage:not(:empty) {
+      margin: 20px 30px;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: white;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    #tenantMessage.error {
+      color: #b91c1c;
+    }
+
+    #tenantMessage.success {
+      color: #15803d;
+    }
+
+    dialog {
+      width: min(740px, calc(100% - 32px));
+      max-height: 90vh;
+      margin: auto;
+      padding: 24px;
+      border: 0;
+      border-radius: 18px;
+      background: white;
+      color: #0f172a;
+      overflow: auto;
+    }
+
+    dialog::backdrop {
+      background: #0f172a99;
+    }
+
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .dialog-head h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .close {
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 8px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 24px;
+    }
+
+    .tenant-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .full,
+    .tenant-form .tenant-actions,
+    .tenant-note {
+      grid-column: 1 / -1;
+    }
+
+    .tenant-form .tenant-actions {
+      justify-content: flex-end;
+    }
+
+    #stayNote {
+      margin: 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #formMessage:not(:empty) {
+      padding: 12px;
+      border-radius: 8px;
+      background: #fff1f2;
+      color: #b91c1c;
+      line-height: 1.5;
+    }
+
+    .tenant-note {
+      margin: 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid #818cf8;
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 1100px) {
+      .tenant-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+      }
+
+      .sidebar nav {
+        display: flex;
+        overflow-x: auto;
+      }
+
+      .sidebar nav a {
+        white-space: nowrap;
+      }
+
+      .brand {
+        margin-bottom: 16px;
+      }
+
+      .sidebar-bottom {
+        display: none;
+      }
+
+      .tenant-wrap {
+        margin-left: 0;
+      }
+
+      .tenant-header {
+        padding: 22px 20px;
+      }
+
+      .tenant-stats {
+        margin: 20px 16px;
+      }
+
+      .tenant-layout {
+        margin: 0 16px 24px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .tenant-form,
+      .tenant-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .tenant-header .tenant-actions {
+        width: 100%;
+      }
+
+      .tenant-panel {
+        padding: 16px;
+      }
+
+      .tenant-card {
+        padding: 15px;
+      }
+
+      .stat-number {
+        font-size: 22px;
+      }
+
+      dialog {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
+
 <body>
+  <aside class="sidebar">
+    <a href="dashboard.html" class="brand">
+      <span>R</span> RoomFlow
+    </a>
+
+    <nav aria-label="Main navigation">
+      <a href="dashboard.html">▦ Dashboard</a>
+      <a href="properties.html">⌂ Properties</a>
+      <a href="rooms.html">▣ Rooms</a>
+      <a href="tenants.html" class="active" aria-current="page">
+        ♙ Tenants
+      </a>
+      <a href="rent.html">₹ Rent Manager</a>
+      <a href="electricity.html">⚡ Electricity</a>
+      <a href="payments.html">▤ Payments</a>
+      <a href="profile.html">♙ My Profile</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="dashboard.html">← Dashboard</a>
+    </div>
+  </aside>
+
   <main class="tenant-wrap">
     <header class="tenant-header">
       <div>
         <h1>Tenant Manager</h1>
-        <div class="muted">Manage tenant information and room occupancy.</div>
+        <div class="muted">
+          Manage tenant information and room occupancy.
+        </div>
       </div>
+
       <div class="tenant-actions">
-        <button class="tenant-btn secondary" id="exportBtn" type="button">Export CSV</button>
-        <button class="tenant-btn secondary" id="refreshBtn" type="button">Refresh</button>
+        <button id="addBtn" class="tenant-btn" type="button">
+          + Add Tenant
+        </button>
+        <button id="exportBtn" class="tenant-btn secondary" type="button">
+          Export CSV
+        </button>
+        <button id="refreshBtn" class="tenant-btn secondary" type="button">
+          Refresh
+        </button>
       </div>
     </header>
 
@@ -61,85 +510,42 @@
 
     <section class="tenant-stats">
       <div class="tenant-card">
-        <div class="muted">Total Tenants</div>
-        <div class="stat-number" id="totalCount">0</div>
+        <div class="muted">Total Tenant Entries</div>
+        <div class="stat-number" id="totalCount">—</div>
       </div>
+
       <div class="tenant-card">
         <div class="muted">Active Tenants</div>
-        <div class="stat-number" id="activeCount">0</div>
+        <div class="stat-number" id="activeCount">—</div>
       </div>
+
       <div class="tenant-card">
-        <div class="muted">Inactive Tenants</div>
-        <div class="stat-number" id="inactiveCount">0</div>
+        <div class="muted">Moved Out</div>
+        <div class="stat-number" id="inactiveCount">—</div>
       </div>
+
       <div class="tenant-card">
-        <div class="muted">Monthly Rent Total</div>
-        <div class="stat-number" id="rentTotal">₹0</div>
+        <div class="muted">Active Monthly Rent</div>
+        <div class="stat-number" id="rentTotal">—</div>
       </div>
     </section>
 
     <section class="tenant-layout">
       <div class="tenant-panel">
-        <h2 id="formTitle">Add Tenant</h2>
-        <form class="tenant-form" id="tenantForm">
-          <input type="hidden" id="tenantId">
-
-          <label for="tenantName">Full Name *</label>
-          <input id="tenantName" maxlength="120" required placeholder="Tenant's full name">
-
-          <label for="tenantPhone">Mobile Number</label>
-          <input id="tenantPhone" type="tel" maxlength="20" placeholder="Mobile number">
-
-          <label for="tenantEmail">Email Address</label>
-          <input id="tenantEmail" type="email" maxlength="150" placeholder="name@example.com">
-
-          <label for="tenantProperty">Property</label>
-          <select id="tenantProperty">
-            <option value="">None / Not linked</option>
-          </select>
-
-          <label for="tenantRoom">Room</label>
-          <select id="tenantRoom">
-            <option value="">None / Not linked</option>
-          </select>
-
-          <label for="tenantRent">Monthly Rent (₹) *</label>
-          <input id="tenantRent" type="number" min="0" max="100000000" step="0.01" required value="0">
-
-          <label for="tenantDeposit">Security Deposit (₹)</label>
-          <input id="tenantDeposit" type="number" min="0" max="100000000" step="0.01" value="0">
-
-          <label for="tenantJoinDate">Move-in Date</label>
-          <input id="tenantJoinDate" type="date">
-
-          <label for="tenantMoveOutDate">Move-out Date</label>
-          <input id="tenantMoveOutDate" type="date">
-
-          <label for="tenantStatus">Status</label>
-          <select id="tenantStatus">
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-
-          <label for="tenantNotes">Notes</label>
-          <textarea id="tenantNotes" maxlength="2000" placeholder="Additional details"></textarea>
-
-          <div class="tenant-actions">
-            <button class="tenant-btn" id="saveBtn" type="submit">Save Tenant</button>
-            <button class="tenant-btn secondary" id="cancelBtn" type="button" hidden>Cancel Edit</button>
-          </div>
-          <p class="tenant-note">Tenant records are stored in your signed-in account. This page does not automatically create rent bills, payments, or room occupancy updates.</p>
-        </form>
-      </div>
-
-      <div class="tenant-panel">
         <h2>Your Tenants</h2>
+
         <div class="tenant-filters">
-          <input id="searchInput" type="search" placeholder="Search name, phone, email, room...">
-          <select id="statusFilter">
+          <input
+            id="searchInput"
+            type="search"
+            aria-label="Search tenants"
+            placeholder="Search name, phone, email, room..."
+          >
+
+          <select id="statusFilter" aria-label="Filter tenant status">
             <option value="">All statuses</option>
             <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="Inactive">Moved out / Inactive</option>
           </select>
         </div>
 
@@ -155,8 +561,13 @@
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody id="tenantsBody">
-              <tr><td colspan="6" class="tenant-empty">Checking login...</td></tr>
+              <tr>
+                <td colspan="6" class="tenant-empty">
+                  Checking login...
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -164,119 +575,453 @@
     </section>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore, collection, addDoc, getDocs, doc,
-      updateDoc, deleteDoc, query, orderBy, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <dialog id="tenantDialog" aria-labelledby="formTitle">
+    <div class="dialog-head">
+      <h2 id="formTitle">Add Tenant</h2>
+      <button
+        id="closeBtn"
+        class="close"
+        type="button"
+        aria-label="Close tenant form"
+      >×</button>
+    </div>
 
-    const firebaseConfig = {
+    <p id="formMessage" role="status" aria-live="polite"></p>
+
+    <form id="tenantForm" class="tenant-form">
+      <p id="stayNote" class="full"></p>
+
+      <input type="hidden" id="tenantId">
+
+      <div class="field">
+        <label for="tenantName">Full Name *</label>
+        <input
+          id="tenantName"
+          maxlength="120"
+          required
+          placeholder="Tenant's full name"
+        >
+      </div>
+
+      <div class="field">
+        <label for="tenantPhone">Mobile Number</label>
+        <input
+          id="tenantPhone"
+          type="tel"
+          maxlength="20"
+          placeholder="Mobile number"
+        >
+      </div>
+
+      <div class="field">
+        <label for="tenantEmail">Email Address</label>
+        <input
+          id="tenantEmail"
+          type="email"
+          maxlength="150"
+          placeholder="name@example.com"
+        >
+      </div>
+
+      <div class="field">
+        <label for="tenantProperty">Property *</label>
+        <select id="tenantProperty">
+          <option value="">Select property</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="tenantRoom">Room *</label>
+        <select id="tenantRoom">
+          <option value="">Select available room</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="tenantRent">Monthly Rent (₹) *</label>
+        <input
+          id="tenantRent"
+          type="number"
+          min="0"
+          max="100000000"
+          step="0.01"
+          value="0"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="tenantDeposit">Security Deposit (₹)</label>
+        <input
+          id="tenantDeposit"
+          type="number"
+          min="0"
+          max="100000000"
+          step="0.01"
+          value="0"
+        >
+      </div>
+
+      <div class="field">
+        <label for="tenantJoinDate">Move-in Date *</label>
+        <input id="tenantJoinDate" type="date" required>
+      </div>
+
+      <div class="field">
+        <label for="tenantMoveOutDate">Move-out Date</label>
+        <input id="tenantMoveOutDate" type="date">
+      </div>
+
+      <div class="field">
+        <label for="tenantStatus">Status</label>
+        <select id="tenantStatus">
+          <option value="Active">Active</option>
+          <option value="Inactive">Moved out / Inactive</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="tenantNotes">Notes</label>
+        <textarea
+          id="tenantNotes"
+          maxlength="2000"
+          placeholder="Additional details"
+        ></textarea>
+      </div>
+
+      <div class="tenant-actions">
+        <button id="saveBtn" class="tenant-btn" type="submit">
+          Save Tenant
+        </button>
+        <button id="cancelBtn" class="tenant-btn secondary" type="button">
+          Cancel
+        </button>
+      </div>
+
+      <p class="tenant-note">
+        One active tenant entry per room. Move out the tenant before
+        creating a new stay. Previous entries remain in history.
+        Bills and payments are managed separately.
+      </p>
+    </form>
+  </dialog>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import { getAuth, onAuthStateChanged } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      getDoc,
+      doc,
+      runTransaction,
+      serverTimestamp
+    } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const app = initializeApp({
       apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
       authDomain: "roomflow-6c920.firebaseapp.com",
       projectId: "roomflow-6c920",
       storageBucket: "roomflow-6c920.firebasestorage.app",
       messagingSenderId: "827966111309",
-      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604",
-      measurementId: "G-1YGPS03PKC"
-    };
+      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
+    });
 
-    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const $ = id => document.getElementById(id);
 
     let currentUser = null;
     let tenants = [];
-    let properties = [];
     let rooms = [];
+    let properties = [];
 
-    const $ = id => document.getElementById(id);
-    const tenantsRef = () => collection(db, "users", currentUser.uid, "tenants");
+    let loaded = false;
+    let busy = false;
+    let authorized = false;
+    let editing = null;
 
-    function showMessage(message, type = "") {
-      $("tenantMessage").textContent = message;
-      $("tenantMessage").className = type;
-    }
+    const active = tenant =>
+      Boolean(tenant) && (tenant.status || "Active") === "Active";
 
-    function escapeHtml(value = "") {
-      return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#39;"
-      })[char]);
-    }
+    const roomName = room =>
+      room?.name || room?.roomName || "Unnamed room";
 
-    function money(value) {
-      return new Intl.NumberFormat("en-IN", {
-        style: "currency", currency: "INR", maximumFractionDigits: 2
+    const propertyName = property =>
+      property?.name || property?.propertyName || "Unnamed property";
+
+    const ref = (kind, id) =>
+      doc(db, "users", currentUser.uid, kind, id);
+
+    const listRef = kind =>
+      collection(db, "users", currentUser.uid, kind);
+
+    const money = value =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
       }).format(Number(value) || 0);
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
     }
 
-    function fillSelect(selectId, items, labelFn) {
-      const select = $(selectId);
-      const previous = select.value;
-      select.replaceChildren(new Option("None / Not linked", ""));
-      items.forEach(item => select.add(new Option(labelFn(item), item.id)));
-      if ([...select.options].some(option => option.value === previous)) {
-        select.value = previous;
+    function today() {
+      const date = new Date();
+
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+      ].join("-");
+    }
+
+    function notice(text, error = false) {
+      $("tenantMessage").textContent = text;
+      $("tenantMessage").className = error ? "error" : "success";
+    }
+
+    function formError(text = "") {
+      $("formMessage").textContent = text;
+    }
+
+    function controls() {
+      for (const id of ["addBtn", "refreshBtn", "exportBtn"]) {
+        $(id).disabled =
+          busy ||
+          !authorized ||
+          (id !== "refreshBtn" && !loaded);
+      }
+
+      $("saveBtn").disabled = busy || !loaded || !authorized;
+      $("closeBtn").disabled = busy;
+      $("cancelBtn").disabled = busy;
+
+      document.querySelectorAll("#tenantsBody button").forEach(button => {
+        button.disabled = busy || !loaded;
+      });
+    }
+
+    function addOption(select, text, value) {
+      select.add(new Option(text, value));
+    }
+
+    function fillProperties() {
+      const select = $("tenantProperty");
+
+      select.replaceChildren(new Option("Select property", ""));
+
+      properties.forEach(property => {
+        addOption(select, propertyName(property), property.id);
+      });
+
+      if (
+        editing?.propertyId &&
+        !properties.some(property => property.id === editing.propertyId)
+      ) {
+        addOption(
+          select,
+          `${editing.propertyName || "Previous property"} (removed)`,
+          editing.propertyId
+        );
       }
     }
 
-    async function loadRelatedRecords() {
-      const [propertySnap, roomSnap] = await Promise.all([
-        getDocs(collection(db, "users", currentUser.uid, "properties")),
-        getDocs(collection(db, "users", currentUser.uid, "rooms"))
-      ]);
+    function roomConflict(room, ownId = "") {
+      if (
+        room.occupantTenantId &&
+        room.occupantTenantId !== ownId
+      ) {
+        return true;
+      }
 
-      properties = propertySnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      rooms = roomSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (
+        tenants.some(tenant =>
+          active(tenant) &&
+          tenant.roomId === room.id &&
+          tenant.id !== ownId
+        )
+      ) {
+        return true;
+      }
 
-      fillSelect("tenantProperty", properties, p =>
-        p.name || p.propertyName || "Unnamed property"
-      );
+      const status = room.status || "Available";
 
-      updateRoomOptions();
+      const ownRoom =
+        editing &&
+        active(editing) &&
+        editing.roomId === room.id;
+
+      if (
+        status !== "Available" &&
+        !(status === "Occupied" && ownRoom)
+      ) {
+        return true;
+      }
+
+      if (
+        room.occupantName &&
+        !ownRoom &&
+        !room.occupantTenantId
+      ) {
+        return true;
+      }
+
+      return false;
     }
 
-    function updateRoomOptions() {
+    function fillRooms(selected = $("tenantRoom").value) {
+      const select = $("tenantRoom");
       const propertyId = $("tenantProperty").value;
-      const previousRoom = $("tenantRoom").value;
 
-      const availableRooms = propertyId
-        ? rooms.filter(room =>
-            !room.propertyId || room.propertyId === propertyId
-          )
-        : rooms;
-
-      fillSelect("tenantRoom", availableRooms, room =>
-        room.name || room.roomName || "Unnamed room"
+      select.replaceChildren(
+        new Option("Select available room", "")
       );
 
-      if (availableRooms.some(room => room.id === previousRoom)) {
-        $("tenantRoom").value = previousRoom;
+      rooms
+        .filter(room => room.propertyId === propertyId)
+        .forEach(room => {
+          const conflict = roomConflict(room, editing?.id || "");
+
+          const option = new Option(
+            roomName(room) + (conflict ? " — Unavailable" : ""),
+            room.id
+          );
+
+          option.disabled = conflict;
+          select.add(option);
+        });
+
+      if (
+        editing?.roomId &&
+        ![...select.options].some(option =>
+          option.value === editing.roomId
+        )
+      ) {
+        addOption(
+          select,
+          `${editing.roomName || "Previous room"} (previous link)`,
+          editing.roomId
+        );
+      }
+
+      if (
+        [...select.options].some(option => option.value === selected)
+      ) {
+        select.value = selected;
       }
     }
 
-    async function loadTenants() {
-      $("tenantsBody").innerHTML =
-        '<tr><td colspan="6" class="tenant-empty">Loading tenants...</td></tr>';
+    function statusFields() {
+      const closed = editing && !active(editing);
+      const movedOut = $("tenantStatus").value === "Inactive";
 
-      const snapshot = await getDocs(
-        query(tenantsRef(), orderBy("createdAt", "desc"))
-      );
+      $("tenantMoveOutDate").required = movedOut;
+      $("tenantMoveOutDate").disabled = !movedOut;
 
-      tenants = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderTenants();
+      if (!movedOut) {
+        $("tenantMoveOutDate").value = "";
+      }
+
+      for (const id of [
+        "tenantProperty",
+        "tenantRoom",
+        "tenantJoinDate",
+        "tenantStatus"
+      ]) {
+        $(id).disabled = Boolean(closed);
+      }
+
+      $("tenantProperty").required = !movedOut;
+      $("tenantRoom").required = !movedOut;
+
+      $("stayNote").textContent = closed
+        ? "This stay has ended. Its room and move-in date are preserved. For a new stay, use Add Tenant."
+        : "Select a property and room for this stay. When the tenant leaves, use Move out. For a room change, close this stay and add a new entry.";
     }
 
-    function renderTenants() {
+    function openForm(tenant = null, checkout = false) {
+      if (busy || !loaded) return;
+
+      editing = tenant ? { ...tenant } : null;
+
+      $("tenantForm").reset();
+      $("tenantId").value = tenant?.id || "";
+
+      fillProperties();
+
+      $("tenantProperty").value = tenant?.propertyId || "";
+      fillRooms(tenant?.roomId || "");
+
+      const fields = {
+        tenantName: "name",
+        tenantPhone: "phone",
+        tenantEmail: "email",
+        tenantNotes: "notes"
+      };
+
+      for (const [id, key] of Object.entries(fields)) {
+        $(id).value = tenant?.[key] || "";
+      }
+
+      $("tenantRent").value = tenant?.monthlyRent ?? 0;
+      $("tenantDeposit").value = tenant?.securityDeposit ?? 0;
+      $("tenantJoinDate").value = tenant?.moveInDate || today();
+
+      $("tenantMoveOutDate").value = checkout
+        ? today()
+        : tenant?.moveOutDate || "";
+
+      $("tenantStatus").value = checkout
+        ? "Inactive"
+        : tenant?.status || "Active";
+
+      $("formTitle").textContent = checkout
+        ? "Move out tenant"
+        : tenant
+          ? "Edit Tenant"
+          : "Add Tenant";
+
+      $("saveBtn").textContent = checkout
+        ? "Confirm Move-out"
+        : tenant
+          ? "Update Tenant"
+          : "Save Tenant";
+
+      formError();
+      statusFields();
+      controls();
+
+      $("tenantDialog").showModal();
+
+      $(checkout ? "tenantMoveOutDate" : "tenantName").focus();
+    }
+
+    function render() {
       const search = $("searchInput").value.trim().toLowerCase();
       const status = $("statusFilter").value;
 
       const filtered = tenants.filter(tenant => {
         const text = [
-          tenant.name, tenant.phone, tenant.email,
-          tenant.propertyName, tenant.roomName, tenant.notes
+          tenant.name,
+          tenant.phone,
+          tenant.email,
+          tenant.propertyName,
+          tenant.roomName,
+          tenant.notes
         ].join(" ").toLowerCase();
 
         return text.includes(search) &&
@@ -284,1395 +1029,707 @@
       });
 
       $("totalCount").textContent = tenants.length;
-      $("activeCount").textContent =
-        tenants.filter(t => (t.status || "Active") === "Active").length;
+      $("activeCount").textContent = tenants.filter(active).length;
+
       $("inactiveCount").textContent =
-        tenants.filter(t => t.status === "Inactive").length;
+        tenants.filter(tenant => !active(tenant)).length;
 
-      const totalRent = tenants
-        .filter(t => (t.status || "Active") === "Active")
-        .reduce((sum, t) => sum + (Number(t.monthlyRent) || 0), 0);
-
-      $("rentTotal").textContent = money(totalRent);
+      $("rentTotal").textContent = money(
+        tenants
+          .filter(active)
+          .reduce(
+            (sum, tenant) => sum + (Number(tenant.monthlyRent) || 0),
+            0
+          )
+      );
 
       if (!filtered.length) {
-        $("tenantsBody").innerHTML =
-          '<tr><td colspan="6" class="tenant-empty">No tenants found. Add your first tenant.</td></tr>';
+        $("tenantsBody").innerHTML = `
+          <tr>
+            <td colspan="6" class="tenant-empty">
+              No matching tenants. Use Add Tenant to create an entry.
+            </td>
+          </tr>
+        `;
+
+        controls();
         return;
       }
 
-      $("tenantsBody").innerHTML = filtered.map(tenant => {
-        const status = tenant.status || "Active";
-        const phone = String(tenant.phone || "");
-        const phoneLink = /^[+\d][\d\s()-]{5,19}$/.test(phone)
-          ? `<div><a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a></div>`
-          : `<div>${escapeHtml(phone || "No phone")}</div>`;
+      $("tenantsBody").innerHTML = filtered.map(tenant => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(tenant.name || "Unnamed")}</strong>
+            <div>${escapeHtml(tenant.phone || "No phone")}</div>
+            <div class="muted">${escapeHtml(tenant.email)}</div>
+          </td>
 
-        return `
-          <tr>
-            <td>
-              <strong>${escapeHtml(tenant.name || "Unnamed")}</strong>
-              ${phoneLink}
-              <div class="muted">${escapeHtml(tenant.email || "")}</div>
-            </td>
-            <td>
-              ${escapeHtml(tenant.propertyName || "—")}
-              <div class="muted">${escapeHtml(tenant.roomName || "No room linked")}</div>
-            </td>
-            <td>
-              <strong>${escapeHtml(money(tenant.monthlyRent))}</strong>
-              <div class="muted">Deposit: ${escapeHtml(money(tenant.securityDeposit))}</div>
-            </td>
-            <td>
-              <div>In: ${escapeHtml(tenant.moveInDate || "—")}</div>
-              <div class="muted">Out: ${escapeHtml(tenant.moveOutDate || "—")}</div>
-            </td>
-            <td>
-              <span class="tenant-badge ${status === "Active" ? "badge-active" : "badge-inactive"}">
-                ${escapeHtml(status)}
-              </span>
-            </td>
-            <td>
-              <button class="tenant-btn secondary small" data-edit="${escapeHtml(tenant.id)}" type="button">Edit</button>
-              <button class="tenant-btn danger small" data-delete="${escapeHtml(tenant.id)}" type="button">Delete</button>
-            </td>
-          </tr>`;
-      }).join("");
+          <td>
+            ${escapeHtml(tenant.propertyName || "Not linked")}
+            <div class="muted">
+              ${escapeHtml(tenant.roomName || "No room linked")}
+            </div>
+          </td>
+
+          <td>
+            <strong>${escapeHtml(money(tenant.monthlyRent))}</strong>
+            <div class="muted">
+              Deposit: ${escapeHtml(money(tenant.securityDeposit))}
+            </div>
+          </td>
+
+          <td>
+            In: ${escapeHtml(tenant.moveInDate || "—")}
+            <div class="muted">
+              Out: ${escapeHtml(tenant.moveOutDate || "—")}
+            </div>
+          </td>
+
+          <td>
+            <span class="tenant-badge ${
+              active(tenant) ? "badge-active" : "badge-inactive"
+            }">
+              ${active(tenant) ? "Active" : "Moved out"}
+            </span>
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="tenant-btn secondary small"
+              data-edit="${escapeHtml(tenant.id)}"
+            >Edit</button>
+
+            ${active(tenant) ? `
+              <button
+                type="button"
+                class="tenant-btn small"
+                data-out="${escapeHtml(tenant.id)}"
+              >Move out</button>
+            ` : ""}
+          </td>
+        </tr>
+      `).join("");
+
+      controls();
     }
 
-    function resetForm() {
-      $("tenantForm").reset();
-      $("tenantId").value = "";
-      $("tenantRent").value = "0";
-      $("tenantDeposit").value = "0";
-      $("tenantStatus").value = "Active";
-      $("formTitle").textContent = "Add Tenant";
-      $("saveBtn").textContent = "Save Tenant";
-      $("cancelBtn").hidden = true;
-      updateRoomOptions();
+    async function reload() {
+      const uid = currentUser.uid;
+
+      const [tenantSnap, propertySnap, roomSnap] =
+        await Promise.all([
+          getDocs(listRef("tenants")),
+          getDocs(listRef("properties")),
+          getDocs(listRef("rooms"))
+        ]);
+
+      if (currentUser?.uid !== uid) {
+        throw new Error("Your session changed. Reload the page.");
+      }
+
+      tenants = tenantSnap.docs.map(snapshot => ({
+        ...snapshot.data(),
+        id: snapshot.id
+      }));
+
+      properties = propertySnap.docs.map(snapshot => ({
+        ...snapshot.data(),
+        id: snapshot.id
+      }));
+
+      rooms = roomSnap.docs.map(snapshot => ({
+        ...snapshot.data(),
+        id: snapshot.id
+      }));
+
+      tenants.sort((a, b) =>
+        (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0) ||
+        String(a.name || "").localeCompare(String(b.name || ""))
+      );
+
+      loaded = true;
+      render();
     }
 
-    function editTenant(id) {
-      const tenant = tenants.find(t => t.id === id);
-      if (!tenant) return;
+    function readPayload() {
+      const payload = {
+        name: $("tenantName").value.trim(),
+        phone: $("tenantPhone").value.trim(),
+        email: $("tenantEmail").value.trim(),
+        propertyId: $("tenantProperty").value,
+        roomId: $("tenantRoom").value,
+        monthlyRent: Number($("tenantRent").value),
+        securityDeposit: Number($("tenantDeposit").value),
+        moveInDate: $("tenantJoinDate").value,
+        moveOutDate: $("tenantMoveOutDate").value,
+        status: $("tenantStatus").value,
+        notes: $("tenantNotes").value.trim()
+      };
 
-      $("tenantId").value = tenant.id;
-      $("tenantName").value = tenant.name || "";
-      $("tenantPhone").value = tenant.phone || "";
-      $("tenantEmail").value = tenant.email || "";
-      $("tenantProperty").value = tenant.propertyId || "";
-      updateRoomOptions();
-      $("tenantRoom").value = tenant.roomId || "";
-      $("tenantRent").value = Number(tenant.monthlyRent) || 0;
-      $("tenantDeposit").value = Number(tenant.securityDeposit) || 0;
-      $("tenantJoinDate").value = tenant.moveInDate || "";
-      $("tenantMoveOutDate").value = tenant.moveOutDate || "";
-      $("tenantStatus").value = tenant.status || "Active";
-      $("tenantNotes").value = tenant.notes || "";
+      if (!payload.name) {
+        throw new Error("Please enter the tenant name.");
+      }
 
-      $("formTitle").textContent = "Edit Tenant";
-      $("saveBtn").textContent = "Update Tenant";
-      $("cancelBtn").hidden = false;
-      $("tenantName").focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (
+        ![payload.monthlyRent, payload.securityDeposit].every(
+          value =>
+            Number.isFinite(value) &&
+            value >= 0 &&
+            value <= 100000000
+        )
+      ) {
+        throw new Error("Enter valid rent and deposit amounts.");
+      }
+
+      if (
+        !payload.moveInDate ||
+        payload.moveInDate > today()
+      ) {
+        throw new Error(
+          "Move-in date is required and cannot be in the future."
+        );
+      }
+
+      if (
+        payload.status === "Active" &&
+        (!payload.propertyId || !payload.roomId)
+      ) {
+        throw new Error("Select both a property and a room.");
+      }
+
+      if (
+        payload.status === "Inactive" &&
+        (
+          !payload.moveOutDate ||
+          payload.moveOutDate < payload.moveInDate ||
+          payload.moveOutDate > today()
+        )
+      ) {
+        throw new Error(
+          "Enter a move-out date between the move-in date and today."
+        );
+      }
+
+      if (!editing && payload.status !== "Active") {
+        throw new Error(
+          "Create an active stay first. Use Move out when the tenant leaves."
+        );
+      }
+
+      return payload;
     }
 
-    $("tenantProperty").addEventListener("change", updateRoomOptions);
+    async function persistTenant(payload, expected, tenantRef) {
+      const roomId = expected?.roomId || payload.roomId;
+
+      const competitors = tenants.filter(tenant =>
+        tenant.id !== expected?.id &&
+        active(tenant) &&
+        tenant.roomId === roomId
+      );
+
+      const expectedVersion = expected
+        ? JSON.stringify(expected)
+        : null;
+
+      return runTransaction(db, async transaction => {
+        const tenantSnap = await transaction.get(tenantRef);
+
+        const old = tenantSnap.exists()
+          ? { ...tenantSnap.data(), id: tenantSnap.id }
+          : null;
+
+        if (
+          expected &&
+          (!old || JSON.stringify(old) !== expectedVersion)
+        ) {
+          throw new Error(
+            "This tenant changed in another window. Close this form, refresh and try again."
+          );
+        }
+
+        if (!expected && old) {
+          throw new Error(
+            "This entry already exists. Refresh before trying again."
+          );
+        }
+
+        const oldActive = active(old);
+        const newActive = payload.status === "Active";
+
+        if (
+          old &&
+          (old.roomId || !oldActive) &&
+          (old.roomId || "") !== payload.roomId
+        ) {
+          throw new Error(
+            "To change rooms, move out this tenant first and add a new stay."
+          );
+        }
+
+        if (
+          old &&
+          (old.roomId || !oldActive) &&
+          (old.propertyId || "") !== payload.propertyId
+        ) {
+          throw new Error(
+            "To change property, move out this tenant first and add a new stay."
+          );
+        }
+
+        if (
+          old &&
+          !oldActive &&
+          (
+            newActive ||
+            payload.moveInDate !== old.moveInDate
+          )
+        ) {
+          throw new Error(
+            "This stay is closed. Use Add Tenant for a new stay."
+          );
+        }
+
+        let roomSnap = null;
+        let propertySnap = null;
+
+        if (roomId && (oldActive || newActive)) {
+          roomSnap = await transaction.get(ref("rooms", roomId));
+        }
+
+        if (newActive) {
+          propertySnap = await transaction.get(
+            ref("properties", payload.propertyId)
+          );
+        }
+
+        const competingSnaps = [];
+
+        if (oldActive || newActive) {
+          for (const tenant of competitors) {
+            competingSnaps.push(
+              await transaction.get(ref("tenants", tenant.id))
+            );
+          }
+        }
+
+        const conflictingTenant = competingSnaps.some(snapshot =>
+          snapshot.exists() &&
+          active(snapshot.data()) &&
+          snapshot.data().roomId === roomId
+        );
+
+        const room = roomSnap?.exists()
+          ? roomSnap.data()
+          : null;
+
+        if (newActive) {
+          if (!propertySnap.exists()) {
+            throw new Error(
+              "Selected property no longer exists. Refresh and select another property."
+            );
+          }
+
+          if (!room) {
+            throw new Error(
+              "Selected room no longer exists. Refresh and select another room."
+            );
+          }
+
+          if (room.propertyId !== payload.propertyId) {
+            throw new Error(
+              "This room does not belong to the selected property. Set its property on the Rooms page first."
+            );
+          }
+
+          if (
+            conflictingTenant ||
+            (
+              room.occupantTenantId &&
+              room.occupantTenantId !== tenantRef.id
+            )
+          ) {
+            throw new Error(
+              "Another active tenant is already linked to this room."
+            );
+          }
+
+          const ownRoom =
+            oldActive && old.roomId === payload.roomId;
+
+          const status = room.status || "Available";
+
+          if (
+            status !== "Available" &&
+            !(status === "Occupied" && ownRoom)
+          ) {
+            throw new Error(
+              "This room is unavailable. Refresh the list and choose an available room."
+            );
+          }
+
+          if (
+            room.occupantName &&
+            !room.occupantTenantId &&
+            !ownRoom
+          ) {
+            throw new Error(
+              "This room already has an occupant. Check its existing occupancy before linking it."
+            );
+          }
+
+          if (
+            ownRoom &&
+            !room.occupantTenantId &&
+            room.occupantName &&
+            room.occupantName !== old.name
+          ) {
+            throw new Error(
+              "Room occupant does not match this tenant. Check the room record first."
+            );
+          }
+        }
+
+        if (oldActive && !newActive && room) {
+          if (
+            conflictingTenant ||
+            (
+              room.occupantTenantId &&
+              room.occupantTenantId !== tenantRef.id
+            )
+          ) {
+            throw new Error(
+              "Room has a different active tenant. Resolve the conflicting room records before moving out."
+            );
+          }
+
+          if (
+            !room.occupantTenantId &&
+            room.occupantName &&
+            room.occupantName !== old.name
+          ) {
+            throw new Error(
+              "Room occupant does not match this tenant. Check the room record first."
+            );
+          }
+        }
+
+        const saved = {
+          ...payload,
+          updatedAt: serverTimestamp()
+        };
+
+        if (newActive) {
+          saved.propertyName = propertyName(propertySnap.data());
+          saved.roomName = roomName(room);
+
+          transaction.update(ref("rooms", roomId), {
+            status: "Occupied",
+            occupantTenantId: tenantRef.id,
+            occupantName: payload.name,
+            updatedAt: serverTimestamp()
+          });
+        } else {
+          saved.propertyName = old?.propertyName || "";
+          saved.roomName = old?.roomName || "";
+
+          if (oldActive && room) {
+            transaction.update(ref("rooms", roomId), {
+              status: ["Maintenance", "Inactive"].includes(room.status)
+                ? room.status
+                : "Available",
+              occupantTenantId: "",
+              occupantName: "",
+              updatedAt: serverTimestamp()
+            });
+          }
+
+          if (oldActive) {
+            saved.closedAt = serverTimestamp();
+          }
+        }
+
+        if (old) {
+          transaction.update(tenantRef, saved);
+        } else {
+          transaction.set(tenantRef, {
+            ...saved,
+            createdAt: serverTimestamp()
+          });
+        }
+      });
+    }
+
+    $("tenantProperty").addEventListener("change", () => {
+      $("tenantRoom").value = "";
+      fillRooms("");
+    });
+
+    $("tenantRoom").addEventListener("change", () => {
+      if (editing) return;
+
+      const room = rooms.find(
+        room => room.id === $("tenantRoom").value
+      );
+
+      if (room && Number.isFinite(Number(room.rent))) {
+        $("tenantRent").value = Number(room.rent);
+      }
+    });
+
+    $("tenantStatus").addEventListener("change", () => {
+      if (
+        $("tenantStatus").value === "Inactive" &&
+        !$("tenantMoveOutDate").value
+      ) {
+        $("tenantMoveOutDate").value = today();
+      }
+
+      statusFields();
+    });
+
+    $("addBtn").addEventListener("click", () => {
+      openForm();
+    });
+
+    for (const id of ["cancelBtn", "closeBtn"]) {
+      $(id).addEventListener("click", () => {
+        if (!busy) {
+          $("tenantDialog").close();
+        }
+      });
+    }
+
+    $("tenantDialog").addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
+
+    $("searchInput").addEventListener("input", () => {
+      if (loaded) render();
+    });
+
+    $("statusFilter").addEventListener("change", () => {
+      if (loaded) render();
+    });
+
+    $("tenantsBody").addEventListener("click", event => {
+      if (busy || !loaded) return;
+
+      const button = event.target.closest(
+        "button[data-edit], button[data-out]"
+      );
+
+      if (!button) return;
+
+      const tenant = tenants.find(tenant =>
+        tenant.id === (button.dataset.edit || button.dataset.out)
+      );
+
+      if (tenant) {
+        openForm(tenant, Boolean(button.dataset.out));
+      }
+    });
 
     $("tenantForm").addEventListener("submit", async event => {
       event.preventDefault();
-      if (!currentUser) return;
 
-      const id = $("tenantId").value;
-      const name = $("tenantName").value.trim();
-      const phone = $("tenantPhone").value.trim();
-      const email = $("tenantEmail").value.trim();
-      const monthlyRent = Number($("tenantRent").value);
-      const securityDeposit = Number($("tenantDeposit").value);
-      const moveInDate = $("tenantJoinDate").value;
-      const moveOutDate = $("tenantMoveOutDate").value;
+      if (busy || !loaded || !authorized) return;
 
-      if (!name) {
-        showMessage("Please enter the tenant's name.", "error");
-        return;
-      }
+      formError();
 
-      if (!Number.isFinite(monthlyRent) || monthlyRent < 0 ||
-          !Number.isFinite(securityDeposit) || securityDeposit < 0) {
-        showMessage("Rent and deposit must be valid non-negative amounts.", "error");
-        return;
-      }
-
-      if (moveInDate && moveOutDate && moveOutDate < moveInDate) {
-        showMessage("Move-out date cannot be before move-in date.", "error");
-        return;
-      }
-
-      const propertyId = $("tenantProperty").value;
-      const roomId = $("tenantRoom").value;
-      const property = properties.find(p => p.id === propertyId);
-      const room = rooms.find(r => r.id === roomId);
-
-      const payload = {
-        name,
-        phone,
-        email,
-        propertyId,
-        propertyName: property
-          ? (property.name || property.propertyName || "")
-          : "",
-        roomId,
-        roomName: room ? (room.name || room.roomName || "") : "",
-        monthlyRent,
-        securityDeposit,
-        moveInDate,
-        moveOutDate,
-        status: $("tenantStatus").value,
-        notes: $("tenantNotes").value.trim(),
-        updatedAt: serverTimestamp()
-      };
-
-      $("saveBtn").disabled = true;
+      let payload;
 
       try {
-        if (id) {
-          await updateDoc(
-            doc(db, "users", currentUser.uid, "tenants", id),
-            payload
-          );
-          showMessage("Tenant updated successfully.", "success");
-        } else {
-          await addDoc(tenantsRef(), {
-            ...payload,
-            createdAt: serverTimestamp()
-          });
-          showMessage("Tenant added successfully.", "success");
-        }
-
-        resetForm();
-        await loadTenants();
+        payload = readPayload();
       } catch (error) {
-        console.error(error);
-        showMessage(
-          "Could not save tenant. Check your Firestore rules and connection.",
-          "error"
-        );
-      } finally {
-        $("saveBtn").disabled = false;
-      }
-    });
-
-    $("tenantsBody").addEventListener("click", async event => {
-      const editButton = event.target.closest("[data-edit]");
-      const deleteButton = event.target.closest("[data-delete]");
-
-      if (editButton) {
-        editTenant(editButton.dataset.edit);
+        formError(error.message);
         return;
       }
 
-      if (deleteButton) {
-        const id = deleteButton.dataset.delete;
-        const tenant = tenants.find(t => t.id === id);
-        if (!tenant) return;
+      const expected = editing ? { ...editing } : null;
 
-        if (!confirm(
-          `Delete tenant "${tenant.name || "Unnamed"}"? This cannot be undone.`
-        )) return;
+      const target = expected
+        ? ref("tenants", expected.id)
+        : doc(listRef("tenants"));
+
+      busy = true;
+      controls();
+
+      try {
+        await persistTenant(payload, expected, target);
+
+        $("tenantDialog").close();
+        editing = null;
+
+        notice(
+          payload.status === "Inactive"
+            ? "Tenant stay saved. Previous details remain in history."
+            : "Tenant saved and room marked Occupied."
+        );
 
         try {
-          await deleteDoc(
-            doc(db, "users", currentUser.uid, "tenants", id)
-          );
-          showMessage("Tenant deleted successfully.", "success");
-          await loadTenants();
+          await reload();
         } catch (error) {
-          console.error(error);
-          showMessage("Could not delete tenant. Check Firestore rules.", "error");
+          loaded = false;
+
+          notice(
+            "Saved successfully, but the list could not refresh. Click Refresh before making another change.",
+            true
+          );
         }
+      } catch (error) {
+        console.error(error);
+
+        formError(
+          error.code
+            ? `Could not save (${error.code}). Check your connection and database permissions.`
+            : error.message
+        );
+      } finally {
+        busy = false;
+        controls();
       }
     });
 
-    $("cancelBtn").addEventListener("click", resetForm);
-    $("searchInput").addEventListener("input", renderTenants);
-    $("statusFilter").addEventListener("change", renderTenants);
-
     $("refreshBtn").addEventListener("click", async () => {
+      if (busy || !authorized) return;
+
+      busy = true;
+      controls();
+
       try {
-        await loadRelatedRecords();
-        await loadTenants();
-        showMessage("Tenant list refreshed.", "success");
+        await reload();
+        notice("Tenant and room records refreshed.");
       } catch (error) {
         console.error(error);
-        showMessage("Refresh failed. Check your connection and Firestore rules.", "error");
+        loaded = false;
+
+        notice(
+          "Refresh failed. Check connection and database permissions, then try again.",
+          true
+        );
+      } finally {
+        busy = false;
+        controls();
       }
     });
 
     function csvCell(value) {
-      return '"' + String(value ?? "").replace(/"/g, '""') + '"';
+      let text = String(value ?? "");
+
+      if (/^\s*[=+@-]/.test(text)) {
+        text = "'" + text;
+      }
+
+      return '"' + text.replace(/"/g, '""') + '"';
     }
 
     $("exportBtn").addEventListener("click", () => {
+      if (!loaded || busy) return;
+
+      const keys = [
+        "name",
+        "phone",
+        "email",
+        "propertyName",
+        "roomName",
+        "monthlyRent",
+        "securityDeposit",
+        "moveInDate",
+        "moveOutDate",
+        "status",
+        "notes"
+      ];
+
       const rows = [
-        [
-          "Name", "Phone", "Email", "Property", "Room",
-          "Monthly Rent", "Security Deposit", "Move-in Date",
-          "Move-out Date", "Status", "Notes"
-        ],
-        ...tenants.map(t => [
-          t.name, t.phone, t.email, t.propertyName, t.roomName,
-          t.monthlyRent, t.securityDeposit, t.moveInDate,
-          t.moveOutDate, t.status || "Active", t.notes
-        ])
+        keys,
+        ...tenants.map(tenant => keys.map(key => tenant[key]))
       ];
 
       const csv = "\uFEFF" +
         rows.map(row => row.map(csvCell).join(",")).join("\r\n");
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8"
+      });
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
+
       link.href = url;
       link.download = "roomflow-tenants.csv";
       link.click();
-      URL.revokeObjectURL(url);
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
 
+    controls();
+
     onAuthStateChanged(auth, async user => {
+      loaded = false;
+      authorized = false;
+      currentUser = user;
+      controls();
+
       if (!user) {
-        window.location.href = "login.html";
+        location.replace("login.html");
         return;
       }
 
-      currentUser = user;
-
       try {
-        await Promise.all([loadRelatedRecords(), loadTenants()]);
+        const profile = await getDoc(
+          doc(db, "users", user.uid)
+        );
+
+        if (currentUser?.uid !== user.uid) return;
+
+        if (
+          !profile.exists() ||
+          profile.data().role !== "landlord"
+        ) {
+          $("tenantsBody").innerHTML = `
+            <tr>
+              <td colspan="6" class="tenant-empty">
+                This page is for landlord accounts.
+              </td>
+            </tr>
+          `;
+
+          notice(
+            "A landlord account is required to manage tenants.",
+            true
+          );
+
+          return;
+        }
+
+        authorized = true;
+        busy = true;
+        controls();
+
+        await reload();
       } catch (error) {
         console.error(error);
-        $("tenantsBody").innerHTML =
-          '<tr><td colspan="6" class="tenant-empty">Could not load tenants. Check Firestore setup and security rules.</td></tr>';
-        showMessage(
-          "Loading failed. Check your Firestore database and security rules.",
-          "error"
+
+        $("tenantsBody").innerHTML = `
+          <tr>
+            <td colspan="6" class="tenant-empty">
+              Could not load records.
+              Check connection and database permissions.
+            </td>
+          </tr>
+        `;
+
+        notice(
+          "Loading failed. Reload this page or use Refresh when available.",
+          true
         );
+      } finally {
+        busy = false;
+        controls();
       }
     });
   </script>
-  <style>
-  /* RoomFlow dashboard layout */
-  body {
-    margin: 0;
-    background: #f6f8fc;
-    color: #0f172a;
-  }
-
-  .rf-tenant-shell {
-    display: flex;
-    min-height: 100vh;
-  }
-
-  .rf-tenant-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 268px;
-    height: 100vh;
-    padding: 26px 18px;
-    box-sizing: border-box;
-    background: #111827;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    z-index: 50;
-  }
-
-  .rf-tenant-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 6px 32px;
-    color: #fff;
-    font-size: 25px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .rf-tenant-mark {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #818cf8, #4f46e5);
-    color: white;
-  }
-
-  .rf-tenant-nav {
-    display: grid;
-    gap: 8px;
-  }
-
-  .rf-tenant-nav a {
-    display: block;
-    padding: 15px;
-    border-radius: 11px;
-    color: #cbd5e1;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .rf-tenant-nav a:hover,
-  .rf-tenant-nav a.active {
-    background: #252c4b;
-    color: #fff;
-  }
-
-  .rf-tenant-bottom {
-    margin-top: auto;
-    padding-top: 24px;
-  }
-
-  .rf-tenant-back {
-    display: block;
-    padding: 13px;
-    border-radius: 10px;
-    background: #4f46e5;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .rf-tenant-bottom p {
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-    margin-top: 18px;
-  }
-
-  .rf-tenant-shell > .tenant-wrap {
-    flex: 1;
-    width: calc(100% - 268px);
-    min-width: 0;
-    max-width: none;
-    margin: 0 0 0 268px;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  .rf-tenant-shell .tenant-header {
-    margin: 0;
-    padding: 24px 30px;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .rf-tenant-shell .tenant-header h1 {
-    color: #0f172a;
-    font-size: 25px;
-    margin: 0 0 8px;
-  }
-
-  .rf-tenant-shell .tenant-header .tenant-actions {
-    margin-top: 0;
-  }
-
-  .rf-tenant-shell .muted {
-    color: #64748b;
-    opacity: 1;
-  }
-
-  .rf-tenant-shell .tenant-stats {
-    margin: 26px 30px 24px;
-    gap: 18px;
-  }
-
-  .rf-tenant-shell .tenant-card {
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 6px 20px rgb(15 23 42 / 3%);
-    min-width: 0;
-  }
-
-  .rf-tenant-shell .tenant-card::before {
-    content: "♙";
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 18px;
-    border-radius: 12px;
-    background: #eef2ff;
-    color: #4f46e5;
-    font-size: 20px;
-  }
-
-  .rf-tenant-shell .tenant-card:nth-child(2)::before {
-    content: "✓";
-  }
-
-  .rf-tenant-shell .tenant-card:nth-child(3)::before {
-    content: "−";
-  }
-
-  .rf-tenant-shell .tenant-card:nth-child(4)::before {
-    content: "₹";
-  }
-
-  .rf-tenant-shell .stat-number {
-    margin-top: 12px;
-    color: #0f172a;
-    font-size: 27px;
-    overflow-wrap: anywhere;
-  }
-
-  .rf-tenant-shell .tenant-layout {
-    margin: 0 30px 30px;
-    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-    gap: 20px;
-  }
-
-  .rf-tenant-shell .tenant-panel {
-    min-width: 0;
-    padding: 22px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
-  }
-
-  .rf-tenant-shell .tenant-btn {
-    background: #4f46e5;
-    color: #fff;
-    border-radius: 10px;
-    padding: 11px 15px;
-  }
-
-  .rf-tenant-shell .tenant-btn:hover {
-    background: #4338ca;
-  }
-
-  .rf-tenant-shell .tenant-btn.secondary {
-    background: #eef2ff;
-    color: #3730a3;
-  }
-
-  .rf-tenant-shell .tenant-btn.danger {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .rf-tenant-shell .tenant-btn.small {
-    padding: 7px 10px;
-  }
-
-  .rf-tenant-shell input,
-  .rf-tenant-shell select,
-  .rf-tenant-shell textarea {
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
-    background: white;
-    color: #0f172a;
-  }
-
-  .rf-tenant-shell input:focus,
-  .rf-tenant-shell select:focus,
-  .rf-tenant-shell textarea:focus {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
-  }
-
-  .rf-tenant-shell .tenant-table th {
-    background: #f8fafc;
-    color: #64748b;
-  }
-
-  .rf-tenant-shell .tenant-table th,
-  .rf-tenant-shell .tenant-table td {
-    border-bottom-color: #e2e8f0;
-  }
-
-  .rf-tenant-shell #tenantMessage:empty {
-    display: none;
-  }
-
-  .rf-tenant-shell #tenantMessage:not(:empty) {
-    margin: 20px 30px 0;
-    padding: 14px 16px;
-    border-radius: 10px;
-    background: #f8fafc;
-  }
-
-  .rf-tenant-shell #tenantMessage.error {
-    background: #fef2f2;
-    color: #b91c1c;
-  }
-
-  .rf-tenant-shell #tenantMessage.success {
-    background: #f0fdf4;
-    color: #15803d;
-  }
-
-  @media (max-width: 1200px) {
-    .rf-tenant-shell .tenant-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .rf-tenant-shell .tenant-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 800px) {
-    .rf-tenant-shell {
-      display: block;
-    }
-
-    .rf-tenant-sidebar {
-      position: static;
-      width: 100%;
-      height: auto;
-      padding: 18px;
-    }
-
-    .rf-tenant-brand {
-      margin: 0 0 16px;
-    }
-
-    .rf-tenant-nav {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-    }
-
-    .rf-tenant-nav a {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .rf-tenant-bottom {
-      display: none;
-    }
-
-    .rf-tenant-shell > .tenant-wrap {
-      width: 100%;
-      margin: 0;
-    }
-
-    .rf-tenant-shell .tenant-header {
-      padding: 20px;
-    }
-
-    .rf-tenant-shell .tenant-stats {
-      margin: 20px 16px;
-    }
-
-    .rf-tenant-shell .tenant-layout {
-      margin: 0 16px 24px;
-    }
-
-    .rf-tenant-shell #tenantMessage:not(:empty) {
-      margin: 16px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .rf-tenant-shell .tenant-card {
-      padding: 16px;
-    }
-
-    .rf-tenant-shell .stat-number {
-      font-size: 22px;
-    }
-
-    .rf-tenant-shell .tenant-panel {
-      padding: 16px;
-    }
-
-    .rf-tenant-shell .tenant-stats {
-      gap: 10px;
-    }
-
-    .rf-tenant-shell .tenant-filters {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
-
-<script>
-  (() => {
-    const main = document.querySelector("main.tenant-wrap");
-
-    if (!main || document.getElementById("rfTenantShell")) return;
-
-    const shell = document.createElement("div");
-    shell.id = "rfTenantShell";
-    shell.className = "rf-tenant-shell";
-
-    const sidebar = document.createElement("aside");
-    sidebar.className = "rf-tenant-sidebar";
-
-    sidebar.innerHTML = `
-      <a href="dashboard.html" class="rf-tenant-brand">
-        <span class="rf-tenant-mark">R</span>
-        RoomFlow
-      </a>
-
-      <nav class="rf-tenant-nav" aria-label="Main navigation">
-        <a href="dashboard.html">▦ Dashboard</a>
-        <a href="properties.html">⌂ Properties</a>
-        <a href="rooms.html">▣ Rooms</a>
-        <a href="tenants.html" class="active" aria-current="page">
-          ♙ Tenants
-        </a>
-        <a href="rent.html">₹ Rent Manager</a>
-        <a href="electricity.html">⚡ Electricity</a>
-        <a href="payments.html">▤ Payments</a>
-        <a href="profile.html">♙ My Profile</a>
-      </nav>
-
-      <div class="rf-tenant-bottom">
-        <a href="dashboard.html" class="rf-tenant-back">
-          ← Dashboard
-        </a>
-        <p>RoomFlow · Jatav Industries</p>
-      </div>
-    `;
-
-    main.parentNode.insertBefore(shell, main);
-    shell.append(sidebar, main);
-  })();
-</script>
-  <style>
-  /* Dashboard sidebar */
-  .rf-tenant-shell {
-    display: flex;
-    min-height: 100vh;
-  }
-
-  .rf-tenant-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    width: 268px;
-    height: 100vh;
-    padding: 26px 18px;
-    box-sizing: border-box;
-    background: #111827;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    z-index: 50;
-  }
-
-  .rf-tenant-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 6px 32px;
-    color: white;
-    font-size: 25px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .rf-tenant-mark {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #818cf8, #4f46e5);
-    color: white;
-  }
-
-  .rf-tenant-nav {
-    display: grid;
-    gap: 8px;
-  }
-
-  .rf-tenant-nav a {
-    padding: 15px;
-    border-radius: 11px;
-    color: #cbd5e1;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .rf-tenant-nav a:hover,
-  .rf-tenant-nav a.active {
-    background: #252c4b;
-    color: white;
-  }
-
-  .rf-tenant-bottom {
-    margin-top: auto;
-    padding-top: 24px;
-  }
-
-  .rf-tenant-back {
-    display: block;
-    padding: 13px;
-    border-radius: 10px;
-    background: #4f46e5;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .rf-tenant-bottom p {
-    margin-top: 18px;
-    color: #94a3b8;
-    font-size: 11px;
-    text-align: center;
-  }
-
-  .rf-tenant-shell > .tenant-wrap {
-    width: calc(100% - 268px);
-    min-width: 0;
-    max-width: none;
-    margin: 0 0 0 268px;
-    padding: 0;
-    flex: 1;
-  }
-
-  .rf-tenant-shell .tenant-header {
-    margin: 0;
-    padding: 24px 30px;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  .rf-tenant-shell .tenant-header .tenant-actions {
-    margin-top: 0;
-  }
-
-  .rf-tenant-shell .tenant-stats {
-    margin: 26px 30px;
-    gap: 18px;
-  }
-
-  /* Only the tenant list remains on the main page */
-  .rf-tenant-shell .tenant-layout {
-    display: block;
-    margin: 0 30px 30px;
-  }
-
-  .rf-tenant-shell .tenant-panel {
-    min-width: 0;
-    padding: 24px;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-  }
-
-  .rf-add-tenant {
-    padding: 12px 18px;
-    border: 0;
-    border-radius: 10px;
-    background: #4f46e5;
-    color: white;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .rf-add-tenant:hover {
-    background: #4338ca;
-  }
-
-  /* Tenant form popup */
-  #rfTenantDialog {
-    box-sizing: border-box;
-    width: min(720px, calc(100% - 32px));
-    max-height: 90vh;
-    margin: auto;
-    padding: 0;
-    border: 0;
-    border-radius: 18px;
-    background: white;
-    color: #0f172a;
-    overflow-y: auto;
-    box-shadow: 0 24px 80px #0f172a40;
-  }
-
-  #rfTenantDialog::backdrop {
-    background: #0f172a99;
-  }
-
-  #rfTenantDialog .rf-dialog-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 24px;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  #rfTenantDialog .rf-dialog-head strong {
-    font-size: 18px;
-  }
-
-  #rfTenantDialog .rf-dialog-close {
-    width: 38px;
-    height: 38px;
-    border: 0;
-    border-radius: 10px;
-    background: #f1f5f9;
-    color: #334155;
-    font-size: 24px;
-    cursor: pointer;
-  }
-
-  #rfTenantDialog > .tenant-panel {
-    padding: 24px;
-    border: 0;
-    background: white;
-  }
-
-  #rfTenantDialog .tenant-form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  #rfTenantDialog .rf-field {
-    min-width: 0;
-  }
-
-  #rfTenantDialog .tenant-form label {
-    display: block;
-    margin: 0 0 8px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  #rfTenantDialog input:not([type="hidden"]),
-  #rfTenantDialog select,
-  #rfTenantDialog textarea {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
-    background: white;
-    color: #0f172a;
-    font: inherit;
-  }
-
-  #rfTenantDialog input:focus,
-  #rfTenantDialog select:focus,
-  #rfTenantDialog textarea:focus {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
-  }
-
-  #rfTenantDialog .rf-full,
-  #rfTenantDialog .tenant-actions,
-  #rfTenantDialog .tenant-note {
-    grid-column: 1 / -1;
-  }
-
-  #rfTenantDialog .tenant-actions {
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 8px;
-  }
-
-  #rfTenantDialog .tenant-btn {
-    padding: 12px 16px;
-    border: 0;
-    border-radius: 10px;
-    background: #4f46e5;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  #rfTenantDialog .tenant-btn.secondary {
-    background: #eef2ff;
-    color: #3730a3;
-  }
-
-  #rfTenantDialog .tenant-btn:disabled {
-    opacity: .6;
-    cursor: wait;
-  }
-
-  #rfTenantDialog .tenant-note {
-    margin: 0;
-    color: #64748b;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-  #rfTenantDialog .rf-dialog-message:empty {
-    display: none;
-  }
-
-  #rfTenantDialog .rf-dialog-message {
-    margin: 16px 24px 0;
-    padding: 12px;
-    border-radius: 10px;
-    background: #fef2f2;
-    color: #b91c1c;
-  }
-
-  @media (max-width: 1100px) {
-    .rf-tenant-shell .tenant-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 800px) {
-    .rf-tenant-shell {
-      display: block;
-    }
-
-    .rf-tenant-sidebar {
-      position: static;
-      width: 100%;
-      height: auto;
-      padding: 18px;
-    }
-
-    .rf-tenant-brand {
-      margin-bottom: 16px;
-    }
-
-    .rf-tenant-nav {
-      display: flex;
-      overflow-x: auto;
-    }
-
-    .rf-tenant-nav a {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .rf-tenant-bottom {
-      display: none;
-    }
-
-    .rf-tenant-shell > .tenant-wrap {
-      width: 100%;
-      margin: 0;
-    }
-
-    .rf-tenant-shell .tenant-header {
-      padding: 20px;
-    }
-
-    .rf-tenant-shell .tenant-stats {
-      margin: 20px 16px;
-    }
-
-    .rf-tenant-shell .tenant-layout {
-      margin: 0 16px 24px;
-    }
-  }
-
-  @media (max-width: 520px) {
-    #rfTenantDialog .tenant-form {
-      grid-template-columns: 1fr;
-    }
-
-    .rf-tenant-shell .tenant-header > .tenant-actions {
-      width: 100%;
-    }
-
-    .rf-add-tenant {
-      flex: 1;
-    }
-  }
-</style>
-
-<script>
-  (() => {
-    if (document.getElementById("rfTenantDialog")) return;
-
-    const main = document.querySelector("main.tenant-wrap");
-    const form = document.getElementById("tenantForm");
-    const header = document.querySelector(".tenant-header");
-
-    if (!main || !form || !header) return;
-
-    /* Create sidebar only when it is not already installed. */
-    if (!document.getElementById("rfTenantShell")) {
-      const shell = document.createElement("div");
-      shell.id = "rfTenantShell";
-      shell.className = "rf-tenant-shell";
-
-      const sidebar = document.createElement("aside");
-      sidebar.className = "rf-tenant-sidebar";
-
-      sidebar.innerHTML = `
-        <a href="dashboard.html" class="rf-tenant-brand">
-          <span class="rf-tenant-mark">R</span>
-          RoomFlow
-        </a>
-
-        <nav class="rf-tenant-nav" aria-label="Main navigation">
-          <a href="dashboard.html">▦ Dashboard</a>
-          <a href="properties.html">⌂ Properties</a>
-          <a href="rooms.html">▣ Rooms</a>
-          <a href="tenants.html" class="active" aria-current="page">
-            ♙ Tenants
-          </a>
-          <a href="rent.html">₹ Rent Manager</a>
-          <a href="electricity.html">⚡ Electricity</a>
-          <a href="payments.html">▤ Payments</a>
-          <a href="profile.html">♙ My Profile</a>
-        </nav>
-
-        <div class="rf-tenant-bottom">
-          <a href="dashboard.html" class="rf-tenant-back">
-            ← Dashboard
-          </a>
-          <p>RoomFlow · Jatav Industries</p>
-        </div>
-      `;
-
-      main.parentNode.insertBefore(shell, main);
-      shell.append(sidebar, main);
-    }
-
-    const panel = form.closest(".tenant-panel");
-    if (!panel) return;
-
-    /* Wrap existing labels and fields without replacing their IDs. */
-    Array.from(form.querySelectorAll("label")).forEach(label => {
-      const input = label.nextElementSibling;
-
-      if (!input || !["INPUT", "SELECT", "TEXTAREA"].includes(input.tagName)) {
-        return;
-      }
-
-      const field = document.createElement("div");
-      field.className = "rf-field";
-
-      if (input.tagName === "TEXTAREA") {
-        field.classList.add("rf-full");
-      }
-
-      label.before(field);
-      field.append(label, input);
-    });
-
-    const dialog = document.createElement("dialog");
-    dialog.id = "rfTenantDialog";
-    dialog.setAttribute("aria-labelledby", "formTitle");
-
-    const dialogHead = document.createElement("div");
-    dialogHead.className = "rf-dialog-head";
-    dialogHead.innerHTML = `
-      <strong>Tenant details</strong>
-      <button type="button" class="rf-dialog-close"
-              aria-label="Close tenant form">×</button>
-    `;
-
-    const dialogMessage = document.createElement("p");
-    dialogMessage.className = "rf-dialog-message";
-    dialogMessage.setAttribute("role", "status");
-
-    dialog.append(dialogHead, dialogMessage, panel);
-    document.body.append(dialog);
-
-    let actions = header.querySelector(".tenant-actions");
-
-    if (!actions) {
-      actions = document.createElement("div");
-      actions.className = "tenant-actions";
-      header.append(actions);
-    }
-
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "rf-add-tenant";
-    addButton.textContent = "+ Add Tenant";
-    actions.prepend(addButton);
-
-    const cancelButton = document.getElementById("cancelBtn");
-    const saveButton = document.getElementById("saveBtn");
-
-    function resetExistingForm() {
-      /* Existing Cancel Edit handler resets all form fields. */
-      if (cancelButton) cancelButton.click();
-      else form.reset();
-    }
-
-    function openForm() {
-      dialogMessage.textContent = "";
-
-      if (!dialog.open) dialog.showModal();
-
-      document.getElementById("tenantName")?.focus();
-    }
-
-    function closeForm() {
-      if (saveButton?.disabled) return;
-      dialog.close();
-    }
-
-    addButton.addEventListener("click", () => {
-      resetExistingForm();
-      openForm();
-    });
-
-    dialogHead.querySelector("button").addEventListener("click", closeForm);
-
-    dialog.addEventListener("cancel", event => {
-      if (saveButton?.disabled) event.preventDefault();
-    });
-
-    dialog.addEventListener("close", () => {
-      resetExistingForm();
-    });
-
-    dialog.addEventListener("click", event => {
-      const bounds = dialog.getBoundingClientRect();
-
-      if (
-        event.target === dialog &&
-        (
-          event.clientX < bounds.left ||
-          event.clientX > bounds.right ||
-          event.clientY < bounds.top ||
-          event.clientY > bounds.bottom
-        )
-      ) {
-        closeForm();
-      }
-    });
-
-    /* Existing Edit handler fills the form first; then open it. */
-    document.addEventListener("click", event => {
-      if (event.target.closest("#tenantsBody [data-edit]")) {
-        openForm();
-      }
-    });
-
-    /* Show save errors inside the popup; close after successful save. */
-    const message = document.getElementById("tenantMessage");
-
-    if (message) {
-      new MutationObserver(() => {
-        if (!dialog.open) return;
-
-        const text = message.textContent || "";
-
-        if (message.classList.contains("error")) {
-          dialogMessage.textContent = text;
-        } else if (
-          message.classList.contains("success") &&
-          /tenant (added|updated) successfully/i.test(text)
-        ) {
-          dialog.close();
-        }
-      }).observe(message, {
-        childList: true,
-        characterData: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["class"]
-      });
-    }
-  })();
-</script>
-<style>
-  #rfTenantPopup {
-    width: min(600px, calc(100% - 32px));
-    max-height: 85vh;
-    margin: auto;
-    padding: 0;
-    border: none;
-    border-radius: 18px;
-    background: white;
-    color: #0f172a;
-    overflow-y: auto;
-  }
-
-  #rfTenantPopup::backdrop {
-    background: #0f172a99;
-  }
-
-  #rfTenantPopup .tenant-panel {
-    margin: 0;
-    padding: 24px;
-    border: none;
-  }
-
-  .rf-popup-bar {
-    display: flex;
-    justify-content: flex-end;
-    padding: 12px 18px 0;
-  }
-
-  .rf-popup-close {
-    border: none;
-    border-radius: 8px;
-    padding: 6px 12px;
-    background: #eef2ff;
-    color: #3730a3;
-    font-size: 24px;
-    cursor: pointer;
-  }
-
-  #rfAddTenantTop {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 18px;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .tenant-layout.rf-list-only {
-    display: block !important;
-    grid-template-columns: 1fr !important;
-  }
-
-  .tenant-layout.rf-list-only > .tenant-panel {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  #rfPopupError:empty {
-    display: none;
-  }
-
-  #rfPopupError {
-    margin: 12px 24px;
-    color: #b91c1c;
-  }
-</style>
-
-<script>
-  (() => {
-    function setupTenantPopup() {
-      /* Do nothing if a previous popup version is already installed. */
-      if (
-        document.getElementById("rfTenantPopup") ||
-        document.getElementById("rfTenantDialog")
-      ) return;
-
-      const form = document.getElementById("tenantForm");
-      const header = document.querySelector(".tenant-header");
-      const panel = form?.closest(".tenant-panel");
-      const layout = panel?.parentElement;
-
-      if (!form || !header || !panel) return;
-
-      const popup = document.createElement("dialog");
-      popup.id = "rfTenantPopup";
-      popup.setAttribute("aria-labelledby", "formTitle");
-
-      const bar = document.createElement("div");
-      bar.className = "rf-popup-bar";
-
-      const close = document.createElement("button");
-      close.type = "button";
-      close.className = "rf-popup-close";
-      close.setAttribute("aria-label", "Close tenant form");
-      close.textContent = "×";
-      bar.append(close);
-
-      const error = document.createElement("p");
-      error.id = "rfPopupError";
-      error.setAttribute("role", "status");
-
-      popup.append(bar, error, panel);
-      document.body.append(popup);
-
-      if (layout?.classList.contains("tenant-layout")) {
-        layout.classList.add("rf-list-only");
-      }
-
-      let actions = header.querySelector(".tenant-actions");
-
-      if (!actions) {
-        actions = document.createElement("div");
-        actions.className = "tenant-actions";
-        header.append(actions);
-      }
-
-      const add = document.createElement("button");
-      add.id = "rfAddTenantTop";
-      add.type = "button";
-      add.textContent = "+ Add Tenant";
-      actions.prepend(add);
-
-      const save = document.getElementById("saveBtn");
-      const cancel = document.getElementById("cancelBtn");
-
-      function openPopup() {
-        error.textContent = "";
-        if (!popup.open) popup.showModal();
-        document.getElementById("tenantName")?.focus();
-      }
-
-      add.addEventListener("click", () => {
-        if (cancel) cancel.click();
-        else form.reset();
-        openPopup();
-      });
-
-      close.addEventListener("click", () => {
-        if (!save?.disabled) popup.close();
-      });
-
-      popup.addEventListener("cancel", event => {
-        if (save?.disabled) event.preventDefault();
-      });
-
-      popup.addEventListener("close", () => {
-        cancel?.click();
-      });
-
-      /* Existing Edit logic fills the same form before opening it. */
-      document.addEventListener("click", event => {
-        if (event.target.closest("#tenantsBody [data-edit]")) {
-          openPopup();
-        }
-      });
-
-      const message = document.getElementById("tenantMessage");
-
-      if (message) {
-        new MutationObserver(() => {
-          if (!popup.open) return;
-
-          const text = message.textContent || "";
-
-          if (message.classList.contains("error")) {
-            error.textContent = text;
-          } else if (
-            message.classList.contains("success") &&
-            /tenant (added|updated) successfully/i.test(text)
-          ) {
-            popup.close();
-          }
-        }).observe(message, {
-          childList: true,
-          subtree: true,
-          characterData: true,
-          attributes: true,
-          attributeFilter: ["class"]
-        });
-      }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupTenantPopup);
-    } else {
-      setupTenantPopup();
-    }
-  })();
-</script>
 </body>
 </html>
