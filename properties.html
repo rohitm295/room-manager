@@ -2,602 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Properties | RoomFlow</title>
-
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#f6f8fc;color:#0f172a;font-family:Arial,sans-serif}
-    a{text-decoration:none}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
-    button:disabled{opacity:.6;cursor:wait}
-    .sidebar{position:fixed;inset:0 auto 0 0;width:268px;padding:26px 18px;background:#111827;display:flex;flex-direction:column;overflow-y:auto}
-    .brand{display:flex;align-items:center;gap:12px;margin:0 6px 30px;color:white;font-size:25px;font-weight:800}
-    .brand span{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#818cf8,#4f46e5)}
-    .sidebar nav{display:grid;gap:8px}
-    .sidebar nav a{padding:15px;border-radius:11px;color:#cbd5e1;font-size:14px;font-weight:600}
-    .sidebar nav a:hover,.sidebar nav a.active{background:#252c4b;color:white}
-    .sidebar-bottom{margin-top:auto;padding-top:28px}
-    .sidebar-bottom a{display:block;padding:14px;border-radius:10px;background:#4f46e5;color:white;text-align:center}
-    main{margin-left:268px;padding:30px}
-    .page-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px;margin-bottom:24px;background:white;border:1px solid #e2e8f0;border-radius:16px}
-    h1{margin:0 0 7px;font-size:25px}
-    .muted{color:#64748b;font-size:14px;line-height:1.6}
-    .page-header p{margin:0}
-    .btn{display:inline-block;border:1px solid #dbe2ea;border-radius:9px;padding:11px 16px;background:white;color:#172033;font-weight:600}
-    .primary{background:#4f46e5;border-color:#4f46e5;color:white}
-    .primary:hover{background:#4338ca}
-    .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:24px}
-    .summary-card,.property-card,.property-form{padding:24px;border:1px solid #e2e8f0;border-radius:16px;background:white}
-    .summary-card span{display:block;color:#64748b;font-size:13px;margin-bottom:12px}
-    .summary-card strong{font-size:27px}
-    .toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-    input,select,textarea{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:9px;background:white;color:#0f172a}
-    input:focus,select:focus,textarea:focus{outline:2px solid #818cf8;outline-offset:2px}
-    .toolbar input{flex:2;min-width:180px}
-    .toolbar select{flex:1;min-width:160px}
-    .property-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-    .property-card{min-width:0}
-    .property-card h2{margin:0 0 8px;font-size:21px;overflow-wrap:anywhere}
-    .property-card h2 a{color:#172033}
-    .property-card h2 a:hover{color:#4f46e5}
-    .property-address{margin:0 0 18px;color:#64748b;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
-    .property-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}
-    .detail-item{padding:12px;background:#f8fafc;border-radius:9px;overflow-wrap:anywhere}
-    .detail-item span{display:block;color:#64748b;font-size:12px;margin-bottom:7px}
-    .detail-item strong{font-size:15px}
-    .room-link{margin-bottom:18px}
-    .property-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #e2e8f0}
-    .property-actions{display:flex;gap:7px;flex-wrap:wrap}
-    .property-actions .btn{padding:8px 11px;font-size:13px}
-    .badge{display:inline-block;padding:5px 10px;border-radius:25px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
-    .badge.inactive{background:#e2e8f0;color:#475569}
-    .property-form{margin-bottom:24px}
-    .property-form h2{margin:0 0 20px;font-size:21px}
-    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .field label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
-    .full{grid-column:1/-1}
-    textarea{min-height:80px;resize:vertical}
-    .form-actions{display:flex;gap:10px;margin-top:20px}
-    .hidden{display:none!important}
-    .message:empty{display:none}
-    .message{padding:14px;border-radius:10px;margin-bottom:20px;line-height:1.5}
-    .message.error{background:#fff1f2;color:#b91c1c}
-    .message.success{background:#f0fdf4;color:#15803d}
-    .empty{grid-column:1/-1;text-align:center;padding:40px 20px;background:white;border:1px dashed #cbd5e1;border-radius:14px;color:#64748b}
-    @media(max-width:1100px){.property-grid{grid-template-columns:1fr}}
-    @media(max-width:800px){
-      .sidebar{position:static;width:100%}
-      .brand{margin-bottom:16px}
-      .sidebar nav{display:flex;overflow-x:auto}
-      .sidebar nav a{white-space:nowrap}
-      .sidebar-bottom{display:none}
-      main{margin-left:0;padding:18px}
-    }
-    @media(max-width:520px){
-      .summary-grid,.form-grid{grid-template-columns:1fr}
-      .property-details{grid-template-columns:1fr 1fr}
-      .page-header,.property-card,.property-form{padding:18px}
-      #addPropertyBtn{width:100%}
-    }
-  </style>
+  <link rel="stylesheet" href="floor-flow.css">
 </head>
 
-<body>
-  <aside class="sidebar">
-    <a href="dashboard.html" class="brand">
-      <span>R</span>RoomFlow
-    </a>
-
-    <nav aria-label="Main navigation">
-      <a href="dashboard.html">▦ Dashboard</a>
-      <a href="properties.html" class="active" aria-current="page">⌂ Properties</a>
-      <a href="rooms.html">▣ Rooms</a>
-      <a href="tenants.html">♙ Tenants</a>
-      <a href="rent.html">₹ Rent Manager</a>
-      <a href="electricity.html">⚡ Electricity</a>
-      <a href="payments.html">▤ Payments</a>
-      <a href="profile.html">♙ My Profile</a>
-    </nav>
-
-    <div class="sidebar-bottom">
-      <a href="dashboard.html">← Dashboard</a>
-    </div>
-  </aside>
+<body data-page="properties">
+  <nav aria-label="Main navigation">
+    <a href="dashboard.html">RoomFlow</a>
+    <a href="properties.html" aria-current="page">Properties</a>
+    <a href="rooms.html">Rooms</a>
+    <a href="tenants.html">Tenants</a>
+    <a href="rent.html">Rent</a>
+    <a href="electricity.html">Electricity</a>
+    <a href="payments.html">Payments</a>
+    <a href="profile.html">My Profile</a>
+  </nav>
 
   <main>
-    <header class="page-header">
+    <header>
+      <h1>My Properties</h1>
       <div>
-        <h1>My Properties</h1>
-        <p class="muted">Manage your properties and open their rooms.</p>
+        <button id="refresh" type="button" disabled>Refresh</button>
+        <button id="add" type="button" disabled>+ Add Property</button>
       </div>
-      <button id="addPropertyBtn" type="button" class="btn primary" disabled>
-        + Add Property
-      </button>
     </header>
 
-    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+    <div id="notice" role="status" aria-live="polite">Loading…</div>
+    <section id="list"></section>
+  </main>
 
-    <section class="summary-grid">
-      <article class="summary-card">
-        <span>Total Properties</span>
-        <strong id="propertyCount">—</strong>
-      </article>
-      <article class="summary-card">
-        <span>Active Properties</span>
-        <strong id="activeCount">—</strong>
-      </article>
-      <article class="summary-card">
-        <span>Total Rooms</span>
-        <strong id="roomCount">—</strong>
-      </article>
-    </section>
+  <dialog id="dialog" aria-labelledby="formTitle">
+    <p id="formNotice" role="status" aria-live="polite"></p>
 
-    <section id="propertyFormSection" class="property-form hidden">
+    <form id="form">
       <h2 id="formTitle">Add Property</h2>
 
-      <form id="propertyForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="propertyName">Property Name *</label>
-            <input id="propertyName" maxlength="100" required
-                   placeholder="e.g. Chhaya House">
-          </div>
+      <label for="name">Property name *</label>
+      <input id="name" name="name" required maxlength="100"
+             placeholder="e.g. Chhaya House">
 
-          <div class="field">
-            <label for="propertyType">Property Type *</label>
-            <select id="propertyType" required>
-              <option value="House">House</option>
-              <option value="Flat">Flat / Apartment</option>
-              <option value="PG">PG</option>
-              <option value="Room">Room</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+      <label for="type">Property type</label>
+      <select id="type" name="type" required>
+        <option value="House">House</option>
+        <option value="Flat">Flat / Apartment</option>
+        <option value="PG">PG</option>
+        <option value="Room">Room</option>
+        <option value="Other">Other</option>
+      </select>
 
-          <div class="field full">
-            <label for="propertyAddress">Full Address *</label>
-            <textarea id="propertyAddress" maxlength="500" required
-                      placeholder="Building, area, city"></textarea>
-          </div>
+      <label for="address">Full address *</label>
+      <input id="address" name="address" required maxlength="500"
+             placeholder="Building, area, city">
 
-          <div class="field">
-            <label for="propertyStatus">Property Status *</label>
-            <select id="propertyStatus" required>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
+      <label for="floors">Floors — one per line *</label>
+      <textarea id="floors" name="floors" required
+        placeholder="Ground Floor&#10;First Floor&#10;Second Floor"></textarea>
 
-          <div class="field full">
-            <label for="propertyNotes">Notes</label>
-            <textarea id="propertyNotes" maxlength="2000"
-                      placeholder="Optional property details"></textarea>
-          </div>
-        </div>
+      <small>
+        Save the property, then open Manage rooms to add rooms
+        and their rent under each floor.
+      </small>
 
-        <div class="form-actions">
-          <button type="submit" class="btn primary" id="saveBtn">
-            Save Property
-          </button>
-          <button type="button" class="btn" id="cancelBtn">Cancel</button>
-        </div>
-      </form>
-    </section>
-
-    <section class="toolbar">
-      <input type="search" id="searchInput"
-             placeholder="Search property name, address or type..."
-             aria-label="Search properties">
-      <select id="statusFilter" aria-label="Filter properties">
-        <option value="all">All properties</option>
+      <label for="status">Status</label>
+      <select id="status" name="status" required>
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
       </select>
-      <button type="button" class="btn" id="refreshBtn" disabled>Refresh</button>
-    </section>
 
-    <section id="propertyList" class="property-grid">
-      <div class="empty">Checking login...</div>
-    </section>
-  </main>
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" maxlength="2000"></textarea>
 
-  <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from
-      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore, collection, getDocs, addDoc,
-      updateDoc, deleteDoc, doc, serverTimestamp
-    } from
-      "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      <p>
+        <button id="save" type="submit" disabled>Save</button>
+        <button id="cancel" type="button">Close</button>
+      </p>
+    </form>
+  </dialog>
 
-    const app = initializeApp({
-      apiKey: "AIzaSyCXFw-DrK_ulN3fUYtq2cT85E2mJa8RKUI",
-      authDomain: "roomflow-6c920.firebaseapp.com",
-      projectId: "roomflow-6c920",
-      storageBucket: "roomflow-6c920.firebasestorage.app",
-      messagingSenderId: "827966111309",
-      appId: "1:827966111309:web:85a6bdb0b98f3a865a2604"
-    });
-
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const $ = id => document.getElementById(id);
-
-    let currentUser = null;
-    let properties = [];
-    let rooms = [];
-    let editingId = null;
-    let busy = false;
-    let loaded = false;
-
-    const userCollection = name =>
-      collection(db, "users", currentUser.uid, name);
-
-    const propertyRef = id =>
-      doc(db, "users", currentUser.uid, "properties", id);
-
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#39;"
-      })[char]);
-    }
-
-    function showMessage(text, error = false) {
-      $("pageMessage").textContent = text;
-      $("pageMessage").className = "message " +
-        (error ? "error" : "success");
-    }
-
-    function controls() {
-      $("addPropertyBtn").disabled = busy || !loaded;
-      $("refreshBtn").disabled = busy || !currentUser;
-      $("saveBtn").disabled = busy || !loaded;
-      $("cancelBtn").disabled = busy;
-
-      document.querySelectorAll("#propertyList button").forEach(button => {
-        button.disabled = busy || !loaded;
-      });
-    }
-
-    function showForm(property = null) {
-      if (busy || !loaded) return;
-
-      editingId = property?.id || null;
-      $("propertyForm").reset();
-      $("formTitle").textContent = property ? "Edit Property" : "Add Property";
-      $("saveBtn").textContent = property ? "Update Property" : "Save Property";
-      $("propertyName").value = property?.name || "";
-      $("propertyType").value = property?.type || "House";
-      $("propertyAddress").value = property?.address || "";
-      $("propertyStatus").value = property?.status || "active";
-      $("propertyNotes").value = property?.notes || "";
-
-      $("propertyFormSection").classList.remove("hidden");
-      $("propertyFormSection").scrollIntoView({
-        behavior: "smooth", block: "start"
-      });
-      $("propertyName").focus();
-    }
-
-    function hideForm() {
-      $("propertyFormSection").classList.add("hidden");
-      $("propertyForm").reset();
-      editingId = null;
-    }
-
-    async function loadProperties() {
-      const uid = currentUser.uid;
-
-      const [propertySnap, roomSnap] = await Promise.all([
-        getDocs(userCollection("properties")),
-        getDocs(userCollection("rooms"))
-      ]);
-
-      if (currentUser?.uid !== uid) return;
-
-      properties = propertySnap.docs.map(item => ({
-        ...item.data(), id: item.id
-      }));
-
-      rooms = roomSnap.docs.map(item => ({
-        ...item.data(), id: item.id
-      }));
-
-      loaded = true;
-      renderProperties();
-    }
-
-    function renderProperties() {
-      if (!loaded) return;
-
-      $("propertyCount").textContent = properties.length;
-      $("activeCount").textContent =
-        properties.filter(p => p.status === "active").length;
-
-      $("roomCount").textContent = rooms.filter(room =>
-        properties.some(property => property.id === room.propertyId)
-      ).length;
-
-      const search = $("searchInput").value.trim().toLowerCase();
-      const status = $("statusFilter").value;
-
-      const filtered = properties.filter(property => {
-        const text = [
-          property.name, property.address, property.type
-        ].join(" ").toLowerCase();
-
-        return text.includes(search) &&
-          (status === "all" || property.status === status);
-      });
-
-      if (!filtered.length) {
-        $("propertyList").innerHTML = `
-          <div class="empty">
-            <h3>No properties found</h3>
-            <p>Add a property, then open it to manage its rooms.</p>
-          </div>
-        `;
-        controls();
-        return;
-      }
-
-      $("propertyList").innerHTML = filtered.map(property => {
-        const active = property.status === "active";
-        const linkedRooms = rooms.filter(room =>
-          room.propertyId === property.id
-        );
-
-        const available = linkedRooms.filter(room =>
-          room.status === "Available"
-        ).length;
-
-        const url = "rooms.html?propertyId=" +
-          encodeURIComponent(property.id);
-
-        return `
-          <article class="property-card">
-            <h2>
-              <a href="${url}">
-                ${escapeHTML(property.name || "Unnamed Property")}
-              </a>
-            </h2>
-
-            <p class="property-address">
-              ${escapeHTML(property.address || "No address added")}
-            </p>
-
-            <div class="property-details">
-              <div class="detail-item">
-                <span>Property Type</span>
-                <strong>${escapeHTML(property.type || "Other")}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Total Rooms</span>
-                <strong>${linkedRooms.length}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Available Rooms</span>
-                <strong>${available}</strong>
-              </div>
-            </div>
-
-            <a class="btn primary room-link" href="${url}">
-              View Rooms / Add Room
-            </a>
-
-            ${property.notes ? `
-              <p class="property-address">
-                ${escapeHTML(property.notes)}
-              </p>
-            ` : ""}
-
-            <div class="property-footer">
-              <span class="badge ${active ? "" : "inactive"}">
-                ${active ? "ACTIVE" : "INACTIVE"}
-              </span>
-
-              <div class="property-actions">
-                <button type="button" class="btn"
-                  data-action="edit" data-id="${escapeHTML(property.id)}">
-                  Edit
-                </button>
-                <button type="button" class="btn"
-                  data-action="toggle" data-id="${escapeHTML(property.id)}">
-                  ${active ? "Deactivate" : "Activate"}
-                </button>
-                <button type="button" class="btn"
-                  data-action="delete" data-id="${escapeHTML(property.id)}">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-
-      controls();
-    }
-
-    async function refreshAfterSave(successText) {
-      hideForm();
-      showMessage(successText);
-
-      try {
-        await loadProperties();
-      } catch (error) {
-        console.error(error);
-        loaded = false;
-        showMessage(
-          "Saved successfully, but refresh failed. Click Refresh before making another change.",
-          true
-        );
-      }
-    }
-
-    $("propertyForm").addEventListener("submit", async event => {
-      event.preventDefault();
-
-      if (!currentUser || busy || !loaded) return;
-
-      const data = {
-        name: $("propertyName").value.trim(),
-        type: $("propertyType").value,
-        address: $("propertyAddress").value.trim(),
-        status: $("propertyStatus").value,
-        notes: $("propertyNotes").value.trim(),
-        updatedAt: serverTimestamp()
-      };
-
-      if (!data.name || !data.address) {
-        showMessage("Enter the property name and address.", true);
-        return;
-      }
-
-      busy = true;
-      controls();
-
-      try {
-        if (editingId) {
-          await updateDoc(propertyRef(editingId), data);
-        } else {
-          await addDoc(userCollection("properties"), {
-            ...data, createdAt: serverTimestamp()
-          });
-        }
-
-        await refreshAfterSave("Property saved successfully.");
-      } catch (error) {
-        console.error(error);
-        showMessage("Could not save property. Check connection and permissions.", true);
-      } finally {
-        busy = false;
-        controls();
-      }
-    });
-
-    $("propertyList").addEventListener("click", async event => {
-      const button = event.target.closest("button[data-action]");
-      if (!button || busy || !loaded || !currentUser) return;
-
-      const property = properties.find(p => p.id === button.dataset.id);
-      if (!property) return;
-
-      const action = button.dataset.action;
-
-      if (action === "edit") {
-        showForm(property);
-        return;
-      }
-
-      busy = true;
-      controls();
-
-      try {
-        if (action === "toggle") {
-          const status = property.status === "active" ? "inactive" : "active";
-
-          if (!confirm(
-            status === "inactive"
-              ? "Deactivate this property?"
-              : "Activate this property?"
-          )) return;
-
-          await updateDoc(propertyRef(property.id), {
-            status, updatedAt: serverTimestamp()
-          });
-
-          await refreshAfterSave("Property status updated.");
-        }
-
-        if (action === "delete") {
-          const [roomSnap, tenantSnap] = await Promise.all([
-            getDocs(userCollection("rooms")),
-            getDocs(userCollection("tenants"))
-          ]);
-
-          const hasLinks = [...roomSnap.docs, ...tenantSnap.docs].some(
-            snapshot => snapshot.data().propertyId === property.id
-          );
-
-          if (hasLinks) {
-            showMessage(
-              "This property has room or tenant records. Deactivate it to preserve history.",
-              true
-            );
-            return;
-          }
-
-          if (!confirm("Delete this property permanently?")) return;
-
-          await deleteDoc(propertyRef(property.id));
-          await refreshAfterSave("Property deleted.");
-        }
-      } catch (error) {
-        console.error(error);
-        showMessage("Could not complete this action. Check connection and permissions.", true);
-      } finally {
-        busy = false;
-        controls();
-      }
-    });
-
-    $("addPropertyBtn").addEventListener("click", () => showForm());
-    $("cancelBtn").addEventListener("click", () => {
-      if (!busy) hideForm();
-    });
-    $("searchInput").addEventListener("input", renderProperties);
-    $("statusFilter").addEventListener("change", renderProperties);
-
-    $("refreshBtn").addEventListener("click", async () => {
-      if (!currentUser || busy) return;
-
-      busy = true;
-      controls();
-
-      try {
-        await loadProperties();
-        showMessage("Properties refreshed.");
-      } catch (error) {
-        console.error(error);
-        loaded = false;
-        showMessage("Could not refresh. Check connection and permissions.", true);
-      } finally {
-        busy = false;
-        controls();
-      }
-    });
-
-    controls();
-
-    onAuthStateChanged(auth, async user => {
-      currentUser = user;
-      loaded = false;
-
-      if (!user) {
-        location.replace("login.html");
-        return;
-      }
-
-      busy = true;
-      controls();
-
-      try {
-        await loadProperties();
-      } catch (error) {
-        console.error(error);
-        $("propertyList").innerHTML =
-          '<div class="empty">Could not load properties. Use Refresh to try again.</div>';
-        showMessage("Check your connection and database permissions.", true);
-      } finally {
-        busy = false;
-        controls();
-      }
-    });
-  </script>
+  <script type="module" src="floor-flow.js"></script>
 </body>
 </html>
